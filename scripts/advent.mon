@@ -1,0 +1,10 @@
+; this is deprecated since py65 doesn't provide block device
+
+l ../Taliforth2/taliforth-py65mon.bin c100
+al f77f forth
+l ../breadboard-rom/txt.bin f800
+l data/advent.dat 5200
+l forth/advent_fpp.fs 2000
+;   now do something like:
+;       $2000 6381 evaluate   ( 5933 - 2048 = 3885 no sym; 6500 - 2048 = 4452 w/ sym )
+g forth
