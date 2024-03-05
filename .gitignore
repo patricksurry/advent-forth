@@ -1,4 +1,5 @@
 __pycache__/
+c-src
 alice.gz
 alice.txt
 data/advent.blk

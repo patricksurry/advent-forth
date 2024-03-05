@@ -13,11 +13,8 @@
 \   dest' has 0-2 in high byte and loc in low byte
 \   verb is a vocab index
 \   cond' has 0-7 in high byte and obj index in low byte
-: cave-link ( cave& i -- dest' verb cond' )
-    over 1+ c@ over <= if
-        33 bug then
-    2* 1+ 2* + dup                      \ p p
-        @ dup $1ff and >r 9 rshift      \ p cobj    R: v
+: cave-link ( link-addr -- dest' verb cond' )
+    dup @ dup $1ff and >r 9 rshift      \ p cobj    R: v
     swap 2 +                            \ cobj p2
         @ dup $3ff and >r 10 rshift     \ cobj ct   R: v  d'
     pack r> r> rot                      \ d' v c'
@@ -31,5 +28,15 @@
 ;
 
 : is-forced ( at -- flag )
-    cond + c@ 2 =
+    cond[] + c@ 2 =
+;
+
+: describe ( -- )               \ describe current location
+    'BEAR is-toting if
+        141 speak-message then
+    is-dark if
+        16 speak-message else
+        loc @ dup visited[] + c@ invert speak-location then
+    33 loc @ = 25 pct and closing @ invert and if
+        8 speak-message then
 ;

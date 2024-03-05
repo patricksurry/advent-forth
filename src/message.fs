@@ -1,19 +1,19 @@
 : spkz ( strz -- )
-    DIGRAMS MSGBUF decode type CR
+    DIGRAMS pad NATIVE-DECODE execute type CR
 ;
 
 : speak-message ( i -- )           \ show 1-indexed message
     1- 2* MSGS& + @ MSGS + spkz
 ;
 
-: yesno ( prompt-msg yes-msg no-msg -- flag )
+: yes-no ( prompt-msg yes-msg no-msg -- flag )
     rot ?dup if speak-message then   \ speak non-zero prompt
     ." > "
-    MSGBUF dup 255 accept tolower if    \ non-empty result?
+    pad dup 127 accept tolower if       \ non-empty result?
         c@ [CHAR] n <> else             \ not 'n' or empty means yes
-        drop -1 then                    \ ( yes-msg no-msg is-yes )
+        drop false then                 \ ( yes-msg no-msg is-yes )
     dup >r if drop else nip then
-    ?dup if speak-message then       \ speak relevant non-zero response
+    ?dup if speak-message then          \ speak relevant non-zero response
     r>
 ;
 

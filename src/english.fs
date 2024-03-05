@@ -1,17 +1,17 @@
 \ each VOCAB entry is [ val typ len <chars> ], ending with [0 0 0]
 
 : speak-vocab ( -- )
-    \ output VOCABulary for motion and verb types
+    \ output vocabulary for motion and verb types
     VOCAB begin
         dup 2 + c@ ?dup while               \ p len
-        over 1+ c@ dup MOTION-TYPE = swap VERB-TYPE = or if    \ p len f
+        over 1+ c@ dup MOTION-WORD = swap VERB-WORD = or if    \ p len f
             over 3 + over type space then
         + 3 +
     repeat
     drop
 ;
 
-: vocab-best ( addr n typval-min -- typval-best|-1 )
+: vocab-best ( addr n typval-min -- typval-best | -1 )
     \ find matching word with lowest typ_val >= thresh
     -rot 2>r -1 swap VOCAB          \ -1 vmin p  R: addr n
     begin
@@ -27,63 +27,86 @@
     2drop 2r> 2drop
 ;
 
-: analyze ( addr n -- typ-val 1  ... -- 0)
-    tolower
-    dup 0= if
-        nip exit then
-    0 vocab-best dup
-    -1 = if dunno 0 else 1 then
+2variable tmp-cstr
+
+: analyze ( addr n -- [typ-val true | false] )
+    2dup tmp-cstr 2!
+    tolower ?dup 0= if
+        drop false exit then
+    0 vocab-best dup                    \ typ-val
+    -1 = if                             \ drop result and ptr
+        drop false dunno exit
+    then
+
+    dup tmp-cstr 2@ rot
+    unpack nip VERB-WORD = if           \ update either verb or nonverb
+         last-verb-cstr else
+         last-nonverb-cstr then
+    2! true
 ;
 
 : bad-grammar ( -- )
     ." bad grammar..." CR
 ;
 
-: english ( -- 1|0 )
-    MSGBUF dup 255 accept                   \ addr n
+: english ( -- true | false )
+    0 verb ! 0 object ! 0 motion !
+
+    ." > "
+    pad dup 127 accept                      \ addr n
     cleave analyze 0= if                    \ addr n ( tv 1 | 0 )
-        2drop 0 exit
+        2drop false exit
     then
-    dup [ VERB-TYPE SAY pack ] literal = if
-        SAY verb ! 1 object !
-        2drop 1 exit
+    dup [ 'SAY VERB-WORD pack ] literal = if
+        'SAY verb ! 1 object !
+        2drop true exit
     then                                    \ addr n tv
     -rot cleave 2swap 2drop                 \ tv1 addr n
     ?dup 0= if                              \ empty second word shouldn't fail
         drop -1 else                        \ tv1 -1
         analyze 0=                          \ unknown second word does fail
-            if drop 0 exit then
+            if drop false exit then
     then                                    \ tv1 tv2
-    2dup = over [ SPECIAL-TYPE 51 pack ] literal = and if
-        speak-vocab 0 exit
+    ." english " .s CR
+    2dup = over [ 51 SPECIAL-WORD pack ] literal = and if
+        speak-vocab false exit
     then
-    unpack -rot unpack rot swap             \ v2 v1 t2 t1
-    2dup SPECIAL-TYPE = swap SPECIAL-TYPE = or if
-        speak-message 2drop 2drop 0 exit
+    unpack rot unpack rot swap              \ v2 v1 t2 t1
+    dup SPECIAL-WORD = if
+        2drop nip speak-message false exit
     then
-    2dup MOTION-TYPE = if
-        MOTION-TYPE = if
-            bad-grammar 2drop 2drop 0 exit
+    over SPECIAL-WORD = if
+        2drop drop speak-message false exit
+    then
+    2dup MOTION-WORD = if
+        MOTION-WORD = if
+            bad-grammar 2drop 2drop false exit
         then
-        2drop motion ! drop 1 exit else
+        2drop motion ! drop true exit else
         drop
     then
-    over MOTION-TYPE = if
-        2drop drop motion ! 1 exit
+    over MOTION-WORD = if
+        2drop drop motion ! true exit
     then
-    dup OBJECT-TYPE = if
-        drop swap object !
-        VERB-TYPE = if
-            verb ! 1 exit
+    dup OBJECT-WORD = if                \ v2 v1 t2 t1
+        drop swap object !              \ v2 t2
+        dup VERB-WORD = if
+            drop verb ! true exit
         then
-        bad-grammar drop 0 exit
+        nip OBJECT-WORD = if
+            bad-grammar false
+            true then
+        exit
     then
-    dup VERB-TYPE = if
-        drop swap verb !
-        OBJECT-TYPE = if
-            object ! 1 exit
+    dup VERB-WORD = if                  \ v2 v1 t2 t1
+        drop swap verb !                \ v2 t2
+        dup OBJECT-WORD = if
+            drop object ! true exit
         then
-        bad-grammar drop 0 exit
+        nip VERB-WORD = if
+            bad-grammar false else
+            true then
+        exit
     then
     36 bug
 ;
