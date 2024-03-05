@@ -55,9 +55,22 @@
 $ff constant NOWHERE
 
 \ object ids
+1   constant 'KEYS
 2   constant 'LAMP
+4   constant 'CAGE
+5   constant 'ROD
+6   constant 'ROD2
 7   constant 'STEPS
+8   constant 'BIRD
+9   constant 'DOOR
+11  constant 'SNAKE
+14  constant 'CLAM
+15  constant 'OYSTER
+17  constant 'DWARF
+19  constant 'FOOD
 24  constant 'PLANT
+31  constant 'DRAGON
+33  constant 'TROLL
 35  constant 'BEAR
 50  constant 'NUGGET
 62  constant 'RUG

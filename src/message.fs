@@ -6,10 +6,13 @@
     1- 2* MSGS& + @ MSGS + spkz
 ;
 
+: user-input ( -- addr n )
+    ." > " pad dup 127 accept tolower
+;
+
 : yes-no ( prompt-msg yes-msg no-msg -- flag )
-    rot ?dup if speak-message then   \ speak non-zero prompt
-    ." > "
-    pad dup 127 accept tolower if       \ non-empty result?
+    rot ?dup if speak-message then      \ speak non-zero prompt
+    user-input if                       \ non-empty result?
         c@ [CHAR] n <> else             \ not 'n' or empty means yes
         drop false then                 \ ( yes-msg no-msg is-yes )
     dup >r if drop else nip then

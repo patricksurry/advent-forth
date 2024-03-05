@@ -14,7 +14,7 @@ create act-msg[] 34 0,n
     verb @ dup 1 < over 31 > or if
         39 bug then
 
-    act-msg[] + c@ if speak-message then
+    act-msg[] + c@ ?dup if speak-message then
 ;
 
 : say-nothing 54 speak-message ;
@@ -80,11 +80,11 @@ create act-msg[] 34 0,n
         speak-message drop exit
     else
         drop
-    then
-            \ ( object )
-\	/*
+    then                        \ ( object )
+
+\	TODO
 \	   special case for liquids
-\	*/
+\
 \	if (object == WATER || object == OIL) {
 \		if (!here(BOTTLE) || liq() != object) {
 \			object = BOTTLE;
@@ -122,7 +122,8 @@ create act-msg[] 34 0,n
 \	if ((object == BIRD || object == CAGE) && prop[BIRD] != 0)
 \		carry((BIRD + CAGE) - object, loc);
 
-	( object ) loc @ carry-item
+	\ ( object )
+	loc @ carry-item
 
 \	/*
 \	   handle liquid in bottle
@@ -134,13 +135,162 @@ create act-msg[] 34 0,n
  	54 speak-message
 ;
 
-: obj-drop \ TODO
+: obj-drop
+    object @
+
+    \ check for dynamite
+    'ROD2 is-toting over 'ROD = and over is-toting invert and if
+        drop 'ROD2 dup object !
+    then
+
+    dup is-toting invert if
+        act-speak exit
+    then
+
+    \ TODO
+\	\ snake and bird
+\	if (object == BIRD && here(SNAKE)) {
+\		rspeak(30);
+\		if (closed)
+\			dwarfend();
+\		dstroy(SNAKE);
+\		prop[SNAKE] = -1;
+\	}
+\	\ coins and vending machine
+\	else if (object == COINS && here(VEND)) {
+\		dstroy(COINS);
+\		drop(BATTERIES, loc);
+\		pspeak(BATTERIES, 0);
+\		return;
+\	}
+\	\ bird and dragon (ouch!!)
+\	else if (object == BIRD && at(DRAGON) && prop[DRAGON] == 0) {
+\		rspeak(154);
+\		dstroy(BIRD);
+\		prop[BIRD] = 0;
+\		if (place[SNAKE] != 0)
+\			++tally2;
+\		return;
+\	}
+\	\ Bear and troll
+\	if (object == BEAR && at(TROLL)) {
+\		rspeak(163);
+\		move(TROLL, 0);
+\		move((TROLL + MAXOBJ), 0);
+\		move(TROLL2, 117);
+\		move((TROLL2 + MAXOBJ), 122);
+\		juggle(CHASM);
+\		prop[TROLL] = 2;
+\	}
+\	\ vase
+\	else if (object == VASE) {
+\		if (loc == 96)
+\			rspeak(54);
+\		else {
+\			prop[VASE] = at(PILLOW) ? 0 : 2;
+\			pspeak(VASE, prop[VASE] + 1);
+\			if (prop[VASE] != 0)
+\				fixed[VASE] = -1;
+\		}
+\	}
+\	\ handle liquid and bottle
+\	i = liq();
+\	if (i == object)
+\		object = BOTTLE;
+\	if (object == BOTTLE && i != 0)
+\		place[i] = 0;
+\	\  handle bird and cage
+\	if (object == CAGE && prop[BIRD] != 0)
+\		drop(BIRD, loc);
+\	if (object == BIRD)
+\		prop[BIRD] = 0;
+
+    loc @ drop-item
 ;
 
-: obj-open \ TODO
+: obj-open
+    object @ 33                         \ ( obj msg )
+
+\ TODO
+\	case CLAM:
+\	case OYSTER:
+\		oyclam = (object == OYSTER ? 1 : 0);
+\		if (verb == LOCK)
+\			msg = 61;
+\		else if (!toting(TRIDENT))
+\			msg = 122 + oyclam;
+\		else if (toting(object))
+\			msg = 120 + oyclam;
+\		else {
+\			msg = 124 + oyclam;
+\			dstroy(CLAM);
+\			drop(OYSTER, loc);
+\			drop(PEARL, 105);
+\		}
+\		break;
+
+    over 'DOOR = if
+        drop
+        'DOOR prop[] + c@ 1 = if
+            54 else 111
+        then
+    then
+    over 'CAGE = if drop 32 then
+    over 'KEYS = if drop 55 then
+
+\ TODO
+\	case CHAIN:
+\		if (!here(KEYS))
+\			msg = 31;
+\		else if (verb == LOCK) {
+\			if (prop[CHAIN] != 0)
+\				msg = 34;
+\			else if (loc != 130)
+\				msg = 173;
+\			else {
+\				prop[CHAIN] = 2;
+\				if (toting(CHAIN))
+\					drop(CHAIN, loc);
+\				fixed[CHAIN] = -1;
+\				msg = 172;
+\			}
+\		} else {
+\			if (prop[BEAR] == 0)
+\				msg = 41;
+\			else if (prop[CHAIN] == 0)
+\				msg = 37;
+\			else {
+\				prop[CHAIN] = 0;
+\				fixed[CHAIN] = 0;
+\				if (prop[BEAR] != 3)
+\					prop[BEAR] = 2;
+\				fixed[BEAR] = 2 - prop[BEAR];
+\				msg = 171;
+\			}
+\		}
+\		break;
+\	case GRATE:
+\		if (!here(KEYS))
+\			msg = 31;
+\		else if (closing) {
+\			if (!panic) {
+\				clock2 = 15;
+\				++panic;
+\			}
+\			msg = 130;
+\		} else {
+\			msg = 34 + prop[GRATE];
+\			prop[GRATE] = (verb == LOCK ? 0 : 1);
+\			msg += 2 * prop[GRATE];
+\		}
+\		break;
+\	}
+
+    nip speak-message
 ;
 
-: obj-say \ TODO
+: obj-say
+    ." Okay." CR last-nonverb-cstr 2@ type CR
 ;
 
 : obj-wave \ TODO
@@ -149,7 +299,26 @@ create act-msg[] 34 0,n
 : obj-kill \ TODO
 ;
 
-: obj-eat \ TODO
+: obj-eat
+    object @
+    'FOOD over = if
+        'FOOD destroy-item
+        72 speak-message exit
+    then
+
+    0
+    over 'BIRD = or
+    over 'SNAKE = or
+    over 'CLAM = or
+	over 'OYSTER = or
+	over 'DWARF = or
+	over 'DRAGON = or
+	over 'TROLL = or
+	over 'BEAR = or
+
+	if 71 speak-message
+	else act-speak
+	then
 ;
 
 : obj-drink \ TODO
@@ -188,13 +357,56 @@ create act-msg[] 34 0,n
 : just-open \ TODO
 ;
 
-: just-kill \ TODO
+\ track count and latest obj where f is true
+: add-obj ( last count obj f -- new count )
+    if -rot nip 1+ else drop then
 ;
 
-: just-eat \ TODO
+: just-kill
+    \ check exactly one target is here
+    0 0                             \ obj count
+
+    \ TODO
+	\ if (dcheck() && dflag >= 2)
+	\	object = DWARF;
+
+	'SNAKE dup is-here add-obj
+	'DRAGON dup is-at over prop[] + c@ 0= and add-obj
+	'TROLL dup is-at add-obj
+    'BEAR dup is-here over prop[] + c@ 0= and add-obj
+
+    dup 1 > if                  \ more than one match?
+        2drop need-obj exit
+    then
+    dup 1 = if
+        drop object ! obj-kill exit
+    then
+
+    'BIRD dup is-here 'THROW verb @ <> and add-obj
+    'CLAM dup is-here 'OYSTER is-here or add-obj
+    1 > if
+        drop need-obj exit
+    then
+    object ! obj-kill
 ;
 
-: just-drink \ TODO
+: just-eat
+    'FOOD is-here if
+        'FOOD object !
+        obj-eat
+    else
+        need-obj
+    then
+;
+
+: just-drink
+\ TODO
+\	if (liqloc(loc) != WATER && (liq() != WATER || !here(BOTTLE)))
+\		needobj();
+\	else {
+\		object = WATER;
+\		vdrink();
+\	}
 ;
 
 : just-quit \ TODO
@@ -224,7 +436,7 @@ create act-msg[] 34 0,n
     if speak-message then
 ;
 
-: just-suspend  \ TODO   		saveflg = 1;
+: just-suspend  \ TODO   saveflg = 1;
 ;
 
 : just-load \ TODO

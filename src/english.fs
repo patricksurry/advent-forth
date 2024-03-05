@@ -31,14 +31,13 @@
 
 : analyze ( addr n -- [typ-val true | false] )
     2dup tmp-cstr 2!
-    tolower ?dup 0= if
+    ?dup 0= if
         drop false exit then
-    0 vocab-best dup                    \ typ-val
-    -1 = if                             \ drop result and ptr
-        drop false dunno exit
+    0 vocab-best dup -1 = if            \ typ-val
+        drop false dunno exit           \ drop result and ptr
     then
 
-    dup tmp-cstr 2@ rot
+    dup tmp-cstr 2@ rot                 \ ( tv addr n tv )
     unpack nip VERB-WORD = if           \ update either verb or nonverb
          last-verb-cstr else
          last-nonverb-cstr then
@@ -52,14 +51,13 @@
 : english ( -- true | false )
     0 verb ! 0 object ! 0 motion !
 
-    ." > "
-    pad dup 127 accept                      \ addr n
-    cleave analyze 0= if                    \ addr n ( tv 1 | 0 )
+    user-input cleave analyze 0= if         \ addr n ( tv 1 | 0 )
         2drop false exit
     then
     dup [ 'SAY VERB-WORD pack ] literal = if
-        'SAY verb ! 1 object !
-        2drop true exit
+        drop 'SAY verb ! 1 object !         \ oddly requires you have keys?
+        last-nonverb-cstr 2!                \ save remaining text
+        true exit
     then                                    \ addr n tv
     -rot cleave 2swap 2drop                 \ tv1 addr n
     ?dup 0= if                              \ empty second word shouldn't fail
@@ -73,7 +71,7 @@
     then
     unpack rot unpack rot swap              \ v2 v1 t2 t1
     dup SPECIAL-WORD = if
-        2drop nip speak-message false exit
+        2drop nip  speak-message false exit
     then
     over SPECIAL-WORD = if
         2drop drop speak-message false exit

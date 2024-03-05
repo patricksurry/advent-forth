@@ -1,3 +1,12 @@
+\ TODO
+
+\ - print _fpp size from advblk
+\ - helper to show last word compiled? ( latestnt name>string type )
+
+\	/* initialize various flags and other variables */
+\	for (i=50; i<MAXOBJ; i++) prop[i] = 0xff;
+
+
 \ taliforth user_words reads and executes boot block
 \ advblk.py generates boot block code to load and evaluate source and then relocate main data tables
 
@@ -29,10 +38,6 @@ include location.fs
 include english.fs
 include verb.fs
 include turn.fs
-
-\ TODO
-\	/* initialize various flags and other variables */
-\	for (i=50; i<MAXOBJ; i++) prop[i] = 0xff;
 
 : main
     65 1 0 yes-no if        \ instructions?

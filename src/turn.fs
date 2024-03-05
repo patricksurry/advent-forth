@@ -1,6 +1,6 @@
 
 : try-move ( cond' -- flag )
-    unpack                  \ cobj ct
+    unpack                  \ ( cobj ct )
     case
         0 of dup 0= swap pct or endof
 		1 of dup 0= swap is-toting or endof
@@ -81,7 +81,7 @@
             detail @ 1+ dup detail !
             3 < if 15 speak-message then
             0 wzdark !
-            loc @ 0 over visited[] + c!
+            loc @ false over visited[] + c!
             newloc ! 0 loc !
         endof
         'CAVE of
@@ -97,9 +97,7 @@
 
 : do-object ( -- )
     object @
-    dup fixed[] + loc c@ = over is-here or
-    ." do-object" .s CR
-     if       \ is object here?
+    dup fixed[] + c@ loc @ = over is-here or if       \ is object here?
         transitive-verb else
 
     \ TODO special cases
@@ -196,10 +194,12 @@
 \		}
 
         describe
+
         is-dark invert if
-            loc @ visited[] + 1 over c@ + c!
+            true loc @ visited[] + c!
             describe-items
         then
+
     then
 
 \	if (closed) {
