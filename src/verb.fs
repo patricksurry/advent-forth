@@ -19,6 +19,8 @@ create act-msg[] 34 0,n
 
 : say-nothing 54 speak-message ;
 
+: need-obj last-verb-cstr 2@ type ."  what?" CR ;
+
 \ handle verbs with or without object
 
 : verb-on
@@ -47,7 +49,43 @@ create act-msg[] 34 0,n
     then
 ;
 
-: verb-pour \ TODO
+: verb-pour
+    object @
+    dup 'BOTTLE = over 0= or if
+        drop bottle-liquid dup object !
+    then
+    dup 0= if
+        drop need-obj exit
+    then
+    dup is-toting invert if
+        drop act-speak exit
+    then
+    dup 'OIL <> over 'WATER <> and if
+        drop 78 speak-message exit
+    then
+    1 'BOTTLE prop[] + c!
+    0 over place[] + c!
+
+    'PLANT is-at if
+        dup 'WATER <> if
+            112 speak-message
+        else
+            'PLANT dup prop[] + c@ swap over 1+ speak-item
+            2 + 6 mod dup 'PLANT prop[] + c!
+            2/ 'PLANT2 prop[] c@
+            describe
+        then
+    else
+        'DOOR is-at if
+            dup 'OIL = 1 and dup
+            'DOOR prop[] + c!
+            113 +
+        else
+            77
+        then
+        speak-message
+    then
+    drop
 ;
 
 : verb-blast \ TODO
@@ -321,7 +359,18 @@ create act-msg[] 34 0,n
 	then
 ;
 
-: obj-drink \ TODO
+: obj-drink
+    object @ 'WATER <> if
+        110 speak-message
+    else
+        'WATER bottle-liquid <> 'BOTTLE is-here invert if
+            act-speak
+        else
+            1 'BOTTLE prop[] + c!
+            0 'WATER place[] + c!
+            74 speak-message
+        then
+    then
 ;
 
 : obj-throw \ TODO
@@ -336,7 +385,26 @@ create act-msg[] 34 0,n
 : obj-fill \ TODO
 ;
 
-: obj-read \ TODO
+: obj-read
+    is-dark if
+        ." I see no " last-nonverb-cstr type ."  here." CR
+    	exit
+    then
+
+    object @ 'OYSTER = if
+	    'OYSTER is-toting closed and if
+      		192 193 54 yes-no drop exit
+        then
+    then
+
+	0 object @ case
+	    'MAGAZINE of drop 190 endof
+	    'TABLET of drop 196 endof
+        'MESSAGE of drop 191 endof
+    endcase
+	?dup if speak-message
+	else act-speak
+	then
 ;
 
 : obj-break \ TODO
@@ -346,10 +414,6 @@ create act-msg[] 34 0,n
 ;
 
 \ intransitive verb handlers
-
-: need-obj
-    last-verb-cstr 2@ type ."  what?" CR
-;
 
 : just-take \ TODO
 ;

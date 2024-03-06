@@ -1,11 +1,21 @@
 \ TODO
+\ - line wrapping with leading spaces (do embedded newlines work at all?)
 
-\ - print _fpp size from advblk
-\ - helper to show last word compiled? ( latestnt name>string type )
-
-\	/* initialize various flags and other variables */
-\	for (i=50; i<MAXOBJ; i++) prop[i] = 0xff;
-
+\ help debugging stack trace
+: trace>name ( addr -- nt )
+    \ find largest nt prior to addr
+    >r 0 latestnt begin
+        ?dup while
+        2dup u< over r@ u< and if
+            nip dup
+        then
+        2 + @
+    repeat
+    r> drop
+    dup if
+        dup u. dup wordsize u. dup name>string type space cr
+    then
+;
 
 \ taliforth user_words reads and executes boot block
 \ advblk.py generates boot block code to load and evaluate source and then relocate main data tables
@@ -40,6 +50,9 @@ include verb.fs
 include turn.fs
 
 : main
+    \ initialize
+    MAXOBJ 50 do $ff i prop[] + c! loop
+
     65 1 0 yes-no if        \ instructions?
         1000 else 330
     then limit !

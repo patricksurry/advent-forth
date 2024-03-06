@@ -34,6 +34,29 @@
     or
 ;
 
+: liquid-type ( i -- obj )
+    case
+        0 of 'WATER endof
+        1 of 0 endof
+        2 of 'OIL endof
+    endcase
+;
+
+: bottle-liquid ( -- 'WATER | 'OIL | 0 )
+    'BOTTLE prop[] + c@ dup 0< if
+        negate 1- then
+    liquid-type
+;
+
+: liquid-at ( loc -- obj )
+    cond[] + c@ dup LIQUID and if
+        WATOIL and
+    else
+        drop 1
+    then
+    liquid-type
+;
+
 : carry-item ( obj where -- )
 	drop               \ where is unused
     dup MAXOBJ < if
