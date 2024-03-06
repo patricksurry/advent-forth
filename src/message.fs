@@ -2,14 +2,19 @@
     DIGRAMS pad NATIVE-DECODE execute type CR
 ;
 
-: speak-message ( i -- )           \ show 1-indexed message
+\ show 1-indexed message
+\ database.c:rspeak
+: speak-message ( i -- )
     1- 2* MSGS& + @ MSGS + spkz
 ;
 
+\ english.c:getwords
 : user-input ( -- addr n )
     ." > " pad dup 127 accept tolower
 ;
 
+\ optionally prompt user and respond to a yes/no question returning flag
+\ database.c:yes
 : yes-no ( prompt-msg yes-msg no-msg -- flag )
     rot ?dup if speak-message then      \ speak non-zero prompt
     user-input if                       \ non-empty result?

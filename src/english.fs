@@ -1,5 +1,6 @@
 \ each VOCAB entry is [ val typ len <chars> ], ending with [0 0 0]
 
+\ english.c:outwords
 : speak-vocab ( -- )
     \ output vocabulary for motion and verb types
     VOCAB begin
@@ -11,8 +12,9 @@
     drop
 ;
 
+\ find matching word with lowest typ_val >= thresh
+\ database.c:vocab
 : vocab-best ( addr n typval-min -- typval-best | -1 )
-    \ find matching word with lowest typ_val >= thresh
     -rot 2>r -1 swap VOCAB          \ -1 vmin p  R: addr n
     begin
         dup 2 + c@                  \ best vmin p len
@@ -29,6 +31,7 @@
 
 2variable tmp-cstr
 
+\ english.c:analyze
 : analyze ( addr n -- [typ-val true | false] )
     2dup tmp-cstr 2!
     ?dup 0= if
@@ -48,6 +51,7 @@
     ." bad grammar..." CR
 ;
 
+\ english.c:english
 : english ( -- true | false )
     0 verb ! 0 object ! 0 motion !
 

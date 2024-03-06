@@ -1,6 +1,9 @@
 \ TODO
 \ - line wrapping with leading spaces (do embedded newlines work at all?)
-\ - worth creataing an init function?  (hard to reinit anyway)
+\ - worth creataing an init-play function?  (hard to reinit anyway)
+\ - save/restore (advent.c)
+\ - links and check TODOs itverb.c verb.c
+
 
 \ help debugging stack trace
 : trace>name ( addr -- nt )
@@ -23,6 +26,7 @@
 
 8 nc-limit !        \ don't inline too much
 
+\ database.c:bug
 : bug ( n -- )
     ." Fatal error number " . CR
     abort
@@ -42,15 +46,28 @@ KERNEL $77 + constant NATIVE-STRWRAP
     NATIVE-RNG execute RAND16 @
 ;
 
+\ database.c:pct
+: pct ( n -- flag )             \ true with percent n
+    random abs 100 mod <
+;
+
+: umin ( x y -- x|y ) 2dup u< if drop else nip then ;
+: u<= u> invert ;
+: <= > invert ;
+: >= < invert ;
+
 include defs.fs
 include message.fs
 include item.fs
 include location.fs
 include english.fs
 include verb.fs
+include dwarf.fs
 include turn.fs
 
+\ see advent.c:main
 : main
+    \TODO save/restore/debug
     65 1 0 yes-no if        \ instructions?
         1000 else 330
     then limit !

@@ -2,16 +2,20 @@
 \ the first string is found in the ITEMS& array,
 \ subsequent strings are found by skipping past ascii zeros
 
-: speak-item ( i state -- )     \ show an item message, with -1 indexed state
+\ show an item message, with -1 indexed state
+\ database.c:pspeak
+: speak-item ( i state -- )
     1+ swap 1- 2* ITEMS& + @ ITEMS + swap               \ first item string ( strz state+1 )
     begin ?dup while 1- swap asciiz> + 1+ swap repeat   \ skip state+1 strings
     spkz
 ;
 
+\ database.c:toting
 : is-toting ( item -- flag )
     place{ c}@ NOWHERE =
 ;
 
+\ database.c:here
 : is-here ( item -- flag )
     dup
         place{ c}@ loc @ =
@@ -19,6 +23,7 @@
     or
 ;
 
+\ database.c:dark
 : is-dark ( -- flag )
     loc @ cond{ c}@ LIGHT and 0=      \ ! (cond[loc] & LIGHT)
         'LAMP prop{ b}@ 0=
@@ -27,6 +32,7 @@
     and
 ;
 
+\ database.c:is-at
 : is-at ( item -- flag )
     dup
         place{ c}@ loc @ =
@@ -34,6 +40,7 @@
     or
 ;
 
+\ database.c:liq2
 : liquid-type ( i -- obj )
     case
         0 of 'WATER endof
@@ -42,21 +49,14 @@
     endcase
 ;
 
+\ database.c:liq
 : bottle-liquid ( -- 'WATER | 'OIL | 0 )
     'BOTTLE prop{ b}@ dup 0< if
         negate 1- then
     liquid-type
 ;
 
-: liquid-at ( loc -- obj )
-    cond{ c}@ dup LIQUID and if
-        WATOIL and
-    else
-        drop 1
-    then
-    liquid-type
-;
-
+\ database.c:carry
 : carry-item ( obj where -- )
 	drop               \ where is unused
     dup MAXOBJ < if
@@ -67,6 +67,7 @@
     then
 ;
 
+\ database.c:drop
 : drop-item ( obj where -- )
     swap dup MAXOBJ < if                    \ where obj
         place{ c} dup c@ NOWHERE = if       \ where place+obj
@@ -78,8 +79,10 @@
     c!
 ;
 
+\ database.c:juggle
 : juggle ( obj -- ) drop ;          \ no-op
 
+\ database.c:move
 : move-item ( obj where -- )
     over dup MAXOBJ < if            \ obj where obj
         place{ c} else
@@ -92,10 +95,13 @@
     drop-item
 ;
 
+\ database.c:dstroy
 : destroy-item ( obj -- )
     0 move-item
 ;
 
+
+\ database.c:put
 : put-item ( obj where pval -- pval' )
     >r move-item -1 r> -        \ obj where move-item; return -1 - pval
 ;
@@ -119,6 +125,7 @@
     speak-item
 ;
 
+\ turn.c:descitem
 : describe-items ( -- )     \ describe visible items
     MAXOBJ 1- 1 do
         i is-at if i ?describe-item then

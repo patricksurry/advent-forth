@@ -13,6 +13,7 @@
 \   dest' has 0-2 in high byte and loc in low byte
 \   verb is a vocab index
 \   cond' has 0-7 in high byte and obj index in low byte
+\ database.c:gettrav
 : cave-link ( link-addr -- dest' verb cond' )
     dup @ dup $1ff and >r 9 rshift      \ p cobj    R: v
     swap 2 +                            \ cobj p2
@@ -20,17 +21,21 @@
     pack r> r> rot                      \ d' v c'
 ;
 
-: speak-location ( i flag-long -- )     \ describe 1-indexed location as long or short version
+\ describe 1-indexed location as long or short version
+\ database.c:desclg,descsh
+: speak-location ( i flag-long -- )
     swap cave& swap                     \ addr f
     if dup c@ else 0 then               \ addr long-off|0
     ?dup 0= if dup 1+ c@ 2* 1+ 2* then  \ addr long-off|short-off
     + spkz
 ;
 
+\ database.c:forced
 : is-forced ( at -- flag )
     cond{ c}@ 2 =
 ;
 
+\ turn.c:describe
 : describe ( -- )               \ describe current location
     'BEAR is-toting if
         141 speak-message then
@@ -40,3 +45,25 @@
     33 loc @ = 25 pct and closing @ invert and if
         8 speak-message then
 ;
+
+\ database.c:liqloc
+: liquid-at ( loc -- obj )
+    cond{ c}@ dup LIQUID and if
+        WATOIL and
+    else
+        drop 1
+    then
+    liquid-type
+;
+
+\ check for presence of dwarves..
+\ database.c:dcheck
+\ unsigned char dcheck(void) {
+\   unsigned char i;
+\
+\   for (i = 1; i < (DWARFMAX - 1); ++i) {
+\     if (dloc[i] == loc)
+\       return i;
+\   }
+\   return 0;
+\ }
