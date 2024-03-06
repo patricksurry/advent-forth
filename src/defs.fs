@@ -127,7 +127,7 @@ variable oldloc2 3 oldloc2 !
     + here - 0,n
 ;
 
-create cond[] MAXLOC 1+ here
+create cond{ MAXLOC 1+ here
 	0 c,
 	5 c, 1 c, 5 c, 5 c, 1 c, 1 c, 5 c, 17 c, 1 c, 1 c,  0 c, 0 c,      \ 1 ...
 	32 c, 0 c, 0 c, 2 c, 0 c, 0 c, 64 c, 2 c,   	                   \ 13 ...
@@ -144,7 +144,7 @@ create cond[] MAXLOC 1+ here
 	8 c, 8 c, 8 c, 8 c, 8 c, 8 c, 8 c, 8 c, 8 c, 		               \ 122 ...
 	0pad
 
-create place[] MAXLOC 1+ here
+create place{ MAXLOC 1+ here
     0 c,
 	3 c, 3 c, 8 c, 10 c, 11 c, 0 c, 14 c, 13 c, 94 c, 96 c,   		       \ 1 ...
 	19 c, 17 c, 101 c, 103 c, 0 c, 106 c, 0 c, 0 c, 3 c, 3 c,  0 c, 0 c,   \ 11 ...
@@ -155,7 +155,7 @@ create place[] MAXLOC 1+ here
 	92 c, 95 c, 97 c, 100 c, 101 c, 0 c, 119 c, 127 c, 130 c,	           \ 56 ...
     0pad
 
-create fixed[] MAXLOC 1+ here
+create fixed{ MAXLOC 1+ here
 	0 c, 0 c, 0 c,
 	9 c, 0 c, 0 c, 0 c, 15 c, 0 c, NOWHERE c,  0 c, 				       \ 3 ...
 	NOWHERE c, 27 c, NOWHERE c, 0 c, 0 c, 0 c, NOWHERE c,  0 c, 0 c, 0 c, 0 c, 0 c,        \ 11 ...
@@ -166,9 +166,22 @@ create fixed[] MAXLOC 1+ here
 	121 c, NOWHERE c,
     0pad
 
-create visited[] MAXLOC 1+ here 0pad     \ non-zero if has been here
-create prop[] MAXOBJ 1+ here 0pad        \ status of objects
+create visited{ MAXLOC 1+ here 0pad         \ t/f if has been here
+create prop{ MAXOBJ 1+ here 0pad            \ (signed) status of objects
 
+\ unsigned char(c) and signed byte(b) array accessors
+: c} ( off addr -- addr ) + ;
+: b} + ;
+: b@ ( addr -- b ) c@ dup 128 and if $ff00 or then ;
+: b! c! ;
+: c}@ ( off addr -- c ) + c@ ;
+: b}@ ( off addr -- b ) + b@ ;
+: c}! ( v off addr -- ) + c! ;
+: b}! + c! ;
+
+:noname
+    MAXOBJ 50 do $ff i prop{ b}! loop
+; execute
 
 : pct ( n -- flag )             \ true with percent n
     random abs 100 mod <

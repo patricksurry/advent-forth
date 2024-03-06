@@ -28,7 +28,7 @@
 ;
 
 : is-forced ( at -- flag )
-    cond[] + c@ 2 =
+    cond{ c}@ 2 =
 ;
 
 : describe ( -- )               \ describe current location
@@ -36,7 +36,7 @@
         141 speak-message then
     is-dark if
         16 speak-message else
-        loc @ dup visited[] + c@ invert speak-location then
+        loc @ dup visited{ c}@ invert speak-location then
     33 loc @ = 25 pct and closing @ invert and if
         8 speak-message then
 ;

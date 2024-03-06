@@ -1,5 +1,6 @@
 \ TODO
 \ - line wrapping with leading spaces (do embedded newlines work at all?)
+\ - worth creataing an init function?  (hard to reinit anyway)
 
 \ help debugging stack trace
 : trace>name ( addr -- nt )
@@ -50,9 +51,6 @@ include verb.fs
 include turn.fs
 
 : main
-    \ initialize
-    MAXOBJ 50 do $ff i prop[] + c! loop
-
     65 1 0 yes-no if        \ instructions?
         1000 else 330
     then limit !

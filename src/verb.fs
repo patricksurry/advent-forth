@@ -2,19 +2,19 @@
 
 create obj-act&  34 cells 0,n
 create just-act& 34 cells 0,n
-create act-msg[] 34 0,n
+create act-msg{  34 0,n
 
 : set-actions ( action obj-act just-act msg -- )
     >r rot dup >r cells dup >r      \ obj-act just-act 2*act   R: msg act 2*act
     just-act& + ! r> obj-act& + !
-    2r> act-msg[] + c!
+    2r> act-msg{ c}!
 ;
 
 : act-speak ( -- )
     verb @ dup 1 < over 31 > or if
         39 bug then
 
-    act-msg[] + c@ ?dup if speak-message then
+    act-msg{ c}@ ?dup if speak-message then
 ;
 
 : say-nothing 54 speak-message ;
@@ -28,7 +28,7 @@ create act-msg[] 34 0,n
         limit @ 0 < if
             184 speak-message
         else
-            1 'LAMP prop[] + c!
+            1 'LAMP prop{ b}!
             39 speak-message
             wzdark @ if
                 0 wzdark !
@@ -42,7 +42,7 @@ create act-msg[] 34 0,n
 
 : verb-off
     'LAMP is-here if
-        0 'LAMP prop[] + c!
+        0 'LAMP prop{ b}!
         40 speak-message
     else
         act-speak
@@ -63,22 +63,22 @@ create act-msg[] 34 0,n
     dup 'OIL <> over 'WATER <> and if
         drop 78 speak-message exit
     then
-    1 'BOTTLE prop[] + c!
-    0 over place[] + c!
+    1 'BOTTLE prop{ b}!
+    0 over place{ c}!
 
     'PLANT is-at if
         dup 'WATER <> if
             112 speak-message
         else
-            'PLANT dup prop[] + c@ swap over 1+ speak-item
-            2 + 6 mod dup 'PLANT prop[] + c!
-            2/ 'PLANT2 prop[] c@
+            'PLANT dup prop{ b}@ swap over 1+ speak-item
+            2 + 6 mod dup 'PLANT prop{ b}!
+            2/ 'PLANT2 prop{ b}@
             describe
         then
     else
         'DOOR is-at if
             dup 'OIL = 1 and dup
-            'DOOR prop[] + c!
+            'DOOR prop{ b}!
             113 +
         else
             77
@@ -105,16 +105,16 @@ create act-msg[] 34 0,n
 
     \ special case objects and fixed objects
     25
-    over 'PLANT = 'PLANT prop[] + c@ 0 <= and if
+    over 'PLANT = 'PLANT prop{ b}@ 0 <= and if
         drop 115
     then
-    over 'BEAR = 'BEAR prop[] + c@ 1 = and if
+    over 'BEAR = 'BEAR prop{ b}@ 1 = and if
         drop 169
     then
-    over 'CHAIN = 'BEAR prop[] + c@ 0<> and if
+    over 'CHAIN = 'BEAR prop{ b}@ 0<> and if
         drop 170
     then
-    over fixed[] + c@ if
+    over fixed{ c}@ if
         speak-message drop exit
     else
         drop
@@ -269,7 +269,7 @@ create act-msg[] 34 0,n
 
     over 'DOOR = if
         drop
-        'DOOR prop[] + c@ 1 = if
+        'DOOR prop{ b}@ 1 = if
             54 else 111
         then
     then
@@ -366,8 +366,8 @@ create act-msg[] 34 0,n
         'WATER bottle-liquid <> 'BOTTLE is-here invert if
             act-speak
         else
-            1 'BOTTLE prop[] + c!
-            0 'WATER place[] + c!
+            1 'BOTTLE prop{ b}!
+            0 'WATER place{ c}!
             74 speak-message
         then
     then
@@ -435,9 +435,9 @@ create act-msg[] 34 0,n
 	\	object = DWARF;
 
 	'SNAKE dup is-here add-obj
-	'DRAGON dup is-at over prop[] + c@ 0= and add-obj
+	'DRAGON dup is-at over prop{ b}@ 0= and add-obj
 	'TROLL dup is-at add-obj
-    'BEAR dup is-here over prop[] + c@ 0= and add-obj
+    'BEAR dup is-here over prop{ b}@ 0= and add-obj
 
     dup 1 > if                  \ more than one match?
         2drop need-obj exit

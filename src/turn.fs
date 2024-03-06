@@ -7,7 +7,7 @@
 		2 of dup is-toting swap is-at or endof
 
 		dup 3 < over 7 > or if 37 bug then
-		dup 3 - rot prop[] + c@ <>
+		dup 3 - rot prop{ b}@ <>
     endcase
 ;
 
@@ -81,7 +81,7 @@
             detail @ 1+ dup detail !
             3 < if 15 speak-message then
             0 wzdark !
-            loc @ false over visited[] + c!
+            loc @ false over visited{ c}!
             newloc ! 0 loc !
         endof
         'CAVE of
@@ -97,7 +97,7 @@
 
 : do-object ( -- )
     object @
-    dup fixed[] + c@ loc @ = over is-here or if       \ is object here?
+    dup fixed{ c}@ loc @ = over is-here or if       \ is object here?
         transitive-verb else
 
     \ TODO special cases
@@ -196,7 +196,7 @@
         describe
 
         is-dark invert if
-            true loc @ visited[] + c!
+            true loc @ visited{ c}!
             describe-items
         then
 
