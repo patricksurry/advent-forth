@@ -69,7 +69,6 @@
         analyze 0=                          \ unknown second word does fail
             if drop false exit then
     then                                    \ tv1 tv2
-    ." english " .s CR
     2dup = over [ 51 SPECIAL-WORD pack ] literal = and if
         speak-vocab false exit
     then

@@ -652,41 +652,33 @@ create act-msg{  34 0,n
 
 \ verb.c:vfill
 : obj-fill ( obj -- )
-    drop
-\ TODO
-\	int msg;
-\	int i;
-\
-\	switch (object) {
-\	case BOTTLE:
-\		if (liq() != 0)
-\			msg = 105;
-\		else if (liqloc(loc) == 0)
-\			msg = 106;
-\		else {
-\			prop[BOTTLE] = cond[loc] & WATOIL;
-\			i = liq();
-\			if (toting(BOTTLE))
-\				place[i] = NOWHERE;
-\			msg = (i == OIL ? 108 : 107);
-\		}
-\		break;
-\	case VASE:
-\		if (liqloc(loc) == 0) {
-\			msg = 144;
-\			break;
-\		}
-\		if (!toting(VASE)) {
-\			msg = 29;
-\			break;
-\		}
-\		rspeak(145);
-\		vdrop();
-\		return;
-\	default:
-\		msg = 29;
-\	}
-\	rspeak(msg);
+    case
+    'BOTTLE of
+        bottle-liquid if 105
+        else loc @ liquid-at 0= if 106
+        else
+            loc @ cond{ c}@ WATOIL and 'BOTTLE prop{ b}!
+            bottle-liquid
+            'BOTTLE is-toting if
+                NOWHERE over place{ c}!
+            then
+            'OIL = if 108 else 107 then
+        then then
+        endof
+    'VASE of
+        loc @ liquid-at 0= if
+            144
+        else 'VASE is-toting 0= if
+            29
+        else
+            145 speak-message
+            'VASE obj-drop
+            exit
+        then then
+        endof
+    29 swap
+    endcase
+    speak-message
 ;
 
 \ verb.c:vread
@@ -844,13 +836,13 @@ create act-msg{  34 0,n
 
 \ itverb.c:ivdrink
 : just-drink
-\ TODO
-\	if (liqloc(loc) != WATER && (liq() != WATER || !here(BOTTLE)))
-\		needobj();
-\	else {
-\		object = WATER;
-\		vdrink();
-\	}
+    loc @ liquid-at 'WATER <>
+    bottle-liquid 'WATER <>
+    'BOTTLE is-here 0= or and if
+        need-obj
+    else
+        'WATER dup object ! obj-drink
+    then
 ;
 
 \ itverb.c:ivquit
@@ -983,7 +975,6 @@ create act-msg{  34 0,n
 \ turn.c:trverb,trobj
 : transitive-verb ( -- )  \ act on an object
     verb @ ?dup if
-        ." trverb " .s CR
         cells obj-act& + @
         ?dup 0= if
             ." This verb is not implemented yet." CR

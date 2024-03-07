@@ -81,6 +81,7 @@ $ff constant NOWHERE
 35  constant 'BEAR
 36  constant 'MESSAGE
 50  constant 'NUGGET
+58  constant 'VASE
 62  constant 'RUG
 64  constant 'CHAIN
 

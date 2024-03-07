@@ -59,8 +59,12 @@ ${data_start:04x} constant ADVDAT
 ;
 
 {forth_blk} $2000 {nblocks(forth)} read-blocks
-$2000 asciiz> evaluate
-$4000 relocate-data
+$2000 asciiz> dup
+s" Compiling " type u. s" bytes ... " type CR
+here -rot evaluate here swap -
+s" ... used " type u. s" bytes" type CR
+ADVDAT here - . s" bytes remain before ADVDAT" type CR
+$5000 relocate-data
 """
 
 out = bytearray(64*1024)
