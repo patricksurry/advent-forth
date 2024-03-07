@@ -2,7 +2,6 @@
 \ - line wrapping with leading spaces (do embedded newlines work at all?)
 \ - worth creataing an init-play function?  (hard to reinit anyway)
 \ - save/restore (advent.c)
-\ - links and check TODOs itverb.c verb.c
 
 
 \ help debugging stack trace
@@ -61,8 +60,8 @@ include message.fs
 include item.fs
 include location.fs
 include english.fs
+include special.fs
 include verb.fs
-include dwarf.fs
 include turn.fs
 
 \ see advent.c:main

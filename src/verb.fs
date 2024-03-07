@@ -5,7 +5,7 @@ create just-act& 34 cells 0,n
 create act-msg{  34 0,n
 
 : set-actions ( action obj-act just-act msg -- )
-    >r rot dup >r cells dup >r      \ obj-act just-act 2*act   R: msg act 2*act
+    >r rot dup >r cells dup >r      ( obj-act just-act 2*act   R: msg act 2*act )
     just-act& + ! r> obj-act& + !
     2r> act-msg{ c}!
 ;
@@ -94,29 +94,27 @@ create act-msg{  34 0,n
 ;
 
 \ verb.c:vblast
-: verb-blast \ TODO
-\	if (prop[ROD2] < 0 || !closed)
-\		actspk(verb);
-\	else {
-\		bonus = 133;
-\		if (loc == 115)
-\			bonus = 134;
-\		if (here(ROD2))
-\			bonus = 135;
-\		rspeak(bonus);
-\		normend();
-\	}
+: verb-blast
+    'ROD2 prop{ b}@ 0< closed @ invert or if
+        act-speak
+    else
+        133
+        115 loc @ = if drop 134 then
+        'ROD2 is-here if drop 135 then
+        dup speak-message
+        bonus !
+        normal-end
+    then
 ;
 
 \ transitive verbs
 
-: obj-rub
-    object @ 'LAMP = if act-speak else 76 speak-message then
+: obj-rub ( obj -- )
+    'LAMP = if act-speak else 76 speak-message then
 ;
 
 \ verb.c:vtake
-: obj-take
-    object @
+: obj-take ( obj -- )
     dup is-toting if
         act-speak
     then
@@ -192,9 +190,7 @@ create act-msg{  34 0,n
 ;
 
 \ verb.c:vdrop
-: obj-drop
-    object @
-
+: obj-drop ( obj -- )
     \ check for dynamite
     'ROD2 is-toting over 'ROD = and over is-toting invert and if
         drop 'ROD2 dup object !
@@ -266,8 +262,8 @@ create act-msg{  34 0,n
 ;
 
 \ verb.c:vopen
-: obj-open
-    object @ 33                         \ ( obj msg )
+: obj-open ( obj -- )
+    33                         ( obj msg )
 
 \ TODO
 \	case CLAM:
@@ -348,25 +344,30 @@ create act-msg{  34 0,n
 ;
 
 \ verb.c:vsay
-: obj-say
+: obj-say ( obj -- )
+    drop
     ." Okay." CR last-nonverb-cstr 2@ type CR
 ;
 
 \ verb.c:vwave
-: obj-wave
-\ TODO
-\	if (!toting(object) && (object != ROD || !toting(ROD2)))
-\		rspeak(29);
-\	else if (object != ROD || !at(FISSURE) || !toting(object) || closing)
-\		actspk(verb);
-\	else {
-\		prop[FISSURE] = 1 - prop[FISSURE];
-\		pspeak(FISSURE, 2 - prop[FISSURE]);
-\	}
+: obj-wave ( obj -- )
+    dup 'ROD <> 'ROD2 is-toting invert or over is-toting invert if
+        29 speak-message
+    else
+        dup 'ROD <> 'FISSURE is-at invert or over is-toting invert or closing @ or if
+            act-speak
+        else
+            'FISSURE prop{ b} 1 over b@ -   ( ptr 1-val )
+            dup rot b!                      ( 1-val )
+            'FISSURE 2 rot - speak-item
+        then
+    then
+    drop
 ;
 
 \ verb.c:vkill
-: obj-kill
+: obj-kill ( obj -- )
+    drop
 \ TODO
 \	int msg;
 \	int i;
@@ -431,8 +432,7 @@ create act-msg{  34 0,n
 ;
 
 \ verb.c:veat
-: obj-eat
-    object @
+: obj-eat ( obj -- )
     'FOOD over = if
         'FOOD destroy-item
         72 speak-message exit
@@ -454,8 +454,8 @@ create act-msg{  34 0,n
 ;
 
 \ verb.c:vdrink
-: obj-drink
-    object @ 'WATER <> if
+: obj-drink ( obj -- )
+    'WATER <> if
         110 speak-message
     else
         'WATER bottle-liquid <> 'BOTTLE is-here invert if
@@ -469,7 +469,8 @@ create act-msg{  34 0,n
 ;
 
 \ verb.c:vthrow
-: obj-throw
+: obj-throw ( obj -- )
+    drop
 \ TODO
 \	int msg;
 \	int i;
@@ -563,7 +564,8 @@ create act-msg{  34 0,n
 ;
 
 \ verb.c:vfeed
-: obj-feed
+: obj-feed ( obj -- )
+    drop
 \ TODO
 \	int msg;
 \
@@ -621,27 +623,36 @@ create act-msg{  34 0,n
 
 \ INVENTORY, FIND etc.
 \ verb.c:vfind
-: obj-find
-\ TODO
-\	int msg;
-\
-\	if (toting(object))
-\		msg = 24;
-\	else if (closed)
-\		msg = 138;
-\	else if (dcheck() && dflag >= 2 && object == DWARF)
-\		msg = 94;
-\	else if (at(object) || (liq() == object && here(BOTTLE)) || object == liqloc(loc))
-\		msg = 94;
-\	else {
-\		actspk(verb);
-\		return;
-\	}
-\	rspeak(msg);
+: obj-find ( obj -- )
+    r> 0
+    r@ is-toting if
+        drop 24
+    else
+        closed @ if
+            drop 138
+        else
+            r@ 'DWARF = dwarf-check and dflag @ 2 >= and if
+                drop 94
+            else
+                \ TODO does short-circuit || matter?
+                r@ bottle-liquid = 'BOTTLE is-here and
+                r@ is-at or r@ loc @ liquid-at = or if
+                    drop 94
+                then
+            then
+        then
+    then
+    r> drop
+    ?dup if
+        speak-message
+    else
+        act-speak
+    then
 ;
 
 \ verb.c:vfill
-: obj-fill
+: obj-fill ( obj -- )
+    drop
 \ TODO
 \	int msg;
 \	int i;
@@ -681,11 +692,12 @@ create act-msg{  34 0,n
 \ verb.c:vread
 : obj-read
     is-dark if
+        drop
         ." I see no " last-nonverb-cstr type ."  here." CR
     	exit
     then
 
-    object @ 'OYSTER = if
+    'OYSTER = if
 	    'OYSTER is-toting closed and if
       		192 193 54 yes-no drop exit
         then
@@ -702,7 +714,8 @@ create act-msg{  34 0,n
 ;
 
 \ verb.c:vbreak
-: obj-break
+: obj-break ( obj -- )
+    drop
 \ TODO
 \	int msg;
 \
@@ -727,14 +740,13 @@ create act-msg{  34 0,n
 
 \ verb.c:vwake
 : obj-wake
-\ TODO
-\	if (object != DWARF || !closed)
-\		actspk(verb);
-\	else {
-\		rspeak(199);
-\		dwarfend();
-\	}
-;
+    'DWARF = closed and if
+        199 speak-message
+        dwarf-end
+    else
+        act-speak
+    then
+    ;
 
 \ intransitive verb handlers
 
@@ -796,9 +808,9 @@ create act-msg{  34 0,n
     \ check exactly one target is here
     0 0                             \ obj count
 
-    \ TODO
-	\ if (dcheck() && dflag >= 2)
-	\	object = DWARF;
+    dwarf-check dflag @ 2 >= and if
+        'DWARF object !
+    then
 
 	'SNAKE dup is-here add-obj
 	'DRAGON dup is-at over prop{ b}@ 0= and add-obj
@@ -809,7 +821,7 @@ create act-msg{  34 0,n
         2drop need-obj exit
     then
     dup 1 = if
-        drop object ! obj-kill exit
+        drop dup object ! obj-kill exit
     then
 
     'BIRD dup is-here 'THROW verb @ <> and add-obj
@@ -817,13 +829,13 @@ create act-msg{  34 0,n
     1 > if
         drop need-obj exit
     then
-    object ! obj-kill
+    dup object ! obj-kill
 ;
 
 \ itverb.c:iveat
 : just-eat
     'FOOD is-here if
-        'FOOD object !
+        'FOOD dup object !
         obj-eat
     else
         need-obj
@@ -843,23 +855,19 @@ create act-msg{  34 0,n
 
 \ itverb.c:ivquit
 : just-quit
-\ TODO
-\	if ((gaveup = yes(22, 54, 54)))
-\		normend();
+    22 54 54 yes-no 1 and dup gaveup ! if
+        normal-end
+    then
 ;
 
 \ itverb.c:ivfill
 : just-fill
-\ TODO
-\	if (!here(BOTTLE))
-\		needobj();
-\	else {
-\		object = BOTTLE;
-\		vfill();
-\	}
-;
-
-: just-score \ TODO
+    'BOTTLE is-here if
+        'BOTTLE dup object !
+        obj-fill
+    else
+        need-obj
+    then
 ;
 
 \ fee fie foe fum
@@ -901,17 +909,16 @@ create act-msg{  34 0,n
 
 \ itverb.c:ivread
 : just-read
-\	if (here(MAGAZINE))
-\		object = MAGAZINE;
-\	if (here(TABLET))
-\		object = object*100 + TABLET;
-\	if (here(MESSAGE))
-\		object = object*100 + MESSAGE;
-\	if (object > 100 || object == 0 || dark()) {
-\		needobj();
-\		return;
-\	}
-\	vread();
+    0 0
+    'MAGAZINE dup is-here add-obj
+    'TABLET dup is-here add-obj
+    'MESSAGE dup is-here add-obj
+    1 <> is-dark or if
+        drop need-obj
+    else
+        dup object !
+        obj-read
+    then
 ;
 
 \ itverb.c:inventory
@@ -930,16 +937,18 @@ create act-msg{  34 0,n
     if speak-message then
 ;
 
-: just-suspend  \ TODO   saveflg = 1;
+: just-suspend
+\ TODO   saveflg = 1;
 ;
 
-: just-load \ TODO
+: just-load
+\ TODO
 ;
 
 'CALM      ' act-speak     ' need-obj       14  set-actions
 'WALK      ' act-speak     ' act-speak      43  set-actions
 'QUIT      ' act-speak     ' just-quit      13  set-actions
-'SCORE     ' act-speak     ' just-score     13  set-actions
+'SCORE     ' act-speak     ' score          13  set-actions
 'FOO       ' act-speak     ' just-foo       147 set-actions
 'BRIEF     ' act-speak     0                155 set-actions
 'SUSPEND   ' act-speak     ' just-suspend   13  set-actions
@@ -979,7 +988,7 @@ create act-msg{  34 0,n
         ?dup 0= if
             ." This verb is not implemented yet." CR
         else
-            execute
+            object @ swap execute
         then
     else
         ." What do you want to do with the "

@@ -69,12 +69,12 @@
 
 \ database.c:drop
 : drop-item ( obj where -- )
-    swap dup MAXOBJ < if                    \ where obj
-        place{ c} dup c@ NOWHERE = if       \ where place+obj
+    swap dup MAXOBJ < if                    ( where obj )
+        place{ c} dup c@ NOWHERE = if       ( where place+obj )
             -1 holding +!
         then
     else
-        MAXOBJ - fixed{ c}                  \ where fixed+obj-MAXOBJ
+        MAXOBJ - fixed{ c}                  ( where fixed+obj-MAXOBJ )
     then
     c!
 ;

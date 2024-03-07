@@ -55,15 +55,3 @@
     then
     liquid-type
 ;
-
-\ check for presence of dwarves..
-\ database.c:dcheck
-\ unsigned char dcheck(void) {
-\   unsigned char i;
-\
-\   for (i = 1; i < (DWARFMAX - 1); ++i) {
-\     if (dloc[i] == loc)
-\       return i;
-\   }
-\   return 0;
-\ }

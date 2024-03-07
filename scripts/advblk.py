@@ -72,5 +72,5 @@ off = forth_blk*1024
 out[off:off+len(forth)] = forth
 
 outfile = 'data/advent.blk'
-print(f"advblk: writing {len(forth)} source bytes + {len(data)} data bytes in {nblocks(out)} blocks to {outfile}")
 open(outfile, 'wb').write(out)
+print(f"advblk: wrote {len(forth)} source + {len(data)} data bytes as {nblocks(out)} blocks to {outfile}")

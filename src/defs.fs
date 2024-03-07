@@ -64,7 +64,8 @@ $ff constant NOWHERE
 8   constant 'BIRD
 9   constant 'DOOR
 11  constant 'SNAKE
-12  constant 'TABLET
+12  constant 'FISSURE
+13  constant 'TABLET
 14  constant 'CLAM
 15  constant 'OYSTER
 16  constant 'MAGAZINE
@@ -109,6 +110,11 @@ variable closing 0 closing !
 variable holding 0 holding !
 variable detail  0 detail  !
 
+\ timing variables
+variable clock1 30 clock1  !
+variable clock2 50 clock2  !
+variable panic   0 panic   !
+
 variable limit 100 limit   !
 variable tally  15 tally   !
 variable tally2  0 tally2  !
@@ -118,6 +124,9 @@ variable loc     3 loc     !
 variable oldloc  3 oldloc  !
 variable oldloc2 3 oldloc2 !
 
+variable dflag   0 dflag   !
+variable bonus   0 bonus   !
+variable gaveup  0 gaveup  !
 
 : 0,n ( n -- )
     ?dup 0> if 0 do 0 c, loop then
