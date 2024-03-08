@@ -37,9 +37,6 @@ consts = '\n'.join([
 if 0x2000 + len(forth) > 0xbc00:
     warn("Forth code overlaps IO space")
 
-if 0x4000 + len(data) > 0xbc00:
-    warn("Data relocation overlaps IO space")
-
 boot = f"""TF
 : read-blocks ( blk addr n -- )
     0 do
@@ -52,19 +49,14 @@ boot = f"""TF
 ${data_start:04x} constant ADVDAT
 {consts}
 
-: relocate-data
-    here over < invert if ." no data space" then
-    {data_blk} over {nblocks(data)} read-blocks
-    ADVDAT {len(data)} move
-;
-
 {forth_blk} $2000 {nblocks(forth)} read-blocks
 $2000 asciiz> dup
 s" Compiling " type u. s" bytes ... " type CR
 here -rot evaluate here swap -
 s" ... used " type u. s" bytes" type CR
 ADVDAT here - . s" bytes remain before ADVDAT" type CR
-$5000 relocate-data
+( zeros up to 1K after data which is OK into accept buffers @ $bc00 )
+{data_blk} ADVDAT {nblocks(data)} read-blocks
 """
 
 out = bytearray(64*1024)
@@ -77,4 +69,4 @@ out[off:off+len(forth)] = forth
 
 outfile = 'data/advent.blk'
 open(outfile, 'wb').write(out)
-print(f"advblk: wrote {len(forth)} source + {len(data)} data bytes as {nblocks(out)} blocks to {outfile}")
+print(f"advblk: wrote {len(forth)} source + {len(data)} data bytes to {outfile}")

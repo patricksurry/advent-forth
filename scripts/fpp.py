@@ -34,13 +34,19 @@ def ref_const(m):
     return consts[c]
 
 def extract_consts(s):
-    return re.sub(r'^(.*?)\s+constant\s+([A-Z][A-Z&-_]+)$', define_const, s)
+    return re.sub(r"^(.*?)\s+constant\s+(['A-Z][A-Z&-_]+)$", define_const, s)
 
 def inline_consts(s):
-    return re.sub(r'[A-Z][A-Z&-_]+', ref_const, s)
+    return re.sub(r"['A-Z][A-Z&-_]+", ref_const, s)
 
-def strip_comments(lines):
-    return [re.sub(r'\\.*', '', line).rstrip() for line in lines]
+def strip_comments(s: str) -> list[str]:
+    lines = s.splitlines()
+    return [
+        re.sub(r'\s+\(\s.*?\s\)(?!\S)', ' ',
+            re.sub(r'\\.*', '', line).rstrip()
+        )
+        for line in lines
+    ]
 
 def include_files(lines, basedir):
     out = []
@@ -54,7 +60,7 @@ def include_files(lines, basedir):
 
 def read_lines(fname, basedir=''):
     fname = path.join(basedir, fname)
-    return include_files(strip_comments(open(fname).read().splitlines()), basedir)
+    return include_files(strip_comments(open(fname).read()), basedir)
 
 
 parser = OptionParser()

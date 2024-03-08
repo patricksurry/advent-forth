@@ -2,7 +2,7 @@
 
 100 constant MAXOBJ     \ max # of objects in cave	(x2 for fixed)
 140 constant MAXLOC     \ max # of cave locations
-17  constant MAXTRAV    \ 16 + 1 = max # of travel directions from loc
+3   constant MAXDIE
 
 \ vocabulary word types
 0 constant MOTION-WORD
@@ -57,6 +57,7 @@ $ff constant NOWHERE
 \ object ids
 1   constant 'KEYS
 2   constant 'LAMP
+3   constant 'GRATE
 4   constant 'CAGE
 5   constant 'ROD
 6   constant 'ROD2
@@ -76,11 +77,13 @@ $ff constant NOWHERE
 22  constant 'OIL
 24  constant 'PLANT
 25  constant 'PLANT2
+23  constant 'MIRROR
 31  constant 'DRAGON
 33  constant 'TROLL
 35  constant 'BEAR
 36  constant 'MESSAGE
 50  constant 'NUGGET
+56  constant 'EGGS
 58  constant 'VASE
 62  constant 'RUG
 64  constant 'CHAIN
@@ -127,7 +130,9 @@ variable oldloc2 3 oldloc2 !
 
 variable dflag   0 dflag   !
 variable bonus   0 bonus   !
+variable numdie  0 numdie  !
 variable gaveup  0 gaveup  !
+variable foobar  0 foobar  !
 
 : 0,n ( n -- )
     ?dup 0> if 0 do 0 c, loop then

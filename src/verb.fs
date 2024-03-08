@@ -365,70 +365,73 @@ create act-msg{  34 0,n
     drop
 ;
 
+: fight-dragon
+    49 0 0 yes-no 0= if
+        exit
+    then
+    'DRAGON 1 speak-item
+    2 'DRAGON prop{ b}!
+    0 'RUG prop{ b}!
+    MAXOBJ 'DRAGON + NOWHERE move-item
+    MAXOBJ 'RUG + 0 move-item
+    'DRAGON 120 move-item
+    'RUG 120 move-item
+    MAXOBJ 1- 1 do
+        i place{ c}@ dup 119 = swap 121 = or if
+            i 120 move-item
+        then
+    loop
+    120 newloc !
+;
+
 \ verb.c:vkill
 : obj-kill ( obj -- )
-    drop
-\ TODO
-\	int msg;
-\	int i;
-\
-\	switch (object) {
-\	case BIRD:
-\		if (closed)
-\			msg = 137;
-\		else {
-\			dstroy(BIRD);
-\			prop[BIRD] = 0;
-\			if (place[SNAKE] == 19)
-\				++tally2;
-\			msg = 45;
-\		}
-\		break;
-\	case 0:
-\		msg = 44;
-\		break;
-\	case CLAM:
-\	case OYSTER:
-\		msg = 150;
-\		break;
-\	case SNAKE:
-\		msg = 46;
-\		break;
-\	case DWARF:
-\		if (closed)
-\			dwarfend();
-\		msg = 49;
-\		break;
-\	case TROLL:
-\		msg = 157;
-\		break;
-\	case BEAR:
-\		msg = 165 + (prop[BEAR] + 1) / 2;
-\		break;
-\	case DRAGON:
-\		if (prop[DRAGON] != 0) {
-\			msg = 167;
-\			break;
-\		}
-\		if (!yes(49, 0, 0))
-\			return;
-\		pspeak(DRAGON, 1);
-\		prop[DRAGON] = 2;
-\		prop[RUG] = 0;
-\		move((DRAGON + MAXOBJ), -1);
-\		move((RUG + MAXOBJ), 0);
-\		move(DRAGON, 120);
-\		move(RUG, 120);
-\		for (i = 1; i < MAXOBJ; ++i)
-\			if (place[i] == 119 || place[i] == 121)
-\				move(i, 120);
-\		newloc = 120;
-\		return;
-\	default:
-\		actspk(verb);
-\		return;
-\	}
-\	rspeak(msg);
+
+    case
+        'BIRD of
+            closed @ if
+                137
+            else
+                'BIRD destroy-item
+                0 'BIRD prop{ b}!
+                'SNAKE place{ c}@ 19 = if
+                    1 tally2 +!
+                then
+                45
+            then endof
+        0 of
+            44 endof
+        'CLAM of
+            150 endof
+        'OYSTER of
+            150 endof
+        'SNAKE of
+            46 endof
+        'DWARF of
+            closed @ if
+                dwarf-end
+            then
+            49 endof
+        'TROLL of
+            157 endof
+        'BEAR of
+            'BEAR prop{ b}@ 1+ 2/ 165 +
+            endof
+        'DRAGON of
+            'DRAGON prop{ b}@ if
+                167
+            else
+                fight-dragon exit
+            then
+        endof
+        0 swap
+    endcase
+
+    ?dup if
+        speak-message
+    else
+        act-speak
+    then
 ;
 
 \ verb.c:veat
@@ -707,27 +710,25 @@ create act-msg{  34 0,n
 
 \ verb.c:vbreak
 : obj-break ( obj -- )
-    drop
-\ TODO
-\	int msg;
-\
-\	if (object == MIRROR) {
-\		msg = 148;
-\		if (closed) {
-\			rspeak(197);
-\			dwarfend();
-\		}
-\	} else if (object == VASE && prop[VASE] == 0) {
-\		msg = 198;
-\		if (toting(VASE))
-\			drop(VASE, loc);
-\		prop[VASE] = 2;
-\		fixed[VASE] = -1;
-\	} else {
-\		actspk(verb);
-\		return;
-\	}
-\	rspeak(msg);
+    dup 'MIRROR = if
+        closed @ if
+            197 speak-message
+            dwarf-end
+        then
+        drop 148
+    else
+        'VASE = 'VASE prop{ b}@ 0= and if
+            198
+            'VASE is-toting if
+                'VASE loc @ drop-item
+            then
+            2 'VASE prop{ b}!
+            NOWHERE 'VASE fixed{ c}!
+        else
+            act-speak
+        then
+    then
+    speak-message
 ;
 
 \ verb.c:vwake
@@ -742,58 +743,44 @@ create act-msg{  34 0,n
 
 \ intransitive verb handlers
 
+\ track count and latest obj where f is true
+\ itverb.c:addobj
+: ?add-obj ( last count obj f -- new count )
+    if -rot nip 1+ else drop then
+;
+
 \ itverb.c:ivtake
 : just-take
-\ TODO
-\	OBJ_T anobj, item;
-\
-\	anobj = 0;
-\	for (item = 1; item < MAXOBJ; ++item) {
-\		if (place[item] == loc) {
-\			if (anobj != 0) {
-\				needobj();
-\				return;
-\			}
-\			anobj = item;
-\		}
-\	}
-\	if (anobj == 0 || (dcheck() && dflag >= 2)) {
-\		needobj();
-\		return;
-\	}
-\	object = anobj;
-\	vtake();
+    0 0
+    MAXOBJ 1- 1 do
+        i loc @ over place{ c}@ = ?add-obj
+    loop
+
+    1 <> dwarf-check dflag 2 >= and or if
+        drop need-obj
+    else
+        dup object ! obj-take
+    then
 ;
 
 \ itverb.c:ivopen
-: just-open \ TODO
-\	if (here(CLAM))
-\		object = CLAM;
-\	if (here(OYSTER))
-\		object = OYSTER;
-\	if (at(DOOR))
-\		object = DOOR;
-\	if (at(GRATE))
-\		object = GRATE;
-\	if (here(CHAIN)) {
-\		if (object != 0) {
-\			needobj();
-\			return;
-\		}
-\		object = CHAIN;
-\	}
-\	if (object == 0) {
-\		rspeak(28);
-\		return;
-\	}
-\	vopen();
+: just-open
+    0 0
+    'CLAM is-here ?add-obj
+    'OYSTER is-here ?add-obj
+    'DOOR is-at ?add-obj
+    'GRATE is-at ?add-obj
+    'CHAIN is-here ?add-obj
+
+    ?dup 0= if
+        drop 28 speak-message
+    else 1 > if
+        drop need-obj
+    else
+        object ! obj-open
+    then then
 ;
 
-\ track count and latest obj where f is true
-\ itverb.c:addobj
-: add-obj ( last count obj f -- new count )
-    if -rot nip 1+ else drop then
-;
 
 \ itverb.c:ivkill
 : just-kill
@@ -804,10 +791,10 @@ create act-msg{  34 0,n
         'DWARF object !
     then
 
-	'SNAKE dup is-here add-obj
-	'DRAGON dup is-at over prop{ b}@ 0= and add-obj
-	'TROLL dup is-at add-obj
-    'BEAR dup is-here over prop{ b}@ 0= and add-obj
+	'SNAKE dup is-here ?add-obj
+	'DRAGON dup is-at over prop{ b}@ 0= and ?add-obj
+	'TROLL dup is-at ?add-obj
+    'BEAR dup is-here over prop{ b}@ 0= and ?add-obj
 
     dup 1 > if                  \ more than one match?
         2drop need-obj exit
@@ -816,8 +803,8 @@ create act-msg{  34 0,n
         drop dup object ! obj-kill exit
     then
 
-    'BIRD dup is-here 'THROW verb @ <> and add-obj
-    'CLAM dup is-here 'OYSTER is-here or add-obj
+    'BIRD dup is-here 'THROW verb @ <> and ?add-obj
+    'CLAM dup is-here 'OYSTER is-here or ?add-obj
     1 > if
         drop need-obj exit
     then
@@ -864,47 +851,54 @@ create act-msg{  34 0,n
 
 \ fee fie foe fum
 \ itverb.c:ivfoo
-: just-foo \ TODO
-\	int k, msg;
-\
-\	k = vocab(word1, 3000);
-\	msg = 42;
-\	if (foobar != 1 - k) {
-\		if (foobar != 0)
-\			msg = 151;
-\		rspeak(msg);
-\		return;
-\	}
-\
-\	foobar = k;
-\	if (k != 4)
-\		return;
-\
-\	foobar = 0;
-\	if (place[EGGS] == 92 || (toting(EGGS) && loc == 92)) {
-\		rspeak(msg);
-\		return;
-\	}
-\
-\	if (place[EGGS] == 0 && place[TROLL] == 0 && prop[TROLL] == 0)
-\		prop[TROLL] = 1;
-\	if (here(EGGS))
-\		k = 1;
-\	else if (loc == 92)
-\		k = 0;
-\	else
-\		k = 2;
-\	move(EGGS, 92);
-\	pspeak(EGGS, k);
-\	return;
+: just-foo
+    42
+    last-verb-cstr 2@ [ 0 SPECIAL-WORD pack ] literal
+    vocab-best unpack drop          \ get the value part
+
+    ( msg val )
+
+    1 over - foobar @ <> if
+        drop
+        foobar @ if drop 151 then
+        speak-message exit
+    then
+
+    dup foobar ! 4 <> if
+        drop exit
+    then
+
+    ( msg )
+
+    0 foobar !
+
+    'EGGS place{ c}@ 92 =
+        'EGGS is-toting loc @ 92 = and
+    or if
+        speak-message
+        exit
+    else
+        drop
+    then
+
+    'EGGS place{ c}@ 0= 'TROLL place{ c}@ 0= and 'TROLL prop{ b}@ 0= and if
+        1 'TROLL prop{ b}!
+    then
+
+    'EGGS is-here if 1
+    else 92 loc @ = if 0
+    else 2 then then
+
+    'EGGS 92 move-item
+    'EGGS swap speak-item
 ;
 
 \ itverb.c:ivread
 : just-read
     0 0
-    'MAGAZINE dup is-here add-obj
-    'TABLET dup is-here add-obj
-    'MESSAGE dup is-here add-obj
+    'MAGAZINE dup is-here ?add-obj
+    'TABLET dup is-here ?add-obj
+    'MESSAGE dup is-here ?add-obj
     1 <> is-dark or if
         drop need-obj
     else

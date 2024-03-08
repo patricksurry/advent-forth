@@ -10,4 +10,4 @@ data/advent.dat: scripts/advpack.py data/advent.json
 	python scripts/advpack.py
 
 data/%_fpp.fs: src/*.fs
-	python scripts/fpp.py $< -o $@
+	python scripts/fpp.py --consts-inline $< -o $@

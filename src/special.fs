@@ -61,32 +61,30 @@
 \ player's incarnation has passed on
 \ turn.c:death
 : death
-    ." TODO death"
-\ 	char yea, i, j;
-\
-\ 	if (!closing) {
-\ 		yea = yes(81 + numdie * 2, 82 + numdie * 2, 54);
-\ 		if (++numdie >= MAXDIE || !yea)
-\ 			normend();
-\ 		place[WATER] = 0;
-\ 		place[OIL] = 0;
-\ 		if (toting(LAMP))
-\ 			prop[LAMP] = 0;
-\ 		for (j = 1; j < MAXOBJ; ++j) {
-\ 			i = MAXOBJ - j;
-\ 			if (toting(i))
-\ 				drop(i, i == LAMP ? 1 : oldloc2);
-\ 		}
-\ 		newloc = 3;
-\ 		oldloc = loc;
-\ 		return;
-\ 	}
-\ 	/*
-\ 	   closing -- no resurrection...
-\ 	*/
-\ 	rspeak(131);
-\ 	++numdie;
-\ 	normend();
+
+    closing @ 0= if
+        numdie @ dup 2* dup 81 + swap 82 + 64 yes-no 0=       ( numdie ?no )
+        swap 1+ dup numdie ! MAXDIE >= or if
+            normal-end
+        then
+        0 'WATER place{ c}!
+        0 'OIL place{ c}!
+        'LAMP is-toting if
+            0 'LAMP prop{ b}!
+        then
+        MAXOBJ 1- 1 do      \ original source uses i = MAXOBJ - j, unclear why
+            i is-toting if
+                i dup 'LAMP = if 1 else oldloc2 @ then drop-item
+            then
+        loop
+        3 newloc !
+        loc @ oldloc !
+    else
+        \ closing -- no resurrection...
+        131 speak-message
+        1 numdie +!
+        normal-end
+    then
 ;
 
 \ handle player's demise via waking up the dwarves...

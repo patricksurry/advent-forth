@@ -95,11 +95,11 @@
         2dup 0= swap 0> and while   \ no move and more links?
         drop 1- swap 4 + swap       \ ( next-link n-1 )
         over cave-link              \ ( next-link n-1 d' v c' )
-        \ TODO ." link " .s CR
+        \ DEBUG ." link " .s CR
         \ verb matches motion or 1, or already hit?
         swap dup 1 = swap motion @ = or r> or if        \ cave-addr n-1 d' c'
             true >r try-move        \ cave-addr n-1 d' f
-            ." tried " .s CR
+            \ DEBUG ." tried " .s CR
             0= if drop 0 then       \ cave-addr n-1 d'|0
         else
             false >r 2drop 0        \ cave-addr n-1 0
@@ -306,7 +306,7 @@
 
     begin english until     \ retrieve player instructions
 
-    ." loc " loc @ . ."  verb " verb @ . ."  obj " object @ . ."  motion " motion @ . CR
+    \ DEBUG ." loc " loc @ . ."  verb " verb @ . ."  obj " object @ . ."  motion " motion @ . CR
 
     motion @ if             \ execute player instructions
         do-move
