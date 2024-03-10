@@ -1,16 +1,4 @@
 
-: try-move ( cond' -- flag )
-    unpack                  \ ( cobj ct )
-    case
-        0 of dup 0= swap pct or endof
-		1 of dup 0= swap is-toting or endof
-		2 of dup is-toting swap is-at or endof
-
-		dup 3 < over 7 > or if 37 bug then
-		dup 3 - rot prop{ b}@ <>
-    endcase
-;
-
 \ explain poor move choice
 \ turn.c:badmove
 : bad-move ( -- )
@@ -34,6 +22,19 @@
     verb c@ dup 'FIND = swap 'INVENTORY = or
     if drop 59 then
     speak-message
+;
+
+: check-move ( cond' -- flag )
+    unpack
+    ( cobj ct )
+    case
+        0 of dup 0= swap pct or endof
+		1 of dup 0= swap is-toting or endof
+		2 of dup is-toting swap is-at or endof
+
+		dup 3 < over 7 > or if 37 bug then
+		dup 3 - rot prop{ b}@ <>
+    endcase
 ;
 
 \ handle special movement
@@ -83,32 +84,39 @@
 \ 	default:
 \ 		bug(38);
 \ 	}
-
 ;
 
 \ turn.c:dotrav
 : do-travel ( -- )      \ dotrav() loc -> newloc based on motion
     loc @ dup newloc !              \ default to current loc
-    cave& dup 2 + swap 1+ c@ 0      \ get # of links and link 0 ( link-addr n 0 )
+    cave-links 0
     false >r                        \ hit flag
-    begin                           \ ( link-addr n 0 )
+    ( link-addr n 0 )
+    begin
+        ( link n 0 )
         2dup 0= swap 0> and while   \ no move and more links?
-        drop 1- swap 4 + swap       \ ( next-link n-1 )
-        over cave-link              \ ( next-link n-1 d' v c' )
-        \ DEBUG ." link " .s CR
+        drop over cave-link
+        ( link n d' v c' )
         \ verb matches motion or 1, or already hit?
-        swap dup 1 = swap motion @ = or r> or if        \ cave-addr n-1 d' c'
-            true >r try-move        \ cave-addr n-1 d' f
-            \ DEBUG ." tried " .s CR
-            0= if drop 0 then       \ cave-addr n-1 d'|0
+        swap dup 1 = swap motion @ = or r> or if
+            ( link n d' c' )
+            true >r check-move
+            ( link n d' f )
+            0= if drop 0 then
+            ( link n d'|0 )
         else
-            false >r 2drop 0        \ cave-addr n-1 0
+            false >r 2drop 0
+            ( link n 0 )
         then
+        >r 1- swap 4 + swap r>
+        ( next-link n-1 d'|0 )
     repeat
-    r> drop -rot 2drop              \ d'|0
+    r> drop -rot 2drop
+    ( d'|0 )
 
     ?dup if
-        unpack case                 \ dest dt
+        unpack case
+            ( dest dt )
             0 of newloc ! endof
             1 of move-special endof
             2 of speak-message endof
@@ -120,42 +128,61 @@
 \ return from whence we came!
 \ turn.c:goback
 : go-back ( -- )
-    \ TODO
-\ 	int kk, k2, want, temp;
-\ 	struct trav strav[MAXTRAV];
-\
-\ 	if (forced(oldloc))
-\ 		want = oldloc2;
-\ 	else
-\ 		want = oldloc;
-\ 	oldloc2 = oldloc;
-\ 	oldloc = loc;
-\ 	k2 = 0;
-\ 	if (want == loc) {
-\ 		rspeak(91);
-\ 		return;
-\ 	}
-\ 	copytrv(travel, strav);
-\ 	for (kk = 0; travel[kk].tdest != -1; ++kk) {
-\ 		if (!travel[kk].tcond && travel[kk].tdest == want) {
-\ 			motion = travel[kk].tverb;
-\ 			dotrav();
-\ 			return;
-\ 		}
-\ 		if (!travel[kk].tcond) {
-\ 			k2 = kk;
-\ 			temp = travel[kk].tdest;
-\ 			gettrav(temp);
-\ 			if (forced(temp) && travel[0].tdest == want)
-\ 				k2 = temp;
-\ 			copytrv(strav, travel);
-\ 		}
-\ 	}
-\ 	if (k2) {
-\ 		motion = travel[k2].tverb;
-\ 		dotrav();
-\ 	} else
-\ 		rspeak(140);
+    oldloc @ dup dup is-forced if
+        oldloc2 @ swap
+    then
+    oldloc2 ! loc @ dup oldloc !
+    ( want loc )
+    over = if
+        91 speak-message
+        exit
+    then
+    ( want )
+
+    \ look through current loc links for wanted destination
+    loc @ cave-links
+    ( want link-addr n )
+    false >r                        \ tmp verb via forced dest
+    begin
+        ?dup while
+        -rot swap over cave-link
+        ( n addr want d' v c' )
+
+        \ unconditional link?
+        0= if
+            \ is it the destination we want?
+            -rot 2dup = if
+                ( n addr v want d' )
+                r> drop 2drop motion ! 2drop
+                do-travel exit
+            then
+            ( n addr v want d' )
+            \ is dest forced to where we want to go?
+            unpack 0= over is-forced and if
+                cave-links drop cave-link 2drop
+                ( n addr v want d0' )
+                over = if
+                    swap r> drop >r
+                else
+                    nip
+                then
+            else
+                drop nip
+            then
+            ( n addr want )
+        else
+            2drop
+        then
+
+        swap 4 + rot 1-
+        ( want addr' n-1 )
+    repeat
+    2drop
+    r> ?dup if
+        motion !
+    else
+        140 speak-message
+    then
 ;
 
 \ turn.c:domove
@@ -262,8 +289,11 @@
 
     loc @ newloc @ <> if
         1 turns +!
-        newloc @ dup loc !          ( location )
-        ?dup 0= if death exit then  \ location 0 means death
+        newloc @ dup loc !
+        ( location )
+        ?dup 0= if                  \ location 0 means death
+            death exit
+        then
         is-forced if                \ forced moved?
             describe
             do-move
@@ -280,7 +310,7 @@
 
         describe
 
-        is-dark invert if
+        is-dark 0= if
             true loc @ visited{ c}!
             describe-items
         then

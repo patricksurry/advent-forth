@@ -194,7 +194,6 @@ create prop{ MAXOBJ 1+ here 0pad            \ (signed) status of objects
 : c}! ( v off addr -- ) + c! ;
 : b}! + c! ;
 
-\ TODO could be part of init-play (see advent.c:initplay)
 :noname
     MAXOBJ 50 do $ff i prop{ b}! loop
 ; execute

@@ -5,7 +5,8 @@
 \ show an item message, with -1 indexed state
 \ database.c:pspeak
 : speak-item ( i state -- )
-    1+ swap 1- 2* ITEMS& + @ ITEMS + swap               \ first item string ( strz state+1 )
+    1+ swap 1- 2* ITEMS& + @ ITEMS + swap               \ first item string
+    ( strz state+1 )
     begin ?dup while 1- swap asciiz> + 1+ swap repeat   \ skip state+1 strings
     spkz
 ;
@@ -21,15 +22,6 @@
         place{ c}@ loc @ =
         swap is-toting
     or
-;
-
-\ database.c:dark
-: is-dark ( -- flag )
-    loc @ cond{ c}@ LIGHT and 0=      \ ! (cond[loc] & LIGHT)
-        'LAMP prop{ b}@ 0=
-        'LAMP is-here 0=
-        or
-    and
 ;
 
 \ database.c:is-at
@@ -58,7 +50,7 @@
 
 \ database.c:carry
 : carry-item ( obj where -- )
-	drop               \ where is unused
+	drop                                   \ where is unused
     dup MAXOBJ < if
         place{ c} dup c@ NOWHERE <> if
             NOWHERE swap c! 1 holding +! else
@@ -69,12 +61,15 @@
 
 \ database.c:drop
 : drop-item ( obj where -- )
-    swap dup MAXOBJ < if                    ( where obj )
-        place{ c} dup c@ NOWHERE = if       ( where place+obj )
+    swap dup MAXOBJ < if
+        ( where obj )
+        place{ c} dup c@ NOWHERE = if
+            ( where place+obj )
             -1 holding +!
         then
     else
-        MAXOBJ - fixed{ c}                  ( where fixed+obj-MAXOBJ )
+        MAXOBJ - fixed{ c}
+        ( where fixed+obj-MAXOBJ )
     then
     c!
 ;
@@ -84,14 +79,20 @@
 
 \ database.c:move
 : move-item ( obj where -- )
-    over dup MAXOBJ < if            \ obj where obj
+    over dup MAXOBJ < if
+        ( obj where obj )
         place{ c} else
         MAXOBJ - fixed{ c}
     then
-    + c@                            \ obj where from
-    dup 0 > over MAXOBJ <= and if   \ obj where from
-        >r over r> carry-item else  \ obj where; after obj from carry-item
-        drop then                   \ obj where
+    + c@
+    ( obj where from )
+    dup 0 > over MAXOBJ <= and if
+        ( obj where from )
+        >r over r> carry-item
+    else
+        drop
+    then
+    ( obj where )
     drop-item
 ;
 
@@ -99,7 +100,6 @@
 : destroy-item ( obj -- )
     0 move-item
 ;
-
 
 \ database.c:put
 : put-item ( obj where pval -- pval' )
@@ -121,7 +121,8 @@
     dup 'STEPS = loc @ 'STEPS fixed{ c}@ = and if
         1 else
         dup prop{ b}@
-    then                    \ ( item state )
+    then
+    ( item state )
     speak-item
 ;
 

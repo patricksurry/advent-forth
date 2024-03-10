@@ -5,7 +5,8 @@ create just-act& 34 cells 0,n
 create act-msg{  34 0,n
 
 : set-actions ( action obj-act just-act msg -- )
-    >r rot dup >r cells dup >r      ( obj-act just-act 2*act   R: msg act 2*act )
+    >r rot dup >r cells dup >r
+    ( obj-act just-act 2*act   R: msg act 2*act )
     just-act& + ! r> obj-act& + !
     2r> act-msg{ c}!
 ;
@@ -62,7 +63,7 @@ create act-msg{  34 0,n
     dup 0= if
         drop need-obj exit
     then
-    dup is-toting invert if
+    dup is-toting 0= if
         drop act-speak exit
     then
     dup 'OIL <> over 'WATER <> and if
@@ -95,7 +96,7 @@ create act-msg{  34 0,n
 
 \ verb.c:vblast
 : verb-blast
-    'ROD2 prop{ b}@ 0< closed @ invert or if
+    'ROD2 prop{ b}@ 0< closed @ 0= or if
         act-speak
     else
         133
@@ -134,7 +135,8 @@ create act-msg{  34 0,n
         speak-message drop exit
     else
         drop
-    then                        \ ( object )
+    then
+    ( object )
 
 \ TODO
 \	   special case for liquids
@@ -192,11 +194,11 @@ create act-msg{  34 0,n
 \ verb.c:vdrop
 : obj-drop ( obj -- )
     \ check for dynamite
-    'ROD2 is-toting over 'ROD = and over is-toting invert and if
+    'ROD2 is-toting over 'ROD = and over is-toting 0= and if
         drop 'ROD2 dup object !
     then
 
-    dup is-toting invert if
+    dup is-toting 0= if
         act-speak exit
     then
 
@@ -263,7 +265,8 @@ create act-msg{  34 0,n
 
 \ verb.c:vopen
 : obj-open ( obj -- )
-    33                         ( obj msg )
+    33
+    ( obj msg )
 
 \ TODO
 \	case CLAM:
@@ -351,14 +354,16 @@ create act-msg{  34 0,n
 
 \ verb.c:vwave
 : obj-wave ( obj -- )
-    dup 'ROD <> 'ROD2 is-toting invert or over is-toting invert if
+    dup 'ROD <> 'ROD2 is-toting 0= or over is-toting 0= if
         29 speak-message
     else
-        dup 'ROD <> 'FISSURE is-at invert or over is-toting invert or closing @ or if
+        dup 'ROD <> 'FISSURE is-at 0= or over is-toting 0= or closing @ or if
             act-speak
         else
-            'FISSURE prop{ b} 1 over b@ -   ( ptr 1-val )
-            dup rot b!                      ( 1-val )
+            'FISSURE prop{ b} 1 over b@ -
+            ( ptr 1-val )
+            dup rot b!
+            ( 1-val )
             'FISSURE 2 rot - speak-item
         then
     then
@@ -461,7 +466,7 @@ create act-msg{  34 0,n
     'WATER <> if
         110 speak-message
     else
-        'WATER bottle-liquid <> 'BOTTLE is-here invert if
+        'WATER bottle-liquid <> 'BOTTLE is-here 0= if
             act-speak
         else
             1 'BOTTLE prop{ b}!
@@ -785,7 +790,8 @@ create act-msg{  34 0,n
 \ itverb.c:ivkill
 : just-kill
     \ check exactly one target is here
-    0 0                             \ obj count
+    0 0
+    ( obj count )
 
     dwarf-check dflag @ 2 >= and if
         'DWARF object !
@@ -857,7 +863,6 @@ create act-msg{  34 0,n
     vocab-best unpack drop          \ get the value part
 
     ( msg val )
-
     1 over - foobar @ <> if
         drop
         foobar @ if drop 151 then
@@ -869,7 +874,6 @@ create act-msg{  34 0,n
     then
 
     ( msg )
-
     0 foobar !
 
     'EGGS place{ c}@ 92 =

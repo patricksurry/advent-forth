@@ -1,5 +1,5 @@
 : spkz ( strz -- )
-    DIGRAMS pad NATIVE-DECODE execute type CR
+    DIGRAMS pad decode type CR
 ;
 
 \ show 1-indexed message
@@ -18,8 +18,11 @@
 : yes-no ( prompt-msg yes-msg no-msg -- flag )
     rot ?dup if speak-message then      \ speak non-zero prompt
     user-input if                       \ non-empty result?
-        c@ [CHAR] n <> else             \ not 'n' or empty means yes
-        drop false then                 \ ( yes-msg no-msg is-yes )
+        c@ [CHAR] n <>                  \ not 'n' or empty means yes
+    else
+        drop false
+    then
+    ( yes-msg no-msg is-yes )
     dup >r if drop else nip then
     ?dup if speak-message then          \ speak relevant non-zero response
     r>
