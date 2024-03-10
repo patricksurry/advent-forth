@@ -37,30 +37,20 @@ consts = '\n'.join([
 if 0x2000 + len(forth) > 0xbc00:
     warn("Forth code overlaps IO space")
 
-boot = f"""TF
-: read-blocks ( blk addr n -- )
-    0 do
-        2dup 1 blkrw
-        swap 1+ swap 1024 +
-    loop
-    2drop
-;
-
-${data_start:04x} constant ADVDAT
-{consts}
-
-{forth_blk} $2000 {nblocks(forth)} read-blocks
-$2000 asciiz> dup
-s" Compiling " type u. s" bytes ... " type CR
-here -rot evaluate here swap -
-s" ... used " type u. s" bytes" type CR
-ADVDAT here - . s" bytes remain before ADVDAT" type CR
-( zeros up to 1K after data which is OK into accept buffers @ $bc00 )
-{data_blk} ADVDAT {nblocks(data)} read-blocks
-"""
+boot = open('data/boot_fpp.fs').read().format(
+    data_start=data_start,
+    data_blk=data_blk,
+    data_blocks=nblocks(data),
+    forth_blk=forth_blk,
+    forth_blocks=nblocks(forth),
+    consts=consts,
+)
+open('data/boot_fpp_fmt.fs', 'w').write(boot)
+if len(boot) + 2 > 1024:
+    warn("Boot block too long: {len(boot)} > 1024")
 
 out = bytearray(64*1024)
-out[0:len(boot)] = boot.encode('ascii')
+out[0:len(boot)] = ('TF' + boot).encode('ascii')
 
 off = data_blk*1024
 out[off:off+len(data)] = data

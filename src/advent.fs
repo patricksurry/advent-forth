@@ -2,7 +2,7 @@
 \ - line wrapping with leading spaces (do embedded newlines work at all?)
 \ - worth creataing an init-play function?  (hard to reinit anyway)
 \ - save/restore (advent.c)
-
+\ - invert should usually be 0= ?
 
 \ help debugging stack trace
 : trace>name ( addr -- nt )
@@ -34,7 +34,7 @@
 \ external word linkage
 
 $80 constant RAND16
-$f800 constant KERNEL
+$f480 constant KERNEL
 KERNEL $08 + constant NATIVE-RNG
 KERNEL $1c + constant NATIVE-DECODE
 KERNEL $77 + constant NATIVE-STRWRAP
@@ -52,6 +52,7 @@ KERNEL $77 + constant NATIVE-STRWRAP
 
 : umin ( x y -- x|y ) 2dup u< if drop else nip then ;
 : u<= u> invert ;
+: u>= u< invert ;
 : <= > invert ;
 : >= < invert ;
 
@@ -66,7 +67,7 @@ include turn.fs
 
 \ see advent.c:main
 : main
-    \TODO save/restore/debug
+    \ TODO save/restore/debug
     65 1 0 yes-no if        \ instructions?
         1000 else 330
     then limit !

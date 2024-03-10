@@ -12,21 +12,51 @@
     drop
 ;
 
-\ find matching word with lowest typ_val >= thresh
+\ check if string matches any of the words listed for a vocab entry
+\ each vocab entry has bytes like: typ, val, n0, s0, n1, s1, ...
+\ the last string has n1 hi bit set;
+\ the last vocab entry has typ, val = $ff, $ff
+: vocab-match ( addr n vptr -- addr n [vptr' | 0 ] [typ_val | -1] )
+    dup @ dup -1 = if                   ( addr n vptr tv )
+        nip 0 swap exit                 \ last entry? result is 0 -1
+    then
+    \ check each string until we find next header, noting if any match
+    >r -rot 2>r 0 swap 2 +              ( f wptr  R: addr n tv )
+    begin
+        dup 1+ swap c@                  ( f s0 n0'  R: addr n tv )
+        dup $80 and -rot $7f and        ( f last? s0 n0  R: addr n tv )
+        2dup + -rot dup 2r@ rot over = if    ( f last? p1 s0 n0 addr n  R: addr n tv )
+            compare 0=                  \ if string lengths match, compare 0 means matched
+        else
+            2drop 2drop 0               \ don't bother
+        then                            ( f last? p1 match? )
+        2swap -rot or -rot              ( f' p1 last? )
+    until
+    2r> 2swap r> rot 0= if              ( addr n vptr' tv )
+        drop -1                         \ no match tv => -1
+    then
+;
+
+\ find the vocab entry with matching word and lowest typ_val >= thresh
 \ database.c:vocab
 : vocab-best ( addr n typval-min -- typval-best | -1 )
-    -rot 2>r -1 swap VOCAB          \ -1 vmin p  R: addr n
+    -1 swap 2swap VOCAB             ( -1 tvmin addr n vptr )
     begin
-        dup 2 + c@                  \ best vmin p len
-        ?dup while                  \ end of VOCAB?
-        over 3 + swap 2dup + -rot   \ best vmin p q sp len
-        2r@ compare 0=              \ best vmin p q flag
-            if >r @ 2dup u<=        \ on match test against vmin, then take min or drop
-                if rot umin swap else drop then r>
-            else nip
-            then                    \ best vmin q
-    repeat
-    2drop 2r> 2drop
+        vocab-match                 ( best tvmin addr n vptr' [tv | -1] )
+        dup -1 <> if                \ found a hit?
+            2swap 2>r 2swap         ( vptr' tv best tvmin   R: addr n )
+            rot 2dup u<= if         ( vptr' best tvmin tv )
+                rot umin swap
+            else
+                drop
+            then                    ( vptr' best' tvmin )
+            rot 2r> rot
+        else
+            drop
+        then                        ( best' tvmin addr n vptr' )
+        ?dup 0=
+    until                           ( best tvmin addr n )
+    2drop drop
 ;
 
 2variable tmp-cstr

@@ -5,16 +5,23 @@ from itertools import accumulate
 from dizzy import dizzy, undizzy, dizzy_squeeze, woozy, unwoozy, unwrap
 
 
-def compact_word(word: str, lo: int, hi: int):
+def compact_word(lo: int, hi: int, words: list[str]) -> bytes:
     """
     byte 0: code % 1000 (<=147)
     byte 1: code // 1000 (<=3)
-    byte 2: strlen (<=15), points to next entry, 0/0/0 header for last
-    n byte str
+    byte 2: length of str 0 (<=15)  (hi bit set on last string)
+    byte 3+: chars for str 0
+    ...
+    last string in group has high bit of length set, followed by next header
+    last header is ff/ff
     """
-    assert lo < 256 and hi < 4
-    return struct.pack("<BBB", lo, hi, len(word)) + word.encode('ascii')
-
+    assert lo < 256 and hi < 4 and all([len(w) < 16 for w in words])
+    n = len(words)
+    cws = b''.join([
+        bytes([len(w) + (0x80 if i == n-1 else 0)]) + w.encode('ascii')
+        for i,w in enumerate(words)
+    ])
+    return bytes([lo, hi]) + cws
 
 def compact_cave(long: bytes, short: bytes, travel: list[tuple[int,int,int,int,int]]):
     """
@@ -109,9 +116,14 @@ header = struct.pack("<H", len(data))
 print(f"DIGRAMS {len(data)} bytes")
 
 # words
+# first group as (lo, hi): [ words ]
+wdict = {}
+for (w, lo, hi) in advent['words']:
+    wdict.setdefault((lo, hi), []).append(w)
+
 data = b''.join(
-    compact_word(*w) for w in advent['words']
-) + bytes(3)
+    compact_word(lo, hi, ws) for (lo, hi), ws in wdict.items()
+) + bytes([0xff, 0xff])
 
 print(f"VOCAB   {len(data)} bytes")
 bin += data

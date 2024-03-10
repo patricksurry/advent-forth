@@ -4,7 +4,8 @@ alice.gz
 alice.txt
 data/advent.blk
 data/advent.dat
-*_fpp.fs
+*_fpp*.fs
 scripts/alice.dzy
 scripts/alice.wzy
 scripts/corpus.asc
+c65-*.dat

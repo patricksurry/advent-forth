@@ -4,7 +4,7 @@
 \ block 0 is read, and is `evaluate`d from offset 2 if offset 0 contains 'TF'
 
 : blkrw ( blk buf action -- )
-    -rot $c014 ! $c012 ! $c010 !
+    -rot $c014 ! $c012 ! $c010 c!
 ;
 
 : blkboot ( -- )

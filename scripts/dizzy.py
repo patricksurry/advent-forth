@@ -17,9 +17,17 @@ from collections import Counter
 import re
 
 
+def _eol(m):
+    s = m.group(1)
+    return s if len(s) > 1 else ' '
+
+
 def unwrap(s: str) -> str:
-    """Replace wrapping newlines with a single space (not reversible)"""
-    s = re.sub(r' *\n(?=\n*)', ' ', s)
+    """
+    Replace wrapping newlines with a single space or newline (not reversible).
+    Multiple newlines or leading space is considered explicit formatting and not removed.
+    """
+    s = re.sub(r' *(\n+\s*)', _eol, s)
     # also replace double space after period
     s = re.sub(r'\.  (?=[A-Z])', '. ', s)
     return s
