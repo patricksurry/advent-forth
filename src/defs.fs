@@ -64,6 +64,7 @@ $ff constant NOWHERE
 7   constant 'STEPS
 8   constant 'BIRD
 9   constant 'DOOR
+10  constant 'PILLOW
 11  constant 'SNAKE
 12  constant 'FISSURE
 13  constant 'TABLET
@@ -71,21 +72,34 @@ $ff constant NOWHERE
 15  constant 'OYSTER
 16  constant 'MAGAZINE
 17  constant 'DWARF
+\ #define KNIFE       18
 19  constant 'FOOD
 20  constant 'BOTTLE
 21  constant 'WATER
 22  constant 'OIL
+23  constant 'MIRROR
 24  constant 'PLANT
 25  constant 'PLANT2
-23  constant 'MIRROR
+\ #define AXE         28
 31  constant 'DRAGON
+32  constant 'CHASM
 33  constant 'TROLL
+34  constant 'TROLL2
 35  constant 'BEAR
 36  constant 'MESSAGE
+38  constant 'VEND
+39  constant 'BATTERIES
 50  constant 'NUGGET
+54  constant 'COINS
+\ #define CHEST       55
 56  constant 'EGGS
+\ #define TRIDENT     57
 58  constant 'VASE
+\ #define EMERALD     59
+\ #define PYRAMID     60
+\ #define PEARL       61
 62  constant 'RUG
+\ #define SPICES      63
 64  constant 'CHAIN
 
 \ bit mapping of "cond" array with location status

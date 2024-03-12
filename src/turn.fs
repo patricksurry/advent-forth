@@ -295,7 +295,7 @@
             death exit
         then
         is-forced if                \ forced moved?
-            describe
+            describe-location
             do-move
             exit
         then
@@ -308,7 +308,7 @@
             exit
         then
 
-        describe
+        describe-location
 
         is-dark 0= if
             true loc @ visited{ c}!

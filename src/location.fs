@@ -59,14 +59,17 @@
 ;
 
 \ turn.c:describe
-: describe ( -- )               \ describe current location
+: describe-location ( -- )               \ describe current location
     'BEAR is-toting if
-        141 speak-message then
+        141 speak-message
+    then
     is-dark if
         16 speak-message else
-        loc @ dup visited{ c}@ 0= speak-location then
+        loc @ dup visited{ c}@ 0= speak-location
+    then
     33 loc @ = 25 pct and closing @ 0= and if
-        8 speak-message then
+        8 speak-message
+    then
 ;
 
 \ database.c:liqloc

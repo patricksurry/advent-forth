@@ -75,7 +75,7 @@
 ;
 
 \ database.c:juggle
-: juggle ( obj -- ) drop ;          \ no-op
+: juggle-item ( obj -- ) drop ;          \ no-op
 
 \ database.c:move
 : move-item ( obj where -- )

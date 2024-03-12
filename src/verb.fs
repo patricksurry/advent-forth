@@ -36,7 +36,7 @@ create act-msg{  34 0,n
             39 speak-message
             wzdark @ if
                 0 wzdark !
-                describe
+                describe-location
             then
         then
     else
@@ -79,7 +79,7 @@ create act-msg{  34 0,n
             'PLANT dup prop{ b}@ swap over 1+ speak-item
             2 + 6 mod dup 'PLANT prop{ b}!
             2/ 'PLANT2 prop{ b}@
-            describe
+            describe-location
         then
     else
         'DOOR is-at if
@@ -122,66 +122,83 @@ create act-msg{  34 0,n
     then
 
     dup is-toting 0= if
-        act-speak exit
+        drop act-speak exit
     then
 
-    \ TODO
-\	\ snake and bird
-\	if (object == BIRD && here(SNAKE)) {
-\		rspeak(30);
-\		if (closed)
-\			dwarfend();
-\		dstroy(SNAKE);
-\		prop[SNAKE] = -1;
-\	}
-\	\ coins and vending machine
-\	else if (object == COINS && here(VEND)) {
-\		dstroy(COINS);
-\		drop(BATTERIES, loc);
-\		pspeak(BATTERIES, 0);
-\		return;
-\	}
-\	\ bird and dragon (ouch!!)
-\	else if (object == BIRD && at(DRAGON) && prop[DRAGON] == 0) {
-\		rspeak(154);
-\		dstroy(BIRD);
-\		prop[BIRD] = 0;
-\		if (place[SNAKE] != 0)
-\			++tally2;
-\		return;
-\	}
-\	\ Bear and troll
-\	if (object == BEAR && at(TROLL)) {
-\		rspeak(163);
-\		move(TROLL, 0);
-\		move((TROLL + MAXOBJ), 0);
-\		move(TROLL2, 117);
-\		move((TROLL2 + MAXOBJ), 122);
-\		juggle(CHASM);
-\		prop[TROLL] = 2;
-\	}
-\	\ vase
-\	else if (object == VASE) {
-\		if (loc == 96)
-\			rspeak(54);
-\		else {
-\			prop[VASE] = at(PILLOW) ? 0 : 2;
-\			pspeak(VASE, prop[VASE] + 1);
-\			if (prop[VASE] != 0)
-\				fixed[VASE] = -1;
-\		}
-\	}
-\	\ handle liquid and bottle
-\	i = liq();
-\	if (i == object)
-\		object = BOTTLE;
-\	if (object == BOTTLE && i != 0)
-\		place[i] = 0;
-\	\  handle bird and cage
-\	if (object == CAGE && prop[BIRD] != 0)
-\		drop(BIRD, loc);
-\	if (object == BIRD)
-\		prop[BIRD] = 0;
+ 	\ snake and bird
+    dup 'BIRD = 'SNAKE is-here and if
+        30 speak-message
+        closed @ if
+            dwarf-end
+        then
+        'SNAKE destroy-item
+        -1 'SNAKE prop{ b}!
+    then
+
+    \ coins and vending machine
+    dup 'COINS = is-here 'VEND and if
+        destroy-item
+    	'BATTERIES dup loc @ drop-item
+    	speak-item
+    	exit
+    then
+    dup 'BIRD = 'DRAGON is-at and 'DRAGON prop{ b}! 0= and if
+        154 speak-message
+        'BIRD destroy-item
+        0 'BIRD prop{ b}!
+        'SNAKE place{ c}@ if
+            1 tally2 +!
+        then
+        exit
+    then
+
+    \ Bear and troll
+    dup 'BEAR = 'TROLL is-at and if
+       163 speak-message
+        'TROLL dup 0 move-item
+        MAXOBJ + 0 move-item
+        'TROLL2 dup 117 move-item
+        MAXOBJ + 122 move-item
+        'CHASM juggle-item
+        2 'TROLL prop{ b}!
+    then
+
+    \ vase
+    dup 'VASE = if
+        96 loc @ = if
+            54 speak-message
+        else
+            'PILLOW is-at if 0 else 2 then
+            'VASE prop{ b}!
+            'VASE dup prop{ b}@ dup -rot 1+
+            ( prop[VASE] VASE prop[VASE]+1 )
+            speak-message
+            if
+                NOWHERE 'VASE fixed{ c}!
+            then
+        then
+    then
+
+	\ handle liquid and bottle
+	bottle-liquid
+	( obj liq )
+	2dup = if
+	   nip 'BOTTLE dup object ! swap
+	then
+	over 'BOTTLE = over and if
+	   0 swap place{ c}!
+	else
+	   drop
+    then
+    ( obj )
+
+	\  handle bird and cage
+	dup 'CAGE = 'BIRD prop{ b}@ and if
+	   'BIRD loc @ drop-item
+	then
+	dup 'BIRD = if
+	   0 'BIRD prop{ b}!
+    then
 
     loc @ drop-item
 ;
