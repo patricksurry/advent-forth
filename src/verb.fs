@@ -114,83 +114,6 @@ create act-msg{  34 0,n
     'LAMP = if act-speak else 76 speak-message then
 ;
 
-\ verb.c:vtake
-: obj-take ( obj -- )
-    dup is-toting if
-        act-speak
-    then
-
-    \ special case objects and fixed objects
-    25
-    over 'PLANT = 'PLANT prop{ b}@ 0 <= and if
-        drop 115
-    then
-    over 'BEAR = 'BEAR prop{ b}@ 1 = and if
-        drop 169
-    then
-    over 'CHAIN = 'BEAR prop{ b}@ 0<> and if
-        drop 170
-    then
-    over fixed{ c}@ if
-        speak-message drop exit
-    else
-        drop
-    then
-    ( object )
-
-\ TODO
-\	   special case for liquids
-\
-\	if (object == WATER || object == OIL) {
-\		if (!here(BOTTLE) || liq() != object) {
-\			object = BOTTLE;
-\			if (toting(BOTTLE) && prop[BOTTLE] == 1) {
-\				vfill();
-\				return;
-\			}
-\			if (prop[BOTTLE] != 1)
-\				msg = 105;
-\			if (!toting(BOTTLE))
-\				msg = 104;
-\			rspeak(msg);
-\			return;
-\		}
-\		object = BOTTLE;
-\	}
-\	if (holding >= 7) {
-\		rspeak(92);
-\		return;
-\	}
-\	/*
-\	   special case for bird.
-\	*/
-\	if (object == BIRD && prop[BIRD] == 0) {
-\		if (toting(ROD)) {
-\			rspeak(26);
-\			return;
-\		}
-\		if (!toting(CAGE)) {
-\			rspeak(27);
-\			return;
-\		}
-\		prop[BIRD] = 1;
-\	}
-\	if ((object == BIRD || object == CAGE) && prop[BIRD] != 0)
-\		carry((BIRD + CAGE) - object, loc);
-
-	\ ( object )
-	loc @ carry-item
-
-\	/*
-\	   handle liquid in bottle
-\	*/
-\	i = liq();
-\	if (object == BOTTLE && i != 0)
-\		place[i] = NOWHERE;
-
- 	54 speak-message
-;
-
 \ verb.c:vdrop
 : obj-drop ( obj -- )
     \ check for dynamite
@@ -687,6 +610,88 @@ create act-msg{  34 0,n
     29 swap
     endcase
     speak-message
+;
+
+\ verb.c:vtake
+: obj-take ( obj -- )
+    dup is-toting if
+        act-speak
+    then
+
+    \ special case objects and fixed objects
+    25
+    over 'PLANT = 'PLANT prop{ b}@ 0 <= and if
+        drop 115
+    then
+    over 'BEAR = 'BEAR prop{ b}@ 1 = and if
+        drop 169
+    then
+    over 'CHAIN = 'BEAR prop{ b}@ 0<> and if
+        drop 170
+    then
+    over fixed{ c}@ if
+        speak-message drop exit
+    else
+        drop
+    then
+    ( obj )
+
+    \ special case for liquids
+
+    dup 'WATER = over 'OIL = or if
+        'BOTTLE object !
+        ( oldobj )
+        bottle-liquid <> 'BOTTLE is-here 0= or if
+            'BOTTLE is-toting 'BOTTLE prop{ b}@ 1 = and if
+                obj-fill exit
+            then
+
+            is-toting 'BOTTLE 0= if
+                104
+            else 'BOTTLE prop{ b}@ 1 <> if
+                105
+            else
+                25
+            then then
+            speak-message drop exit
+        else
+            drop
+        then
+    then
+    (  )
+
+    holding @ 7 >= if
+        92 speak-message
+        exit
+    then
+
+    \ special case for bird.
+
+    object @
+    dup 'BIRD = 'BIRD prop{ b}@ 0= and if
+        'ROD is-toting if
+            26 speak-message drop exit
+        then
+        'CAGE is-toting 0= if
+            27 speak-message drop exit
+        then
+        1 'BIRD prop{ b}!
+    then
+    dup 'BIRD = over 'CAGE = or 'BIRD prop{ b}@ 0<> and if
+        \ carry the other item
+        'BIRD 'CAGE + over - loc @ carry-item
+    then
+	( object )
+	dup loc @ carry-item
+
+    \  handle liquid in bottle
+    bottle-liquid swap 'BOTTLE = over 0<> and if
+        NOWHERE swap place{ c}!
+    else
+        drop
+    then
+
+ 	54 speak-message
 ;
 
 \ verb.c:vread

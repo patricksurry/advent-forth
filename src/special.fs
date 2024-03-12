@@ -63,7 +63,8 @@
 : death
 
     closing @ 0= if
-        numdie @ dup 2* dup 81 + swap 82 + 64 yes-no 0=       ( numdie ?no )
+        numdie @ dup 2* dup 81 + swap 82 + 64 yes-no 0=
+        ( numdie ?no )
         swap 1+ dup numdie ! MAXDIE >= or if
             normal-end
         then
