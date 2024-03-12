@@ -93,11 +93,11 @@ $ff constant NOWHERE
 54  constant 'COINS
 \ #define CHEST       55
 56  constant 'EGGS
-\ #define TRIDENT     57
+57  constant 'TRIDENT
 58  constant 'VASE
 \ #define EMERALD     59
 \ #define PYRAMID     60
-\ #define PEARL       61
+61  constant 'PEARL
 62  constant 'RUG
 \ #define SPICES      63
 64  constant 'CHAIN

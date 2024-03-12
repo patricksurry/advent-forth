@@ -208,23 +208,22 @@ create act-msg{  34 0,n
     33
     ( obj msg )
 
-\ TODO
-\	case CLAM:
-\	case OYSTER:
-\		oyclam = (object == OYSTER ? 1 : 0);
-\		if (verb == LOCK)
-\			msg = 61;
-\		else if (!toting(TRIDENT))
-\			msg = 122 + oyclam;
-\		else if (toting(object))
-\			msg = 120 + oyclam;
-\		else {
-\			msg = 124 + oyclam;
-\			dstroy(CLAM);
-\			drop(OYSTER, loc);
-\			drop(PEARL, 105);
-\		}
-\		break;
+    over dup 'CLAM = swap 'OYSTER = or if
+        drop dup 'OYSTER =
+        ( obj oyclam )
+        verb @ 'LOCK = if
+            drop 61
+        else 'TRIDENT is-toting 0= if
+            122 +
+        else over is-toting if
+            120 +
+        else
+            124 +
+            'CLAM destroy-item
+            'OYSTER loc @ drop-item
+            'PEARL 105 drop-item
+        then then then
+    then
 
     over 'DOOR = if
         drop
@@ -232,56 +231,60 @@ create act-msg{  34 0,n
             54 else 111
         then
     then
+
     over 'CAGE = if drop 32 then
+
     over 'KEYS = if drop 55 then
 
-\ TODO
-\	case CHAIN:
-\		if (!here(KEYS))
-\			msg = 31;
-\		else if (verb == LOCK) {
-\			if (prop[CHAIN] != 0)
-\				msg = 34;
-\			else if (loc != 130)
-\				msg = 173;
-\			else {
-\				prop[CHAIN] = 2;
-\				if (toting(CHAIN))
-\					drop(CHAIN, loc);
-\				fixed[CHAIN] = -1;
-\				msg = 172;
-\			}
-\		} else {
-\			if (prop[BEAR] == 0)
-\				msg = 41;
-\			else if (prop[CHAIN] == 0)
-\				msg = 37;
-\			else {
-\				prop[CHAIN] = 0;
-\				fixed[CHAIN] = 0;
-\				if (prop[BEAR] != 3)
-\					prop[BEAR] = 2;
-\				fixed[BEAR] = 2 - prop[BEAR];
-\				msg = 171;
-\			}
-\		}
-\		break;
-\	case GRATE:
-\		if (!here(KEYS))
-\			msg = 31;
-\		else if (closing) {
-\			if (!panic) {
-\				clock2 = 15;
-\				++panic;
-\			}
-\			msg = 130;
-\		} else {
-\			msg = 34 + prop[GRATE];
-\			prop[GRATE] = (verb == LOCK ? 0 : 1);
-\			msg += 2 * prop[GRATE];
-\		}
-\		break;
-\	}
+    over 'CHAIN = if
+        drop
+        'KEYS is-here 0= if
+            31
+        else 'LOCK verb @ = if
+            'CHAIN prop{ b}@ if
+                34
+            else 130 loc @ <> if
+                173
+            else
+                172
+                2 'CHAIN prop{ b}!
+                'CHAIN is-toting if
+                    'CHAIN loc @ drop-item
+                then
+                NOWHERE 'CHAIN fixed{ c}!
+            then then
+        else
+            'BEAR prop{ b}@ 0= if
+                41
+            else 'CHAIN prop{ b}@ 0= if
+                37
+            else
+                171
+                0 'CHAIN 2dup prop{ b}! fixed{ c}!
+                'BEAR prop{ b}@ 3 <> if
+                    2 'BEAR prop{ b}!
+                then
+                2 'BEAR prop{ b}@ - 'BEAR fixed{ c}!
+            then then
+        then then
+
+    over 'GRATE = if
+        drop
+        'KEYS is-here 0= if
+            31
+        else closing @ if
+            130
+            panic @ 0= if
+                15 clock2 !
+                1 panic !
+            then
+        else
+            34 'GRATE prop{ b}@ +
+            'LOCK verb @ = if 0 else 1 then
+            dup 'GRATE prop{ b}!
+            2* +
+        then then
+    then
 
     nip speak-message
 ;
