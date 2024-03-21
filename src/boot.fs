@@ -1,24 +1,11 @@
-\ read/write blk...blk+n-1 to/from addr
-: rwblocks ( blk addr n action -- )
-    rot 2swap
-    ( action addr blk n )
-    over + swap do
-        ( action buf )
-        2dup i -rot swap blkrw  \ generate blk buf action
-        ( action buf )
-        1024 +
-    loop
-    2drop
-;
-
 \ define data pointers
 ${data_start:04x} constant ADVDAT
 {consts}
 
 \ load and compile forth source
-{forth_blk} $2000 {forth_blocks} 1 rwblocks
+{forth_blk} $4000 {forth_blocks} blk-read-n
 \ count length to nul
-$2000 asciiz> dup
+$4000 {forth_len} dup
 s" Compiling " type u. s" bytes ... " type CR
 here -rot
 ( at addr n )
@@ -26,12 +13,19 @@ evaluate
 here swap -
 s" ... used " type u. s" bytes" type CR
 ADVDAT here - . s" bytes remain before ADVDAT" type CR
+.s cr       \ stack should be empty after evaluate
 
-\ now we have space to load data; zeroing up to 1K trailing into accept buffers @ $bc00
-{data_blk} ADVDAT {data_blocks} 1 rwblocks
+\ now we have space to load data...
 
-\ turnkey entry point
+\ copy last block first and move tail up 1024*(blks-1) to avoid overwriting "ROM"
+{data_blk} {data_blocks} + 1- ADVDAT blk-read
+ADVDAT {data_start} {data_blocks} 1- 10 lshift + {data_tail} move
+
+\ then read the remaining whole blocks
+{data_blk} ADVDAT {data_blocks} 1- blk-read-n
+
+\ save turnkey entry point and dump image
 ' main $7e !
-64 0 64 2 rwblocks
+64 0 64 blk-write-n
 
 main

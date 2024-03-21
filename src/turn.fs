@@ -33,7 +33,7 @@
 		2 of dup is-toting swap is-at or endof
 
 		dup 3 < over 7 > or if 37 bug then
-		dup 3 - rot prop{ b}@ <>
+		dup 3 - rot prop{}@ <>
     endcase
 ;
 
@@ -88,14 +88,14 @@
 
 \ turn.c:dotrav
 : do-travel ( -- )      \ dotrav() loc -> newloc based on motion
-    loc @ dup newloc !              \ default to current loc
+    loc@ dup newloc !              \ default to current loc
     cave-links 0
     false >r                        \ hit flag
     ( link-addr n 0 )
     begin
         ( link n 0 )
         2dup 0= swap 0> and while   \ no move and more links?
-        drop over cave-link
+        drop over decode-link
         ( link n d' v c' )
         \ verb matches motion or 1, or already hit?
         swap dup 1 = swap motion @ = or r> or if
@@ -131,7 +131,7 @@
     oldloc @ dup dup is-forced if
         oldloc2 @ swap
     then
-    oldloc2 ! loc @ dup oldloc !
+    oldloc2 ! loc@ dup oldloc !
     ( want loc )
     over = if
         91 speak-message
@@ -140,12 +140,12 @@
     ( want )
 
     \ look through current loc links for wanted destination
-    loc @ cave-links
+    loc@ cave-links
     ( want link-addr n )
     false >r                        \ tmp verb via forced dest
     begin
         ?dup while
-        -rot swap over cave-link
+        -rot swap over decode-link
         ( n addr want d' v c' )
 
         \ unconditional link?
@@ -159,7 +159,7 @@
             ( n addr v want d' )
             \ is dest forced to where we want to go?
             unpack 0= over is-forced and if
-                cave-links drop cave-link 2drop
+                cave-links drop decode-link 2drop
                 ( n addr v want d0' )
                 over = if
                     swap r> drop >r
@@ -194,16 +194,16 @@
             detail @ 1+ dup detail !
             3 < if 15 speak-message then
             0 wzdark !
-            loc @ false over visited{ c}!
+            loc@ false over visited{ c}!
             newloc ! 0 loc !
         endof
         'CAVE of
-            loc @ 8 <
+            loc@ 8 <
             if 57 else 58 then
             speak-message
         endof
         oldloc @ oldloc2 !
-        loc @ oldloc !
+        loc@ oldloc !
         do-travel
     endcase
 ;
@@ -211,7 +211,7 @@
 \ turn.c:doobj
 : do-object ( -- )
     object @
-    dup fixed{ c}@ loc @ = over is-here or if       \ is object here?
+    dup fixed{ c}@ loc@ = over is-here or if       \ is object here?
         drop transitive-verb exit
     then
 
@@ -259,15 +259,14 @@
 \		trobj();
 \	} else
 
-    drop
-    ." I see no " last-nonverb-cstr 2@ type ."  here." CR
+    drop say-not-here
 ;
 
 \ turn.c:turn
 : turn
     newloc @ dup 9 < swap 0<> and closing @ and if
         130 speak-message
-        loc @ newloc !
+        loc@ newloc !
         panic @ 0= if
             15 clock2 !
         then
@@ -287,7 +286,7 @@
 \	}
 \	dwarves(); /* & special dwarf(pirate who steals)	*/
 
-    loc @ newloc @ <> if
+    loc@ newloc @ <> if
         1 turns +!
         newloc @ dup loc !
         ( location )
@@ -303,7 +302,7 @@
         \ wandering in the dark?
         wzdark @ is-dark and 35 pct and if
             23 speak-message
-            loc @ oldloc2 !
+            loc@ oldloc2 !
             death
             exit
         then
@@ -311,32 +310,36 @@
         describe-location
 
         is-dark 0= if
-            true loc @ visited{ c}!
+            true loc@ visited{ c}!
             describe-items
         then
 
     then
 
-\ TODO
-\	if (closed) {
-\		if (prop[OYSTER] < 0 && toting(OYSTER))
-\			pspeak(OYSTER, 1);
-\		for (i = 1; i < MAXOBJ; ++i) {
-\			if (toting(i) && prop[i] < 0)
-\				prop[i] = -1 - prop[i];
-\		}
-\	}
+    closed @ if
+        'OYSTER prop{}@ 0< 'OYSTER is-toting and if
+            'OYSTER 1 speak-item
+        then
+        MAXOBJ 1 do
+            i is-toting i prop{}@ 0< and if
+                -1 i prop{}@ - prop{}!
+            then
+        loop
+    then
 
-\	wzdark = dark();
-\	if (knfloc > 0 && knfloc != loc)
-\		knfloc = 0;
-\
-\	if (stimer()) /* as the grains of sand slip by	*/
-\		return;
+    is-dark wzdark !
+    knfloc @ dup 0> over loc @ <> and if
+        0 knfloc !
+    then
+
+    \ as the grains of sand slip by
+    stimer if
+        exit
+    then
 
     begin english until     \ retrieve player instructions
 
-    \ DEBUG ." loc " loc @ . ."  verb " verb @ . ."  obj " object @ . ."  motion " motion @ . CR
+    ." loc " loc@ . ."  verb " verb @ . ."  obj " object @ . ."  motion " motion @ . .s CR
 
     motion @ if             \ execute player instructions
         do-move

@@ -21,16 +21,16 @@
 \   verb is a vocab index
 \   cond' has 0-7 in high byte and obj index in low byte, cf. tcond in C
 \ database.c:gettrav
-: cave-link ( link-addr -- dest' verb cond' )
-    dup @ dup $1ff and >r 9 rshift
-    ( p cobj    R: v )
-    swap 2 +
-    ( cobj p2 )
-    @ dup $3ff and >r 10 rshift
-    ( cobj ct   R: v  d' )
-    pack r> r> rot
-    ( d' v c' )
-;
+\ : cave-link ( link-addr -- dest' verb cond' )
+\     dup @ dup $1ff and >r 9 rshift
+\     ( p cobj    R: v )
+\     swap 2 +
+\     ( cobj p2 )
+\     @ dup $3ff and >r 10 rshift
+\     ( cobj ct   R: v  d' )
+\     pack r> r> rot
+\     ( d' v c' )
+\ ;
 
 \ describe 1-indexed location as long or short version
 \ database.c:desclg,descsh
@@ -51,8 +51,8 @@
 
 \ database.c:dark
 : is-dark ( -- flag )
-    loc @ cond{ c}@ LIGHT and 0=      \ ! (cond[loc] & LIGHT)
-        'LAMP prop{ b}@ 0=
+    loc@ cond{ c}@ LIGHT and 0=      \ ! (cond[loc] & LIGHT)
+        'LAMP prop{}@ 0=
         'LAMP is-here 0=
         or
     and
@@ -65,9 +65,9 @@
     then
     is-dark if
         16 speak-message else
-        loc @ dup visited{ c}@ 0= speak-location
+        loc@ dup visited{ c}@ 0= speak-location
     then
-    33 loc @ = 25 pct and closing @ 0= and if
+    33 loc@ = 25 pct and closing @ 0= and if
         8 speak-message
     then
 ;

@@ -1,55 +1,61 @@
 
 \ turn.c:score
 : score
-\ TODO
-\ {
-\ 	int t, i, k, s;
-\ 	s = t = k = 0;
-\ 	for (i = 50; i <= MAXTRS; ++i) {
-\ 		if (i == CHEST)
-\ 			k = 14;
-\ 		else if (i > CHEST)
-\ 			k = 16;
-\ 		else
-\ 			k = 12;
-\ 		if (prop[i] >= 0)
-\ 			t += 2;
-\ 		if (place[i] == 3 && prop[i] == 0)
-\ 			t += k - 2;
-\ 	}
-\ 	printf("%-20s%d\n", "Treasures:", s = t);
-\ 	t = (MAXDIE - numdie) * 10;
-\ 	if (t)
-\ 		printf("%-20s%d\n", "Survival:", t);
-\ 	s += t;
-\ 	if (!gaveup)
-\ 		s += 4;
-\ 	t = dflag ? 25 : 0;
-\ 	if (t)
-\ 		printf("%-20s%d\n", "Getting well in:", t);
-\ 	s += t;
-\ 	t = closing ? 25 : 0;
-\ 	if (t)
-\ 		printf("%-20s%d\n", "Masters section:", t);
-\ 	s += t;
-\ 	if (closed) {
-\ 		if (bonus == 0)
-\ 			t = 10;
-\ 		else if (bonus == 135)
-\ 			t = 25;
-\ 		else if (bonus == 134)
-\ 			t = 30;
-\ 		else if (bonus == 133)
-\ 			t = 45;
-\ 		printf("%-20s%d\n", "Bonus:", t);
-\ 		s += t;
-\ 	}
-\ 	if (place[MAGAZINE] == 108)
-\ 		s += 1;
-\ 	s += 2;
-\ 	printf("%-20s%d\n", "Score:", s);
+    0 0
+    ( s t )
+    MAXTRS 1+ 50 do
+        i prop{}@ 0 >= if
+            2 +
+        then
+        i 'CHEST = if
+            12 \ 14 - 2
+        else i 'CHEST > if
+            14 \ 16 - 2
+        else
+            10 \ 12 - 2
+        then then
+        i place{ c}@ 3 = i prop{}@ 0= and if
+            +
+        else
+            drop
+        then
+    loop
+    ( s t )
+    ."       Treasures: " dup u. cr
+    + MAXDIE numdie @ - 10 *
+    ?dup if
+        ."        Survival: " dup u. cr
+        +
+    then
+    ( s )
+    gaveup @ 0= if
+        4 +
+    then
+    dflag @ ?dup if
+        ." Getting well in: 25" cr
+        25 +
+    then
+    closing @ ?dup if
+        ." Masters section: 25" cr
+        25 +
+    then
+    closed @ if
+        bonus @ case
+            0   of 10 endof
+            135 of 25 endof
+            134 of 30 endof
+            133 of 45 endof
+            0 swap
+        endcase
+        ."           Bonus: " dup u. cr
+        +
+    then
+    'MAGAZINE place{ c}@ 108 = if
+        1+
+    then
+    2 +
+    ."           Score: " u. cr
 ;
-
 
 \ turn.c:normend
 : normal-end
@@ -71,7 +77,7 @@
         0 'WATER place{ c}!
         0 'OIL place{ c}!
         'LAMP is-toting if
-            0 'LAMP prop{ b}!
+            0 'LAMP prop{}!
         then
         MAXOBJ 1- 1 do      \ original source uses i = MAXOBJ - j, unclear why
             i is-toting if
@@ -79,7 +85,7 @@
             then
         loop
         3 newloc !
-        loc @ oldloc !
+        loc@ oldloc !
     else
         \ closing -- no resurrection...
         131 speak-message
@@ -95,9 +101,11 @@
  	normal-end
 ;
 
+\ TODO
 \ special time limit stuff...
 \ turn.c:stimer
-\ int stimer(void)
+: stimer
+    0
 \ {
 \ 	int i;
 \
@@ -197,20 +205,20 @@
 \ 	}
 \ 	return 0;
 \ }
+;
 
 \ check for presence of dwarves..
 \ database.c:dcheck
-: dwarf-check ( -- i )
-    0
-\ TODO
-\ unsigned char dcheck(void) {
-\   unsigned char i;
-\
-\   for (i = 1; i < (DWARFMAX - 1); ++i) {
-\     if (dloc[i] == loc)
-\       return i;
-\   }
-\   return 0;
+: dwarf-check ( -- i|0 )
+    loc @ 0
+    MAXDWARF 1- 1 do
+        ( loc 0 )
+        over i dloc{ c}@ = if
+            drop i leave
+            ( loc i )
+        then
+    loop
+    nip
 ;
 
 \ TODO
@@ -320,9 +328,9 @@
 \ 	oldloc2 = newloc;
 \ 	death();
 \ }
-\ /*
-\ 	pirate stuff
-\ */
+
+\ TODO
+\ pirate stuff
 \ turn.c:dopirate
 \ void dopirate(void)
 \ {

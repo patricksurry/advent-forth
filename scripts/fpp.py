@@ -94,7 +94,7 @@ if options.inline:
     lines = map(inline_consts, map(extract_consts, lines))
 
 if options.strip:
-    out = ' '.join(line.strip() for line in lines if line)
+    out = '\n'.join(line.strip() for line in lines if line)
 else:
     out = '\n'.join(line for line in lines if line)
 

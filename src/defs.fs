@@ -1,8 +1,10 @@
 \ see advent.h
 
-100 constant MAXOBJ     \ max # of objects in cave	(x2 for fixed)
+100 constant MAXOBJ     \ 2 * max # of objects in cave	(x2 for fixed)
 140 constant MAXLOC     \ max # of cave locations
-3   constant MAXDIE
+3   constant MAXDIE     \ max resurrections
+79  constant MAXTRS     \ number of scored treasures
+7   constant MAXDWARF   \ number of dwarves
 
 \ vocabulary word types
 0 constant MOTION-WORD
@@ -72,7 +74,7 @@ $ff constant NOWHERE
 15  constant 'OYSTER
 16  constant 'MAGAZINE
 17  constant 'DWARF
-\ #define KNIFE       18
+18  constant 'KNIFE
 19  constant 'FOOD
 20  constant 'BOTTLE
 21  constant 'WATER
@@ -80,7 +82,7 @@ $ff constant NOWHERE
 23  constant 'MIRROR
 24  constant 'PLANT
 25  constant 'PLANT2
-\ #define AXE         28
+28  constant 'AXE
 31  constant 'DRAGON
 32  constant 'CHASM
 33  constant 'TROLL
@@ -89,9 +91,12 @@ $ff constant NOWHERE
 36  constant 'MESSAGE
 38  constant 'VEND
 39  constant 'BATTERIES
+
+\ fixed locations
+
 50  constant 'NUGGET
 54  constant 'COINS
-\ #define CHEST       55
+55  constant 'CHEST
 56  constant 'EGGS
 57  constant 'TRIDENT
 58  constant 'VASE
@@ -133,6 +138,15 @@ variable clock1 30 clock1  !
 variable clock2 50 clock2  !
 variable panic   0 panic   !
 
+\ dwarf locations; note dloc[DWARFMAX-1] = chloc
+create dloc{   0 c, 19 c, 27 c, 33 c, 44 c, 64 c, 114 c,
+create dseen{  0 c,  0 c,  0 c,  0 c,  0 c,  0 c,  0 c,     \ seen flag
+create odloc{  0 c,  0 c,  0 c,  0 c,  0 c,  0 c,  0 c,     \ old locs
+variable dkill  0  dkill    !        \ dwarves killed
+
+\ LOC_T daltloc;			  /* alternate appearance	*/
+\ int chloc, chloc2;		  /* chest locations	*/
+
 variable limit 100 limit   !
 variable tally  15 tally   !
 variable tally2  0 tally2  !
@@ -141,6 +155,7 @@ variable newloc  1 newloc  !
 variable loc     3 loc     !
 variable oldloc  3 oldloc  !
 variable oldloc2 3 oldloc2 !
+variable knfloc  0 knfloc  !
 
 variable dflag   0 dflag   !
 variable bonus   0 bonus   !
@@ -199,15 +214,19 @@ create visited{ MAXLOC 1+ here 0pad         \ t/f if has been here
 create prop{ MAXOBJ 1+ here 0pad            \ (signed) status of objects
 
 \ unsigned char(c) and signed byte(b) array accessors
-: c} ( off addr -- addr ) + ;
-: b} + ;
-: b@ ( addr -- b ) c@ dup 128 and if $ff00 or then ;
-: b! c! ;
 : c}@ ( off addr -- c ) + c@ ;
-: b}@ ( off addr -- b ) + b@ ;
 : c}! ( v off addr -- ) + c! ;
-: b}! + c! ;
+
+: prop{}@ ( off -- b )
+    prop{ + cs@
+;
+: prop{}! ( b off -- )
+    prop{ + c!
+;
+
+: loc@ loc @ ;
 
 :noname
-    MAXOBJ 50 do $ff i prop{ b}! loop
+    \ 50 and above are fixed location
+    MAXOBJ 50 do $ff i prop{}! loop
 ; execute

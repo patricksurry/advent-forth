@@ -1,5 +1,5 @@
 : spkz ( strz -- )
-    DIGRAMS pad decode type CR
+    DIGRAMS typez CR
 ;
 
 \ show 1-indexed message
@@ -10,7 +10,7 @@
 
 \ english.c:getwords
 : user-input ( -- addr n )
-    ." > " pad dup 127 accept tolower
+    ." > " pad dup 127 accept tolower CR
 ;
 
 \ optionally prompt user and respond to a yes/no question returning flag
@@ -28,7 +28,15 @@
     r>
 ;
 
+: say-last-thing
+    last-nonverb-cstr 2@ type
+;
+
+: say-not-here
+    ." I see no " say-last-thing ."  here." CR
+;
+
 : dunno
-    60 61 13 random abs 3 mod -1 do rot loop
+    60 61 13 random 3 modu -1 do rot loop
     2drop speak-message
 ;

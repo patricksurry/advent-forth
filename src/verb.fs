@@ -11,6 +11,34 @@ create act-msg{  34 0,n
     2r> act-msg{ c}!
 ;
 
+
+\ turn.c:trverb,trobj
+: transitive-verb ( -- )  \ act on an object
+    verb @ ?dup if
+        cells obj-act& + @
+        ( xt )
+        ?dup 0= if
+            ." This verb is not implemented yet." CR
+        else
+            object @ swap execute
+        then
+    else
+        ." What do you want to do with the " say-last-thing ." ?" CR
+    then
+;
+
+\ itverb.c:itverb
+: intransitive-verb ( -- )  \ just act
+    verb @ ?dup if
+        cells just-act& + @
+        ?dup 0= if
+            ." This intransitive not implemented yet." CR
+        else
+            execute
+        then
+    then
+;
+
 \ verb.c:actspk
 : act-speak ( -- )
     verb @ dup 1 < over 31 > or if
@@ -32,7 +60,7 @@ create act-msg{  34 0,n
         limit @ 0 < if
             184 speak-message
         else
-            1 'LAMP prop{ b}!
+            1 'LAMP prop{}!
             39 speak-message
             wzdark @ if
                 0 wzdark !
@@ -47,7 +75,7 @@ create act-msg{  34 0,n
 \ verb.c:voff
 : verb-off
     'LAMP is-here if
-        0 'LAMP prop{ b}!
+        0 'LAMP prop{}!
         40 speak-message
     else
         act-speak
@@ -69,22 +97,22 @@ create act-msg{  34 0,n
     dup 'OIL <> over 'WATER <> and if
         drop 78 speak-message exit
     then
-    1 'BOTTLE prop{ b}!
+    1 'BOTTLE prop{}!
     0 over place{ c}!
 
     'PLANT is-at if
         dup 'WATER <> if
             112 speak-message
         else
-            'PLANT dup prop{ b}@ swap over 1+ speak-item
-            2 + 6 mod dup 'PLANT prop{ b}!
-            2/ 'PLANT2 prop{ b}@
+            'PLANT dup prop{}@ swap over 1+ speak-item
+            2 + 6 mod dup 'PLANT prop{}!
+            2/ 'PLANT2 prop{}@
             describe-location
         then
     else
         'DOOR is-at if
             dup 'OIL = 1 and dup
-            'DOOR prop{ b}!
+            'DOOR prop{}!
             113 +
         else
             77
@@ -96,11 +124,11 @@ create act-msg{  34 0,n
 
 \ verb.c:vblast
 : verb-blast
-    'ROD2 prop{ b}@ 0< closed @ 0= or if
+    'ROD2 prop{}@ 0< closed @ 0= or if
         act-speak
     else
         133
-        115 loc @ = if drop 134 then
+        115 loc@ = if drop 134 then
         'ROD2 is-here if drop 135 then
         dup speak-message
         bonus !
@@ -116,6 +144,7 @@ create act-msg{  34 0,n
 
 \ verb.c:vdrop
 : obj-drop ( obj -- )
+
     \ check for dynamite
     'ROD2 is-toting over 'ROD = and over is-toting 0= and if
         drop 'ROD2 dup object !
@@ -132,20 +161,21 @@ create act-msg{  34 0,n
             dwarf-end
         then
         'SNAKE destroy-item
-        -1 'SNAKE prop{ b}!
+        -1 'SNAKE prop{}!
     then
 
     \ coins and vending machine
-    dup 'COINS = is-here 'VEND and if
+    dup 'COINS = 'VEND is-here and if
         destroy-item
-    	'BATTERIES dup loc @ drop-item
+    	'BATTERIES dup loc@ drop-item
     	speak-item
     	exit
     then
-    dup 'BIRD = 'DRAGON is-at and 'DRAGON prop{ b}! 0= and if
+
+    dup 'BIRD = 'DRAGON is-at and 'DRAGON prop{}@ 0= and if
         154 speak-message
         'BIRD destroy-item
-        0 'BIRD prop{ b}!
+        0 'BIRD prop{}!
         'SNAKE place{ c}@ if
             1 tally2 +!
         then
@@ -160,17 +190,17 @@ create act-msg{  34 0,n
         'TROLL2 dup 117 move-item
         MAXOBJ + 122 move-item
         'CHASM juggle-item
-        2 'TROLL prop{ b}!
+        2 'TROLL prop{}!
     then
 
     \ vase
     dup 'VASE = if
-        96 loc @ = if
+        96 loc@ = if
             54 speak-message
         else
             'PILLOW is-at if 0 else 2 then
-            'VASE prop{ b}!
-            'VASE dup prop{ b}@ dup -rot 1+
+            'VASE prop{}!
+            'VASE dup prop{}@ dup -rot 1+
             ( prop[VASE] VASE prop[VASE]+1 )
             speak-message
             if
@@ -182,8 +212,9 @@ create act-msg{  34 0,n
 	\ handle liquid and bottle
 	bottle-liquid
 	( obj liq )
+
 	2dup = if
-	   nip 'BOTTLE dup object ! swap
+	   'BOTTLE object !
 	then
 	over 'BOTTLE = over and if
 	   0 swap place{ c}!
@@ -193,14 +224,14 @@ create act-msg{  34 0,n
     ( obj )
 
 	\  handle bird and cage
-	dup 'CAGE = 'BIRD prop{ b}@ and if
-	   'BIRD loc @ drop-item
+	dup 'CAGE = 'BIRD prop{}@ and if
+	   'BIRD loc@ drop-item
 	then
 	dup 'BIRD = if
-	   0 'BIRD prop{ b}!
+	   0 'BIRD prop{}!
     then
 
-    loc @ drop-item
+    loc@ drop-item
 ;
 
 \ verb.c:vopen
@@ -220,14 +251,14 @@ create act-msg{  34 0,n
         else
             124 +
             'CLAM destroy-item
-            'OYSTER loc @ drop-item
+            'OYSTER loc@ drop-item
             'PEARL 105 drop-item
         then then then
     then
 
     over 'DOOR = if
         drop
-        'DOOR prop{ b}@ 1 = if
+        'DOOR prop{}@ 1 = if
             54 else 111
         then
     then
@@ -241,32 +272,33 @@ create act-msg{  34 0,n
         'KEYS is-here 0= if
             31
         else 'LOCK verb @ = if
-            'CHAIN prop{ b}@ if
+            'CHAIN prop{}@ if
                 34
-            else 130 loc @ <> if
+            else 130 loc@ <> if
                 173
             else
                 172
-                2 'CHAIN prop{ b}!
+                2 'CHAIN prop{}!
                 'CHAIN is-toting if
-                    'CHAIN loc @ drop-item
+                    'CHAIN loc@ drop-item
                 then
                 NOWHERE 'CHAIN fixed{ c}!
             then then
         else
-            'BEAR prop{ b}@ 0= if
+            'BEAR prop{}@ 0= if
                 41
-            else 'CHAIN prop{ b}@ 0= if
+            else 'CHAIN prop{}@ 0= if
                 37
             else
                 171
-                0 'CHAIN 2dup prop{ b}! fixed{ c}!
-                'BEAR prop{ b}@ 3 <> if
-                    2 'BEAR prop{ b}!
+                0 'CHAIN 2dup prop{}! fixed{ c}!
+                'BEAR prop{}@ 3 <> if
+                    2 'BEAR prop{}!
                 then
-                2 'BEAR prop{ b}@ - 'BEAR fixed{ c}!
+                2 'BEAR prop{}@ - 'BEAR fixed{ c}!
             then then
         then then
+    then
 
     over 'GRATE = if
         drop
@@ -279,9 +311,9 @@ create act-msg{  34 0,n
                 1 panic !
             then
         else
-            34 'GRATE prop{ b}@ +
+            34 'GRATE prop{}@ +
             'LOCK verb @ = if 0 else 1 then
-            dup 'GRATE prop{ b}!
+            dup 'GRATE prop{}!
             2* +
         then then
     then
@@ -292,7 +324,7 @@ create act-msg{  34 0,n
 \ verb.c:vsay
 : obj-say ( obj -- )
     drop
-    ." Okay." CR last-nonverb-cstr 2@ type CR
+    ." Okay." CR say-last-thing CR
 ;
 
 \ verb.c:vwave
@@ -303,10 +335,9 @@ create act-msg{  34 0,n
         dup 'ROD <> 'FISSURE is-at 0= or over is-toting 0= or closing @ or if
             act-speak
         else
-            'FISSURE prop{ b} 1 over b@ -
-            ( ptr 1-val )
-            dup rot b!
-            ( 1-val )
+            \ prop[FISSURE] = 1 - prop[FISSURE];
+            \ pspeak(FISSURE, 2 - prop[FISSURE]);
+            1 'FISSURE prop{}@ - dup 'FISSURE prop{}!
             'FISSURE 2 rot - speak-item
         then
     then
@@ -318,8 +349,8 @@ create act-msg{  34 0,n
         exit
     then
     'DRAGON 1 speak-item
-    2 'DRAGON prop{ b}!
-    0 'RUG prop{ b}!
+    2 'DRAGON prop{}!
+    0 'RUG prop{}!
     MAXOBJ 'DRAGON + NOWHERE move-item
     MAXOBJ 'RUG + 0 move-item
     'DRAGON 120 move-item
@@ -341,7 +372,7 @@ create act-msg{  34 0,n
                 137
             else
                 'BIRD destroy-item
-                0 'BIRD prop{ b}!
+                0 'BIRD prop{}!
                 'SNAKE place{ c}@ 19 = if
                     1 tally2 +!
                 then
@@ -363,10 +394,10 @@ create act-msg{  34 0,n
         'TROLL of
             157 endof
         'BEAR of
-            'BEAR prop{ b}@ 1+ 2/ 165 +
+            'BEAR prop{}@ 1+ 2/ 165 +
             endof
         'DRAGON of
-            'DRAGON prop{ b}@ if
+            'DRAGON prop{}@ if
                 167
             else
                 fight-dragon exit
@@ -412,164 +443,144 @@ create act-msg{  34 0,n
         'WATER bottle-liquid <> 'BOTTLE is-here 0= if
             act-speak
         else
-            1 'BOTTLE prop{ b}!
+            1 'BOTTLE prop{}!
             0 'WATER place{ c}!
             74 speak-message
         then
     then
 ;
 
-\ verb.c:vthrow
-: obj-throw ( obj -- )
-    drop
-\ TODO
-\	int msg;
-\	int i;
-\
-\	if (toting(ROD2) && object == ROD && !toting(ROD))
-\		object = ROD2;
-\	if (!toting(object)) {
-\		actspk(verb);
-\		return;
-\	}
-\	/*
-\	   treasure to troll
-\	*/
-\	if (at(TROLL) && object >= 50 && object < MAXOBJ) {
-\		rspeak(159);
-\		drop(object, 0);
-\		move(TROLL, 0);
-\		move((TROLL + MAXOBJ), 0);
-\		drop(TROLL2, 117);
-\		drop((TROLL2 + MAXOBJ), 122);
-\		juggle(CHASM);
-\		return;
-\	}
-\	/*
-\	   feed the bears...
-\	*/
-\	if (object == FOOD && here(BEAR)) {
-\		object = BEAR;
-\		vfeed();
-\		return;
-\	}
-\	/*
-\	   if not axe, same as drop...
-\	*/
-\	if (object != AXE) {
-\		vdrop();
-\		return;
-\	}
-\	/*
-\	   AXE is THROWN
-\	*/
-\	/*
-\	   at a dwarf...
-\	*/
-\	if ((i = dcheck())) {
-\		msg = 48;
-\		if (pct(33)) {
-\			dseen[i] = dloc[i] = 0;
-\			msg = 47;
-\			++dkill;
-\			if (dkill == 1)
-\				msg = 149;
-\		}
-\	}
-\	/*
-\	   at a dragon...
-\	*/
-\	else if (at(DRAGON) && prop[DRAGON] == 0)
-\		msg = 152;
-\	/*
-\	   at the troll...
-\	*/
-\	else if (at(TROLL))
-\		msg = 158;
-\	/*
-\	   at the bear...
-\	*/
-\	else if (here(BEAR) && prop[BEAR] == 0) {
-\		rspeak(164);
-\		drop(AXE, loc);
-\		fixed[AXE] = -1;
-\		prop[AXE] = 1;
-\		juggle(BEAR);
-\		return;
-\	}
-\	/*
-\	   otherwise it is an attack
-\	*/
-\	else {
-\		verb = KILL;
-\		object = 0;
-\		itverb();
-\		return;
-\	}
-\	/*
-\	   handle the left over axe...
-\	*/
-\	rspeak(msg);
-\	drop(AXE, loc);
-\	describe();
-;
-
 \ verb.c:vfeed
 : obj-feed ( obj -- )
+
+    case
+        'BIRD of 100 endof
+        'DWARF of
+            'FOOD is-here 0= if
+                verb @ act-speak
+                exit
+            then
+            1 dflag +!
+            103
+        endof
+        'BEAR of
+            'FOOD is-here 0= if
+                'BEAR prop{}@ dup 0= if
+                    drop 102
+                else
+                    3 = if 110
+                else
+                    verb @ act-speak
+                    exit
+                then then
+            else
+                'FOOD destroy-item
+                1 'BEAR prop{}!
+                0 'AXE prop{}!
+                0 'AXE fixed{ c}!
+                168
+            then
+        endof
+        'DRAGON of
+            'DRAGON prop{}@ if 110 else 102 then
+        endof
+        'TROLL of 182 endof
+        'SNAKE of
+            closed @ 'BIRD is-here 0= or if
+                102
+            else
+                102
+                'BIRD destroy-item
+                0 'BIRD prop{}!
+                1 tally2 +!
+            then
+        endof
+        14 swap
+    endcase
+    speak-message
+;
+
+\ verb.c:vthrow
+: obj-throw ( obj -- )
+
+    dup 'ROD = 'ROD2 is-toting and 'ROD is-toting 0= and if
+        drop 'ROD2 dup object !
+    then
+    dup is-toting 0= if
+        drop verb @ act-speak
+        exit
+    then
+
+    \ treasure to troll
+    dup 50 >= over MAXOBJ < and 'TROLL is-at and if
+        159 speak-message
+        0 drop-item
+        'TROLL 0 move-item
+        'TROLL MAXOBJ + 0 move-item
+        'TROLL2 117 drop-item
+        'TROLL2 MAXOBJ + 122 drop-item
+        'CHASM juggle-item
+        exit
+    then
+
+    \ feed the bears...
+    dup 'FOOD = 'BEAR is-here and if
+        drop 'BEAR dup object ! obj-feed
+        exit
+    then
+
+    \ if not axe, same as drop...
+    dup 'AXE <> if
+        obj-drop
+        exit
+    then
+
     drop
-\ TODO
-\	int msg;
-\
-\	switch (object) {
-\	case BIRD:
-\		msg = 100;
-\		break;
-\	case DWARF:
-\		if (!here(FOOD)) {
-\			actspk(verb);
-\			return;
-\		}
-\		++dflag;
-\		msg = 103;
-\		break;
-\	case BEAR:
-\		if (!here(FOOD)) {
-\			if (prop[BEAR] == 0)
-\				msg = 102;
-\			else if (prop[BEAR] == 3)
-\				msg = 110;
-\			else {
-\				actspk(verb);
-\				return;
-\			}
-\			break;
-\		}
-\		dstroy(FOOD);
-\		prop[BEAR] = 1;
-\		fixed[AXE] = 0;
-\		prop[AXE] = 0;
-\		msg = 168;
-\		break;
-\	case DRAGON:
-\		msg = (prop[DRAGON] != 0 ? 110 : 102);
-\		break;
-\	case TROLL:
-\		msg = 182;
-\		break;
-\	case SNAKE:
-\		if (closed || !here(BIRD)) {
-\			msg = 102;
-\			break;
-\		}
-\		msg = 101;
-\		dstroy(BIRD);
-\		prop[BIRD] = 0;
-\		++tally2;
-\		break;
-\	default:
-\		msg = 14;
-\	}
-\	rspeak(msg);
+
+    \ AXE is THROWN
+    \ at a dwarf...
+
+    dwarf-check ?dup if
+        48
+        33 pct if
+            drop 47
+            over 0 swap
+            ( i msg 0 i )
+            2dup dseen{ c}! dloc{ c}!
+            ( i msg )
+            dkill @ dup 1+ dkill ! 0= if
+                drop 149
+            then
+        then
+        nip
+    then
+
+    \  at a dragon...
+    'DRAGON is-at 'DRAGON prop{}@ 0= and if
+        152
+    \ at the troll...
+    else 'TROLL is-at if
+        158
+    \ at the bear...
+    else 'BEAR is-here 'BEAR prop{}@ 0= and if
+        164 speak-message
+        'AXE loc@ drop-item
+        NOWHERE 'AXE fixed{ c}!
+        1 'AXE prop{}!
+        'BEAR juggle-item
+        exit
+    \ otherwise it is an attack
+    else
+        'KILL verb !
+        0 object !
+        intransitive-verb
+        exit
+    then then then
+
+    \ handle the left over axe...
+    speak-message
+    'AXE loc@ drop-item
+    describe-location
 ;
 
 \ INVENTORY, FIND etc.
@@ -587,7 +598,7 @@ create act-msg{  34 0,n
             else
                 \ TODO does short-circuit || matter?
                 r@ bottle-liquid = 'BOTTLE is-here and
-                r@ is-at or r@ loc @ liquid-at = or if
+                r@ is-at or r@ loc@ liquid-at = or if
                     drop 94
                 then
             then
@@ -606,9 +617,9 @@ create act-msg{  34 0,n
     case
     'BOTTLE of
         bottle-liquid if 105
-        else loc @ liquid-at 0= if 106
+        else loc@ liquid-at 0= if 106
         else
-            loc @ cond{ c}@ WATOIL and 'BOTTLE prop{ b}!
+            loc@ cond{ c}@ WATOIL and 'BOTTLE prop{}!
             bottle-liquid
             'BOTTLE is-toting if
                 NOWHERE over place{ c}!
@@ -617,7 +628,7 @@ create act-msg{  34 0,n
         then then
         endof
     'VASE of
-        loc @ liquid-at 0= if
+        loc@ liquid-at 0= if
             144
         else 'VASE is-toting 0= if
             29
@@ -640,13 +651,13 @@ create act-msg{  34 0,n
 
     \ special case objects and fixed objects
     25
-    over 'PLANT = 'PLANT prop{ b}@ 0 <= and if
+    over 'PLANT = 'PLANT prop{}@ 0 <= and if
         drop 115
     then
-    over 'BEAR = 'BEAR prop{ b}@ 1 = and if
+    over 'BEAR = 'BEAR prop{}@ 1 = and if
         drop 169
     then
-    over 'CHAIN = 'BEAR prop{ b}@ 0<> and if
+    over 'CHAIN = 'BEAR prop{}@ 0<> and if
         drop 170
     then
     over fixed{ c}@ if
@@ -659,50 +670,48 @@ create act-msg{  34 0,n
     \ special case for liquids
 
     dup 'WATER = over 'OIL = or if
-        'BOTTLE object !
-        ( oldobj )
+        'BOTTLE dup object ! swap
+        ( 'BOTTLE oldobj )
         bottle-liquid <> 'BOTTLE is-here 0= or if
-            'BOTTLE is-toting 'BOTTLE prop{ b}@ 1 = and if
+            'BOTTLE is-toting 'BOTTLE prop{}@ 1 = and if
                 obj-fill exit
             then
 
             is-toting 'BOTTLE 0= if
                 104
-            else 'BOTTLE prop{ b}@ 1 <> if
+            else 'BOTTLE prop{}@ 1 <> if
                 105
             else
                 25
             then then
             speak-message drop exit
-        else
-            drop
         then
+        ( 'BOTTLE )
     then
-    (  )
+    ( obj )
 
     holding @ 7 >= if
-        92 speak-message
+        drop 92 speak-message
         exit
     then
 
     \ special case for bird.
-
-    object @
-    dup 'BIRD = 'BIRD prop{ b}@ 0= and if
+    dup 'BIRD = 'BIRD prop{}@ 0= and if
         'ROD is-toting if
             26 speak-message drop exit
         then
         'CAGE is-toting 0= if
             27 speak-message drop exit
         then
-        1 'BIRD prop{ b}!
+        1 'BIRD prop{}!
     then
-    dup 'BIRD = over 'CAGE = or 'BIRD prop{ b}@ 0<> and if
+    dup 'BIRD = over 'CAGE = or 'BIRD prop{}@ 0<> and if
         \ carry the other item
-        'BIRD 'CAGE + over - loc @ carry-item
+        'BIRD 'CAGE + over - loc@ carry-item
     then
-	( object )
-	dup loc @ carry-item
+
+	( obj )
+	dup loc@ carry-item
 
     \  handle liquid in bottle
     bottle-liquid swap 'BOTTLE = over 0<> and if
@@ -717,9 +726,7 @@ create act-msg{  34 0,n
 \ verb.c:vread
 : obj-read
     is-dark if
-        drop
-        ." I see no " last-nonverb-cstr type ."  here." CR
-    	exit
+        drop say-not-here exit
     then
 
     'OYSTER = if
@@ -747,12 +754,12 @@ create act-msg{  34 0,n
         then
         drop 148
     else
-        'VASE = 'VASE prop{ b}@ 0= and if
+        'VASE = 'VASE prop{}@ 0= and if
             198
             'VASE is-toting if
-                'VASE loc @ drop-item
+                'VASE loc@ drop-item
             then
-            2 'VASE prop{ b}!
+            2 'VASE prop{}!
             NOWHERE 'VASE fixed{ c}!
         else
             act-speak
@@ -783,7 +790,7 @@ create act-msg{  34 0,n
 : just-take
     0 0
     MAXOBJ 1- 1 do
-        i loc @ over place{ c}@ = ?add-obj
+        i loc@ over place{ c}@ = ?add-obj
     loop
 
     1 <> dwarf-check dflag 2 >= and or if
@@ -801,13 +808,14 @@ create act-msg{  34 0,n
     'DOOR is-at ?add-obj
     'GRATE is-at ?add-obj
     'CHAIN is-here ?add-obj
+    ( obj count )
 
     ?dup 0= if
         drop 28 speak-message
     else 1 > if
         drop need-obj
     else
-        object ! obj-open
+        dup object ! obj-open
     then then
 ;
 
@@ -823,9 +831,9 @@ create act-msg{  34 0,n
     then
 
 	'SNAKE dup is-here ?add-obj
-	'DRAGON dup is-at over prop{ b}@ 0= and ?add-obj
+	'DRAGON dup is-at over prop{}@ 0= and ?add-obj
 	'TROLL dup is-at ?add-obj
-    'BEAR dup is-here over prop{ b}@ 0= and ?add-obj
+    'BEAR dup is-here over prop{}@ 0= and ?add-obj
 
     dup 1 > if                  \ more than one match?
         2drop need-obj exit
@@ -854,7 +862,7 @@ create act-msg{  34 0,n
 
 \ itverb.c:ivdrink
 : just-drink
-    loc @ liquid-at 'WATER <>
+    loc@ liquid-at 'WATER <>
     bottle-liquid 'WATER <>
     'BOTTLE is-here 0= or and if
         need-obj
@@ -902,7 +910,7 @@ create act-msg{  34 0,n
     0 foobar !
 
     'EGGS place{ c}@ 92 =
-        'EGGS is-toting loc @ 92 = and
+        'EGGS is-toting loc@ 92 = and
     or if
         speak-message
         exit
@@ -910,12 +918,12 @@ create act-msg{  34 0,n
         drop
     then
 
-    'EGGS place{ c}@ 0= 'TROLL place{ c}@ 0= and 'TROLL prop{ b}@ 0= and if
-        1 'TROLL prop{ b}!
+    'EGGS place{ c}@ 0= 'TROLL place{ c}@ 0= and 'TROLL prop{}@ 0= and if
+        1 'TROLL prop{}!
     then
 
     'EGGS is-here if 1
-    else 92 loc @ = if 0
+    else 92 loc@ = if 0
     else 2 then then
 
     'EGGS 92 move-item
@@ -993,31 +1001,3 @@ create act-msg{  34 0,n
 'BLAST     ' verb-blast    ' verb-blast     67  set-actions
 'BREAK     ' obj-break     ' need-obj       146 set-actions
 'WAKE      ' obj-wake      ' need-obj       110 set-actions
-
-
-\ turn.c:trverb,trobj
-: transitive-verb ( -- )  \ act on an object
-    verb @ ?dup if
-        cells obj-act& + @
-        ?dup 0= if
-            ." This verb is not implemented yet." CR
-        else
-            object @ swap execute
-        then
-    else
-        ." What do you want to do with the "
-        last-nonverb-cstr 2@ type ." ?" CR
-    then
-;
-
-\ itverb.c:itverb
-: intransitive-verb ( -- )  \ just act
-    verb @ ?dup if
-        cells just-act& + @
-        ?dup 0= if
-            ." This intransitive not implemented yet." CR
-        else
-            execute
-        then
-    then
-;

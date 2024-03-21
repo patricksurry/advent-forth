@@ -86,13 +86,12 @@ data, digrams = dizzy(woozy(source))
 print(f"dizzy compress {len(source)} source bytes to {len(data)} compressed bytes "
     f"with {len(digrams)} digrams. uncompress ok? {unwoozy(undizzy(data, digrams)) == source}")
 
-max_sqz = (0,0)
+max_sqz = dict(raw=0, woozy=0, sqz=0)
 def sqz(s):
-    global max_sqz
-    z = dizzy_squeeze(woozy(unwrap(s)), digrams) + b'\0'
-    ns = (len(s) + len(z), len(s))
-    if ns > max_sqz:
-        max_sqz = ns
+    w = woozy(unwrap(s))
+    z = dizzy_squeeze(w, digrams) + b'\0'
+    for (t, d) in zip(['raw', 'woozy', 'sqz'], [s, w+b'\0', z]):
+        max_sqz[t] = max(max_sqz[t], len(d))
     return z
 
 """
@@ -160,6 +159,6 @@ bin += data
 header += struct.pack("<HH", len(idx), len(data))
 
 bin = struct.pack("<H", len(header)//2) + header + bin
-print(f"longest string {max_sqz[1]}, compressed {max_sqz[0]-max_sqz[1]}")
+print(f"longest string {max_sqz['raw']}, woozy {max_sqz['woozy']}, packed {max_sqz['sqz']}")
 open('data/advent.dat', 'wb').write(bin)
 print(f"Wrote {len(bin)} bytes to advent.dat")
