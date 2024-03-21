@@ -44,7 +44,8 @@
 \ database.c:liq
 : bottle-liquid ( -- 'WATER | 'OIL | 0 )
     'BOTTLE prop{}@ dup 0< if
-        negate 1- then
+        negate 1-       \ max( prop[BOTTLE], -1 - prop[BOTTLE] )
+    then
     liquid-type
 ;
 

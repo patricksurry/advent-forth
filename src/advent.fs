@@ -1,4 +1,5 @@
 \ TODO
+\ - run tester.fs on all the words in the object array
 \ - make defs an init function so we can restart (advent.c:initplay)
 \ - save/restore (see advent.c)
 \ - debug flag?

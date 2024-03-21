@@ -40,22 +40,28 @@ create act-msg{  34 0,n
 ;
 
 \ verb.c:actspk
-: act-speak ( -- )
+: just-speak ( -- )
     verb @ dup 1 < over 31 > or if
         39 bug then
 
     act-msg{ c}@ ?dup if speak-message then
 ;
+: obj-speak ( obj -- )
+    drop just-speak
+;
 
-: say-nothing 54 speak-message ;
+: just-nothing 54 speak-message ;
+: obj-nothing drop just-nothing ;
 
 \ verb.c:needobj
-: need-obj last-verb-cstr 2@ type ."  what?" CR ;
+: need-obj ( -- )
+    last-verb-cstr 2@ type ."  what?" CR
+;
 
 \ handle verbs with or without object
 
 \ verb.c:von
-: verb-on
+: just-on
     'LAMP is-here if
         limit @ 0 < if
             184 speak-message
@@ -68,23 +74,24 @@ create act-msg{  34 0,n
             then
         then
     else
-        act-speak
+        just-speak
     then
 ;
+: obj-on drop just-on ;
 
 \ verb.c:voff
-: verb-off
+: just-off
     'LAMP is-here if
         0 'LAMP prop{}!
         40 speak-message
     else
-        act-speak
+        just-speak
     then
 ;
+: obj-off drop just-off ;
 
 \ verb.c:vpour
-: verb-pour
-    object @
+: obj-pour ( obj -- )
     dup 'BOTTLE = over 0= or if
         drop bottle-liquid dup object !
     then
@@ -92,7 +99,7 @@ create act-msg{  34 0,n
         drop need-obj exit
     then
     dup is-toting 0= if
-        drop act-speak exit
+        obj-speak exit
     then
     dup 'OIL <> over 'WATER <> and if
         drop 78 speak-message exit
@@ -121,11 +128,12 @@ create act-msg{  34 0,n
     then
     drop
 ;
+: just-pour object @ obj-pour ;
 
 \ verb.c:vblast
-: verb-blast
+: just-blast
     'ROD2 prop{}@ 0< closed @ 0= or if
-        act-speak
+        just-speak
     else
         133
         115 loc@ = if drop 134 then
@@ -135,11 +143,16 @@ create act-msg{  34 0,n
         normal-end
     then
 ;
+: obj-blast drop just-blast ;
 
 \ transitive verbs
 
 : obj-rub ( obj -- )
-    'LAMP = if act-speak else 76 speak-message then
+    'LAMP = if
+        just-speak
+    else
+        76 speak-message
+    then
 ;
 
 \ verb.c:vdrop
@@ -151,7 +164,7 @@ create act-msg{  34 0,n
     then
 
     dup is-toting 0= if
-        drop act-speak exit
+        obj-speak exit
     then
 
  	\ snake and bird
@@ -329,11 +342,11 @@ create act-msg{  34 0,n
 
 \ verb.c:vwave
 : obj-wave ( obj -- )
-    dup 'ROD <> 'ROD2 is-toting 0= or over is-toting 0= if
+    dup 'ROD <> 'ROD2 is-toting 0= or over is-toting 0= and if
         29 speak-message
     else
         dup 'ROD <> 'FISSURE is-at 0= or over is-toting 0= or closing @ or if
-            act-speak
+            just-speak
         else
             \ prop[FISSURE] = 1 - prop[FISSURE];
             \ pspeak(FISSURE, 2 - prop[FISSURE]);
@@ -409,18 +422,18 @@ create act-msg{  34 0,n
     ?dup if
         speak-message
     else
-        act-speak
+        just-speak
     then
 ;
 
 \ verb.c:veat
 : obj-eat ( obj -- )
     'FOOD over = if
-        'FOOD destroy-item
+        destroy-item
         72 speak-message exit
     then
 
-    0
+    false
     over 'BIRD = or
     over 'SNAKE = or
     over 'CLAM = or
@@ -428,10 +441,13 @@ create act-msg{  34 0,n
 	over 'DWARF = or
 	over 'DRAGON = or
 	over 'TROLL = or
-	over 'BEAR = or
+	swap 'BEAR = or
+    ( any? )
 
-	if 71 speak-message
-	else act-speak
+	if
+	   71 speak-message
+	else
+	   just-speak
 	then
 ;
 
@@ -440,8 +456,8 @@ create act-msg{  34 0,n
     'WATER <> if
         110 speak-message
     else
-        'WATER bottle-liquid <> 'BOTTLE is-here 0= if
-            act-speak
+        'WATER bottle-liquid <> 'BOTTLE is-here 0= or if
+            just-speak
         else
             1 'BOTTLE prop{}!
             0 'WATER place{ c}!
@@ -457,7 +473,7 @@ create act-msg{  34 0,n
         'BIRD of 100 endof
         'DWARF of
             'FOOD is-here 0= if
-                verb @ act-speak
+                just-speak
                 exit
             then
             1 dflag +!
@@ -470,7 +486,7 @@ create act-msg{  34 0,n
                 else
                     3 = if 110
                 else
-                    verb @ act-speak
+                    just-speak
                     exit
                 then then
             else
@@ -507,7 +523,7 @@ create act-msg{  34 0,n
         drop 'ROD2 dup object !
     then
     dup is-toting 0= if
-        drop verb @ act-speak
+        obj-speak
         exit
     then
 
@@ -608,7 +624,7 @@ create act-msg{  34 0,n
     ?dup if
         speak-message
     else
-        act-speak
+        just-speak
     then
 ;
 
@@ -646,7 +662,8 @@ create act-msg{  34 0,n
 \ verb.c:vtake
 : obj-take ( obj -- )
     dup is-toting if
-        act-speak
+        obj-speak
+        exit
     then
 
     \ special case objects and fixed objects
@@ -740,8 +757,10 @@ create act-msg{  34 0,n
 	    'TABLET of drop 196 endof
         'MESSAGE of drop 191 endof
     endcase
-	?dup if speak-message
-	else act-speak
+	?dup if
+	   speak-message
+	else
+	   just-speak
 	then
 ;
 
@@ -762,19 +781,20 @@ create act-msg{  34 0,n
             2 'VASE prop{}!
             NOWHERE 'VASE fixed{ c}!
         else
-            act-speak
+            just-speak
+            exit
         then
     then
     speak-message
 ;
 
 \ verb.c:vwake
-: obj-wake
+: obj-wake ( obj -- )
     'DWARF = closed and if
         199 speak-message
         dwarf-end
     else
-        act-speak
+        just-speak
     then
     ;
 
@@ -783,7 +803,11 @@ create act-msg{  34 0,n
 \ track count and latest obj where f is true
 \ itverb.c:addobj
 : ?add-obj ( last count obj f -- new count )
-    if -rot nip 1+ else drop then
+    if
+        -rot nip 1+
+    else
+        drop
+    then
 ;
 
 \ itverb.c:ivtake
@@ -803,11 +827,11 @@ create act-msg{  34 0,n
 \ itverb.c:ivopen
 : just-open
     0 0
-    'CLAM is-here ?add-obj
-    'OYSTER is-here ?add-obj
-    'DOOR is-at ?add-obj
-    'GRATE is-at ?add-obj
-    'CHAIN is-here ?add-obj
+    'CLAM   dup is-here ?add-obj
+    'OYSTER dup is-here ?add-obj
+    'DOOR   dup is-at   ?add-obj
+    'GRATE  dup is-at   ?add-obj
+    'CHAIN  dup is-here ?add-obj
     ( obj count )
 
     ?dup 0= if
@@ -949,15 +973,15 @@ create act-msg{  34 0,n
 	98             \ message
 	65 1 do
 	    i is-toting i 'BEAR <> and if
-	        if 99 speak-message then
+			( msg )
+	        if 99 speak-message 0 then
 			i -1 speak-item
-			0
 	    then
 	loop
     'BEAR is-toting if
         drop 141
     then
-    if speak-message then
+    ?dup if speak-message then
 ;
 
 : just-suspend
@@ -968,27 +992,27 @@ create act-msg{  34 0,n
 \ TODO
 ;
 
-'CALM      ' act-speak     ' need-obj       14  set-actions
-'WALK      ' act-speak     ' act-speak      43  set-actions
-'QUIT      ' act-speak     ' just-quit      13  set-actions
-'SCORE     ' act-speak     ' score          13  set-actions
-'FOO       ' act-speak     ' just-foo       147 set-actions
-'BRIEF     ' act-speak     0                155 set-actions
-'SUSPEND   ' act-speak     ' just-suspend   13  set-actions
+'CALM      ' obj-speak     ' need-obj       14  set-actions
+'WALK      ' obj-speak     ' just-speak     43  set-actions
+'QUIT      ' obj-speak     ' just-quit      13  set-actions
+'SCORE     ' obj-speak     ' score          13  set-actions
+'FOO       ' obj-speak     ' just-foo       147 set-actions
+'BRIEF     ' obj-speak     0                155 set-actions
+'SUSPEND   ' obj-speak     ' just-suspend   13  set-actions
 'LOAD      0               ' just-load      0   set-actions
-'HOURS     ' act-speak     0                13  set-actions
-'LOG       ' act-speak     0                0   set-actions
+'HOURS     ' obj-speak     0                13  set-actions
+'LOG       ' obj-speak     0                0   set-actions
 'TAKE      ' obj-take      ' just-take      24  set-actions
 'DROP      ' obj-drop      ' need-obj       29  set-actions
 'OPEN      ' obj-open      ' just-open      33  set-actions
 'LOCK      ' obj-open      ' just-open      33  set-actions
 'SAY       ' obj-say       ' need-obj       0   set-actions
-'NOTHING   ' say-nothing   ' say-nothing    0   set-actions
-'ON        ' verb-on       ' verb-on        38  set-actions
-'OFF       ' verb-off      ' verb-off       38  set-actions
+'NOTHING   ' obj-nothing   ' just-nothing   0   set-actions
+'ON        ' obj-on        ' just-on        38  set-actions
+'OFF       ' obj-off       ' just-off       38  set-actions
 'WAVE      ' obj-wave      ' need-obj       42  set-actions
 'KILL      ' obj-kill      ' just-kill      110 set-actions
-'POUR      ' verb-pour     ' verb-pour      29  set-actions
+'POUR      ' obj-pour      ' just-pour      29  set-actions
 'EAT       ' obj-eat       ' just-eat       110 set-actions
 'DRINK     ' obj-drink     ' just-drink     73  set-actions
 'RUB       ' obj-rub       ' need-obj       75  set-actions
@@ -998,6 +1022,6 @@ create act-msg{  34 0,n
 'INVENTORY ' obj-find      ' just-inventory 59  set-actions
 'FILL      ' obj-fill      ' just-fill      109 set-actions
 'READ      ' obj-read      ' just-read      195 set-actions
-'BLAST     ' verb-blast    ' verb-blast     67  set-actions
+'BLAST     ' obj-blast     ' just-blast     67  set-actions
 'BREAK     ' obj-break     ' need-obj       146 set-actions
 'WAKE      ' obj-wake      ' need-obj       110 set-actions
