@@ -16,6 +16,8 @@
 8  constant 'BACK
 21 constant 'NULLX
 57 constant 'LOOK
+63 constant 'DEPRESSION
+64 constant 'ENTRANCE
 67 constant 'CAVE
 
 \ action ids
@@ -100,11 +102,11 @@ $ff constant NOWHERE
 56  constant 'EGGS
 57  constant 'TRIDENT
 58  constant 'VASE
-\ #define EMERALD     59
-\ #define PYRAMID     60
+59  constant 'EMERALD
+60  constant 'PYRAMID
 61  constant 'PEARL
 62  constant 'RUG
-\ #define SPICES      63
+63  constant 'SPICES
 64  constant 'CHAIN
 
 \ bit mapping of "cond" array with location status

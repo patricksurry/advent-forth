@@ -40,51 +40,53 @@
 \ handle special movement
 \ turn.c:spcmove
 : move-special ( d -- )
-    \ TODO
-    drop
+    case
+        1 of        \ plover movement via alcove
+            holding @ dup 0= swap 1 = 'EMERALD is-toting and or if
+                199 loc@ - newloc !
+            else
+                117 speak-message
+            then
+        endof
 
-\ 	switch (rdest - 300) {
-\ 	case 1: /* plover movement via alcove */
-\ 		if (!holding || (holding == 1 && toting(EMERALD)))
-\ 			newloc = (99 + 100) - loc;
-\ 		else
-\ 			rspeak(117);
-\ 		break;
-\ 	case 2: /* trying to remove plover, bad route */
-\ 		drop(EMERALD, loc);
-\ 		break;
-\ 	case 3: /* troll bridge */
-\ 		if (prop[TROLL] == 1) {
-\ 			pspeak(TROLL, 1);
-\ 			prop[TROLL] = 0;
-\ 			move(TROLL2, 0);
-\ 			move((TROLL2 + MAXOBJ), 0);
-\ 			move(TROLL, 117);
-\ 			move((TROLL + MAXOBJ), 122);
-\ 			juggle(CHASM);
-\ 			newloc = loc;
-\ 		} else {
-\ 			newloc = (loc == 117 ? 122 : 117);
-\ 			if (prop[TROLL] == 0)
-\ 				++prop[TROLL];
-\ 			if (!toting(BEAR))
-\ 				return;
-\ 			rspeak(162);
-\ 			prop[CHASM] = 1;
-\ 			prop[TROLL] = 2;
-\ 			drop(BEAR, newloc);
-\ 			fixed[BEAR] = -1;
-\ 			prop[BEAR] = 3;
-\ 			if (prop[SPICES] < 0)
-\ 				++tally2;
-\ 			oldloc2 = newloc;
-\ 			death();
-\ 		}
-\ 		break;
-\ 	default:
-\ 		bug(38);
-\ 	}
+        2 of        \ trying to remove plover, bad route
+            'EMERALD loc@ drop-item
+        endof
+
+        3 of        \ troll bridge
+            'TROLL prop{}@ 1 = if
+                'TROLL 1 speak-item
+                0 'TROLL prop{}!
+                'TROLL2 0 move-item
+                [ 'TROLL2 MAXOBJ + ] literal 0 move-item
+                'TROLL 117 move-item
+                [ 'TROLL MAXOBJ + ] literal 122 move-item
+                'CHASM juggle-item
+                loc@ newloc !
+            else
+                loc@ 117 = if 122 else 117 then newloc !
+                'TROLL prop{}@ 0= if
+                    1 prop{}!
+                then
+                'BEAR is-toting if
+                    162 speak-message
+                    1 'CHASM prop{}!
+                    2 'TROLL prop{}!
+                    'BEAR newloc @ drop-item
+                    NOWHERE 'BEAR fixed{ c}@
+                    3 'BEAR prop{}!
+                    'SPICES prop{}@ 0< if
+                        1 tally2 +!
+                    then
+                    newloc @ oldloc2 !
+                    death
+                then
+            then
+        endof
+        38 bug
+    endcase
 ;
+
 
 \ turn.c:dotrav
 : do-travel ( -- )      \ dotrav() loc -> newloc based on motion
@@ -211,55 +213,57 @@
 \ turn.c:doobj
 : do-object ( -- )
     object @
-    dup fixed{ c}@ loc@ = over is-here or if       \ is object here?
+    dup
+    fixed{ c}@ loc@ = over is-here or if       \ is object here?
         drop transitive-verb exit
     then
 
-    \ TODO special cases
-\	/*
-\		did he give grate as destination?
-\	*/
-\	else if (object == GRATE) {
-\		if (loc == 1 || loc == 4 || loc == 7) {
-\			motion = DEPRESSION;
-\			domove();
-\		} else if (loc > 9 && loc < 15) {
-\			motion = ENTRANCE;
-\			domove();
-\		}
-\	}
-\	/*
-\		is it a dwarf he is after?
-\	*/
-\	else if (dcheck() && dflag >= 2) {
-\		object = DWARF;
-\		trobj();
-\	}
-\	/*
-\	   is he trying to get/use a liquid?
-\	*/
-\	else if ((liq() == object && here(BOTTLE)) || liqloc(loc) == object)
-\		trobj();
-\	else if (object == PLANT && at(PLANT2) && prop[PLANT2] == 0) {
-\		object = PLANT2;
-\		trobj();
-\	}
-\	/*
-\	   is he trying to grab a knife?
-\	*/
-\	else if (object == KNIFE && knfloc == loc) {
-\		rspeak(116);
-\		knfloc = -1;
-\	}
-\	/*
-\	   is he trying to get at dynamite?
-\	*/
-\	else if (object == ROD && here(ROD2)) {
-\		object = ROD2;
-\		trobj();
-\	} else
+    \ did they give grate as destination?
+    dup
+    'GRATE = if
+        loc@ dup 1 = over 4 = or over 7 = or if
+            ( obj loc )
+            'DEPRESSION motion !
+            2drop do-move exit
+        else 10 15 within if
+            'ENTRANCE motion !
+            drop do-move exit
+        then then
+    then
 
-    drop say-not-here
+    \ is it a dwarf he is after?
+    dwarf-check dflag @ 2 >= and if
+        'DWARF object !
+        drop transitive-verb exit
+    then
+
+    \ is he trying to get/use a liquid?
+    dup
+    bottle-liquid = 'BOTTLE is-here and
+    over loc@ liquid-at = or if
+        drop transitive-verb exit
+    then
+
+    dup
+    'PLANT = 'PLANT2 is-at and 'PLANT2 prop{}@ 0= and if
+        'PLANT2 object !
+        drop transitive-verb exit
+    then
+
+    \ is he trying to grab a knife?
+    dup 'KNIFE = loc@ knfloc @ = and if
+        116 speak-message
+        -1 knfloc !
+        drop exit
+    then
+
+    \ is he trying to get at dynamite?
+    'ROD = 'ROD2 is-here and if
+        'ROD2 object !
+        transitive-verb exit
+    then
+
+    say-not-here
 ;
 
 \ turn.c:turn
@@ -273,18 +277,22 @@
         1 panic !
     then
 
-    \ TODO
     \ see if a dwarf has seen him and has come from where he wants to go.
-\	if (newloc != loc && !forced(loc) && (cond[loc] & NOPIRAT) == 0) {
-\		for (i = 1; i < (DWARFMAX - 1); ++i) {
-\			if (odloc[i] == newloc && dseen[i]) {
-\				newloc = loc;
-\				rspeak(2);
-\				break;
-\			}
-\		}
-\	}
-\	dwarves(); /* & special dwarf(pirate who steals)	*/
+    newloc @ loc@ <>
+    loc@ is-forced 0= and
+    loc@ cond{ c}@ NOPIRAT and 0= and if
+
+        MAXDWARF 1- 1 do
+            i odloc{ c}@ newloc @ =
+            i dseen{ c}@ and if
+                loc@ newloc !
+                2 speak-message
+                leave
+            then
+        loop
+
+    then
+    do-dwarves \ including special dwarf (pirate who steals)
 
     loc@ newloc @ <> if
         1 turns +!
@@ -328,7 +336,7 @@
     then
 
     is-dark wzdark !
-    knfloc @ dup 0> over loc @ <> and if
+    knfloc @ dup 0> over loc@ <> and if
         0 knfloc !
     then
 

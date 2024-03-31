@@ -221,6 +221,7 @@
     nip
 ;
 
+: do-dwarves ( -- )
 \ TODO
 \ /*
 \ 	dwarf stuff.
@@ -328,7 +329,9 @@
 \ 	oldloc2 = newloc;
 \ 	death();
 \ }
+;
 
+: do-pirate ( -- )
 \ TODO
 \ pirate stuff
 \ turn.c:dopirate
@@ -380,3 +383,4 @@
 \ 	odloc[6] = chloc;
 \ 	dseen[6] = 0;
 \ }
+;
