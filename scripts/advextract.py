@@ -14,6 +14,8 @@ advword.h: word/code x 306
 import re
 import json
 
+csrc = 'c-src'
+osrc = '../adventure-original/src'
 
 def slurp_text(fname: str):
     n = 0
@@ -76,16 +78,31 @@ def parse_caves(fname: str):
     return data
 
 
+def parse_cond(fname: str):
+    data = [
+        line.strip()[13:] for line in open(fname).readlines()
+        if line.strip().startswith('scanint(&cond')
+    ]
+    cond=[]
+    for line in data:
+        m = re.match(r'.(\d+).*?"(.*)"', line)
+        if m:
+            offset = int(m.group(1))
+            cond += [0] * (offset - len(cond))
+            cond += [int(v) for v in m.group(2).split(',') if v]
+    return cond
+
+
 text = {}
 for i,typ in enumerate(['long', 'short', 'items', 'messages']):
-    fname = f"src/advent{i+1}.txt"
+    fname = f"{csrc}/advent{i+1}.txt"
     chunks = slurp_text(fname)
     print(f"{fname} {typ} n={len(chunks)} maxlen={max(len(s) for s in chunks)} chrs={sum(len(s) for s in chunks)}")
     text[typ] = chunks
 
 dups = sum(text['long'][i] == text['short'][i] for i in range(len(text['short'])))
-print('short == long dups {dups}')
-fname = 'src/advword.h'
+print(f'short == long dups {dups}')
+fname = f'{csrc}/advword.h'
 words = read_words(fname)
 print(
     f"{fname} n={len(words)} u={len(set(word for (word, _, _) in words))} "
@@ -96,30 +113,40 @@ print(
 def maxtpl(ts: list[tuple]) -> tuple:
     return tuple(max(xs) for xs in zip(*ts))
 
-fname = 'src/advcave.h'
+fname = f'{csrc}/advcave.h'
 travel = parse_caves(fname)
 print(f"{fname} n={len(travel)} maxdir={max(len(cave) for cave in travel)} maxval={maxtpl(sum(travel, []))}")
 
-from collections import Counter
-print(dict(sorted(Counter(d for dirs in travel for (t,d,v,m,c) in dirs).items())))
+#from collections import Counter
+#print(dict(sorted(Counter(d for dirs in travel for (t,d,v,m,c) in dirs).items())))
 
 items = [chunk.strip().strip('/').split('/') for chunk in text['items']]
 items = [[s.rstrip() for s in states] for states in items]
 print(f"items n={len(items)} maxstate={max(len(ds) for ds in items)} "
     f"maxlen={max(len(d) for d in sum(items, []))}")
 
+cond = parse_cond(f'{osrc}/advent.c')
+
 advent = dict(
-    words = words,
-    messages = text['messages'],
-    items = items,
-    caves = [
+    words = {
+        i+1: w for (i, w) in enumerate(words)
+    },
+    messages = {
+        i+1: s for (i, s) in enumerate(text['messages'])
+    },
+    items = {
+        i+1: d for (i, d) in enumerate(items)
+    },
+    caves = {
+        i+1:
         dict(
+            cond=cond[i+1] if i+1 < len(cond) else 0,
             long=text['long'][i],
             short=text['short'][i],
             travel=travel[i],
         )
         for i in range(len(travel))
-    ],
+    },
 )
 
 json.dump(advent, open('data/advent.json', 'w'), indent=4)

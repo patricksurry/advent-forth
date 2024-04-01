@@ -24,6 +24,9 @@ data/advent.blk: scripts/advblk.py data/boot_fpp.fs data/advent_fpp.fs data/adve
 data/advent.dat: scripts/advpack.py data/advent.json
 	python scripts/advpack.py
 
+data/advent.json: scripts/advextract.py
+	python scripts/advextract.py
+
 data/advent_fpp.fs: src/*.fs
 
 data/%_fpp.fs: src/%.fs

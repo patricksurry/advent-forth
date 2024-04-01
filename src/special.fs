@@ -101,7 +101,7 @@
  	normal-end
 ;
 
-\ TODO
+\ TODO stimer
 \ special time limit stuff...
 \ turn.c:stimer
 : stimer
@@ -222,7 +222,7 @@
 ;
 
 : do-dwarves ( -- )
-\ TODO
+\ TODO do-dwarves
 \ /*
 \ 	dwarf stuff.
 \ */
@@ -331,56 +331,77 @@
 \ }
 ;
 
-: do-pirate ( -- )
-\ TODO
+: stealable ( i -- f )
+    'PYRAMID <>
+    newloc @ dup 'PYRAMID place{ c}@ <>
+    swap 'EMERALD place{ c}@ <>
+    and or
+;
+
+: put-chloc ( -- )
+    chloc @ dup
+    6 dloc{ c}!
+    6 odloc{ c}!
+    0 6 dseen{ c}!
+;
+
+: stealit
+    128 speak-message
+
+    'MESSAGE place{ c}@ 0= if
+        'CHEST chloc @ move-item
+    then
+
+    'MESSAGE chloc2 @ move-item
+
+    MAXTRS 1+ 50 do
+        i stealable if
+            i is-at i fixed{ c}@ 0= and if
+                i newloc @ carry-item
+            then
+            i is-toting if
+                i chloc @ drop-item
+            then
+        then
+    loop
+
+    put-chloc
+;
+
 \ pirate stuff
 \ turn.c:dopirate
-\ void dopirate(void)
-\ {
-\ 	int j, k;
-\
-\ 	if (newloc == chloc || prop[CHEST] >= 0)
-\ 		return;
-\
-\ 	k = 0;
-\ 	for (j = 50; j <= MAXTRS; ++j)
-\ 		if (j != PYRAMID || (newloc != place[PYRAMID] && newloc != place[EMERALD])) {
-\ 			if (toting(j))
-\ 				goto stealit;
-\ 			if (here(j))
-\ 				++k;
-\ 		}
-\ 	if (tally == tally2 + 1 && k == 0 && place[CHEST] == 0 && here(LAMP) && prop[LAMP] == 1) {
-\ 		rspeak(186);
-\ 		move(CHEST, chloc);
-\ 		move(MESSAGE, chloc2);
-\ 		dloc[6] = chloc;
-\ 		odloc[6] = chloc;
-\ 		dseen[6] = 0;
-\ 		return;
-\ 	}
-\ 	if (odloc[6] != dloc[6] && pct(20)) {
-\ 		rspeak(127);
-\ 		return;
-\ 	}
-\ 	return;
-\
-\ stealit:
-\
-\ 	rspeak(128);
-\ 	if (place[MESSAGE] == 0)
-\ 		move(CHEST, chloc);
-\ 	move(MESSAGE, chloc2);
-\ 	for (j = 50; j <= MAXTRS; ++j) {
-\ 		if (j == PYRAMID && (newloc == place[PYRAMID] || newloc == place[EMERALD]))
-\ 			continue;
-\ 		if (at(j) && fixed[j] == 0)
-\ 			carry(j, newloc);
-\ 		if (toting(j))
-\ 			drop(j, chloc);
-\ 	}
-\ 	dloc[6] = chloc;
-\ 	odloc[6] = chloc;
-\ 	dseen[6] = 0;
-\ }
+: do-pirate ( -- )
+    chloc @ newloc @ = 'CHEST prop{}@ 0 >= or if
+        exit
+    then
+
+    0
+    MAXTRS 50 do
+        i stealable if
+            i is-toting if
+                drop stealit exit
+            then
+            i is-here if
+                1+
+            then
+        then
+    loop
+    ( #treasure )
+
+    0=
+    tally @ tally2 @ 1+ and
+    'CHEST place{ c}@ 0= and
+    'LAMP is-here and
+    'LAMP prop{}@ 1 = and
+    if
+        186 speak-message
+        'CHEST chloc @ move-item
+        'MESSAGE chloc2 @ move-item
+        put-chloc
+        exit
+    then
+
+    6 odloc{ c}@ 6 dloc{ c}@ <> 20 pct and if
+        127 speak-message
+    then
 ;

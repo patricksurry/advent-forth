@@ -1,6 +1,6 @@
 \ see advent.h
 
-100 constant MAXOBJ     \ 2 * max # of objects in cave	(x2 for fixed)
+65  constant MAXOBJ     \ max # of objects in cave
 140 constant MAXLOC     \ max # of cave locations
 3   constant MAXDIE     \ max resurrections
 79  constant MAXTRS     \ number of scored treasures
@@ -114,11 +114,8 @@ $ff constant NOWHERE
 2   constant WATOIL
 4   constant LIQUID
 8   constant NOPIRAT
-16  constant HINTC
-32  constant HINTB
-64  constant HINTS
-128 constant HINTM
-240 constant HINT        		\ HINT C+B+S+M */
+\ bits 4-6 store a hint index 1-6 (or 0)
+112 constant HINTMASK           \ x111xxxx = 16+32+64
 
 variable verb
 variable object
@@ -147,8 +144,6 @@ create odloc{  0 c,  0 c,  0 c,  0 c,  0 c,  0 c,  0 c,     \ old locs
 variable dkill  0  dkill    !        \ dwarves killed
 
 \ LOC_T daltloc;			  /* alternate appearance	*/
-\ int chloc, chloc2;		  /* chest locations	*/
-
 variable limit 100 limit   !
 variable tally  15 tally   !
 variable tally2  0 tally2  !
@@ -158,6 +153,8 @@ variable loc     3 loc     !
 variable oldloc  3 oldloc  !
 variable oldloc2 3 oldloc2 !
 variable knfloc  0 knfloc  !
+variable chloc   114 chloc !
+variable chloc2  140 chloc2 !
 
 variable dflag   0 dflag   !
 variable bonus   0 bonus   !
@@ -173,24 +170,8 @@ variable foobar  0 foobar  !
     + here - 0,n
 ;
 
-create cond{ MAXLOC 1+ here
-	0 c,
-	5 c, 1 c, 5 c, 5 c, 1 c, 1 c, 5 c, 17 c, 1 c, 1 c,  0 c, 0 c,      \ 1 ...
-	32 c, 0 c, 0 c, 2 c, 0 c, 0 c, 64 c, 2 c,   	                   \ 13 ...
-	2 c, 2 c, 0 c, 6 c, 0 c, 2 c,  0 c, 0 c, 0 c, 0 c,  	           \ 21 ...
-	2 c, 2 c, 0 c, 0 c, 0 c, 0 c, 0 c, 4 c, 0 c, 2 c,  0 c, 	       \ 31 ...
-	128 c, 128 c, 128 c, 128 c, 136 c, 136 c, 136 c, 128 c, 128 c, 	   \ 42 ...
-	128 c, 128 c, 136 c, 128 c, 136 c, 0 c, 8 c, 0 c, 2 c, 	           \ 51 ...
-	0 c, 0 c, 0 c, 0 c, 0 c, 0 c, 0 c, 0 c, 0 c, 0 c, 0 c,
-	0 c, 0 c, 0 c, 0 c, 0 c, 0 c, 0 c, 0 c,
-	2 c, 128 c, 128 c, 136 c, 0 c, 0 c, 8 c, 136 c, 128 c, 0 c, 2 c, 2 c,  0 c, 0 c, 0 c, 0 c,  \ 79 ...
-	4 c, 0 c, 0 c, 0 c, 0 c, 1 c, 			                           \ 95 ...
-	0 c, 0 c, 0 c, 0 c, 0 c, 0 c, 0 c, 0 c, 0 c, 0 c,  0 c, 0 c,
-	4 c, 0 c, 1 c, 1 c,  0 c, 0 c, 0 c, 0 c, 0 c, 		               \ 113 ...
-	8 c, 8 c, 8 c, 8 c, 8 c, 8 c, 8 c, 8 c, 8 c, 		               \ 122 ...
-	0pad
-
-create place{ MAXLOC 1+ here
+\ objects current location
+create place{ MAXOBJ 1+ here
     0 c,
 	3 c, 3 c, 8 c, 10 c, 11 c, 0 c, 14 c, 13 c, 94 c, 96 c,   		       \ 1 ...
 	19 c, 17 c, 101 c, 103 c, 0 c, 106 c, 0 c, 0 c, 3 c, 3 c,  0 c, 0 c,   \ 11 ...
@@ -201,7 +182,8 @@ create place{ MAXLOC 1+ here
 	92 c, 95 c, 97 c, 100 c, 101 c, 0 c, 119 c, 127 c, 130 c,	           \ 56 ...
     0pad
 
-create fixed{ MAXLOC 1+ here
+\ second object (fixed) locations
+create fixed{ MAXOBJ 1+ here
 	0 c, 0 c, 0 c,
 	9 c, 0 c, 0 c, 0 c, 15 c, 0 c, NOWHERE c,  0 c, 				       \ 3 ...
 	NOWHERE c, 27 c, NOWHERE c, 0 c, 0 c, 0 c, NOWHERE c,  0 c, 0 c, 0 c, 0 c, 0 c,        \ 11 ...

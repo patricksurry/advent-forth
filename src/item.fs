@@ -24,12 +24,25 @@
     or
 ;
 
+: not-here ( item -- flag )
+    is-here 0=
+;
+
 \ database.c:is-at
 : is-at ( item -- flag )
     dup
         place{ c}@ loc@ =
         swap fixed{ c}@ loc@ =
     or
+;
+
+: location-empty ( loc -- flag )
+    true
+    MAXLOC 1 do
+        over i place{ c}@ <> and
+        over i fixed{ c}@ <> and
+    loop
+    nip
 ;
 
 \ database.c:liq2
@@ -99,7 +112,7 @@
 : juggle-item ( obj -- )
     \ Juggle an object by picking it up and putting it down again
     \ to get the object to the front of the chain of things at its loc
-
+    \ TODO not is this the atloc thing that's not implemented?
     dup fixed{ c}@
     over dup place{ c}@
     ( obj fixed[obj] obj place[obj] )

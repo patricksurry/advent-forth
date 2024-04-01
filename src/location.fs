@@ -53,7 +53,7 @@
 : is-dark ( -- flag )
     loc@ cond{ c}@ LIGHT and 0=      \ ! (cond[loc] & LIGHT)
         'LAMP prop{}@ 0=
-        'LAMP is-here 0=
+        'LAMP not-here
         or
     and
 ;

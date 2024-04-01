@@ -321,8 +321,9 @@
             true loc@ visited{ c}!
             describe-items
         then
-
     then
+
+    check-hints
 
     closed @ if
         'OYSTER prop{}@ 0< 'OYSTER is-toting and if

@@ -282,7 +282,7 @@ create act-msg{  34 0,n
 
     over 'CHAIN = if
         drop
-        'KEYS is-here 0= if
+        'KEYS not-here if
             31
         else 'LOCK verb @ = if
             'CHAIN prop{}@ if
@@ -315,7 +315,7 @@ create act-msg{  34 0,n
 
     over 'GRATE = if
         drop
-        'KEYS is-here 0= if
+        'KEYS not-here if
             31
         else closing @ if
             130
@@ -456,7 +456,7 @@ create act-msg{  34 0,n
     'WATER <> if
         110 speak-message
     else
-        'WATER bottle-liquid <> 'BOTTLE is-here 0= or if
+        'WATER bottle-liquid <> 'BOTTLE not-here or if
             just-speak
         else
             1 'BOTTLE prop{}!
@@ -472,7 +472,7 @@ create act-msg{  34 0,n
     case
         'BIRD of 100 endof
         'DWARF of
-            'FOOD is-here 0= if
+            'FOOD not-here if
                 just-speak
                 exit
             then
@@ -480,7 +480,7 @@ create act-msg{  34 0,n
             103
         endof
         'BEAR of
-            'FOOD is-here 0= if
+            'FOOD not-here if
                 'BEAR prop{}@ dup 0= if
                     drop 102
                 else
@@ -502,7 +502,7 @@ create act-msg{  34 0,n
         endof
         'TROLL of 182 endof
         'SNAKE of
-            closed @ 'BIRD is-here 0= or if
+            closed @ 'BIRD not-here or if
                 102
             else
                 102
@@ -689,7 +689,7 @@ create act-msg{  34 0,n
     dup 'WATER = over 'OIL = or if
         'BOTTLE dup object ! swap
         ( 'BOTTLE oldobj )
-        bottle-liquid <> 'BOTTLE is-here 0= or if
+        bottle-liquid <> 'BOTTLE not-here or if
             'BOTTLE is-toting 'BOTTLE prop{}@ 1 = and if
                 obj-fill exit
             then
@@ -888,7 +888,7 @@ create act-msg{  34 0,n
 : just-drink
     loc@ liquid-at 'WATER <>
     bottle-liquid 'WATER <>
-    'BOTTLE is-here 0= or and if
+    'BOTTLE not-here or and if
         need-obj
     else
         'WATER dup object ! obj-drink
@@ -985,11 +985,12 @@ create act-msg{  34 0,n
 ;
 
 : just-suspend
-\ TODO   saveflg = 1;
+\ TODO  just-suspend
+\ saveflg = 1;
 ;
 
 : just-load
-\ TODO
+\ TODO just-load
 ;
 
 'CALM      ' obj-speak     ' need-obj       14  set-actions

@@ -1,4 +1,4 @@
-\ TODO
+\ TODO items
 \ - run tester.fs on all the words in the object array
 \ - make defs an init function so we can restart (advent.c:initplay)
 \ - save/restore (see advent.c)
@@ -53,6 +53,7 @@ include defs.fs
 include message.fs
 include item.fs
 include location.fs
+include hints.fs
 include english.fs
 include special.fs
 include verb.fs

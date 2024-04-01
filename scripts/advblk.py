@@ -10,7 +10,7 @@ from itertools import accumulate
 def nblocks(d):
     return (len(d) - 1) // 1024 + 1
 
-sections = 'DIGRAMS VOCAB CAVES& CAVES MSGS& MSGS ITEMS& ITEMS'.split()
+sections = 'DIGRAMS VOCAB cond{ CAVES& CAVES MSGS& MSGS ITEMS& ITEMS'.split()
 
 data = open('data/advent.dat', 'rb').read()
 forth = open('data/advent_fpp.fs', 'rb').read() + bytes([0])

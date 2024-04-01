@@ -23,6 +23,20 @@ def compact_word(lo: int, hi: int, words: list[str]) -> bytes:
     ])
     return bytes([lo, hi]) + cws
 
+
+def compact_cond(idx: int, c: int):
+    """cond byte for 1-indexed cave.  original used a bit for each hint
+    but to save space, since hints don't overlap, we enumerate in high nibble"""
+    hint = {0: 0, 16: 1, 32: 2, 64: 3, 128: 4}[c&0xf0]
+    extra = {99: 5, 100: 5, 101: 5, 108: 6}
+    if idx in extra:
+        assert hint == 0, "overlapping  hint!"
+        hint = extra[idx]
+    v = (c & 0xf) | (hint << 4)
+    print(idx, c, v)
+    return v
+
+
 def compact_cave(long: bytes, short: bytes, travel: list[tuple[int,int,int,int,int]]):
     """
     compact representation for cave data
@@ -62,7 +76,7 @@ def compact_cave(long: bytes, short: bytes, travel: list[tuple[int,int,int,int,i
 # fetch the extracted data
 advent = json.load(open('data/advent.json'))
 
-caves = advent['caves']
+caves = list(advent['caves'].values())
 
 # was 27176
 for c in caves:
@@ -73,8 +87,8 @@ for c in caves:
 corpus = (
     [c['long'] for c in caves]
     + [c['short'] for c in caves if c['short'] != c['long']]
-    + advent['messages']
-    + sum(advent['items'], [])
+    + list(advent['messages'].values())
+    + sum(advent['items'].values(), [])
 )
 
 # make a digram lookup table
@@ -117,7 +131,7 @@ print(f"DIGRAMS {len(data)} bytes")
 # words
 # first group as (lo, hi): [ words ]
 wdict = {}
-for (w, lo, hi) in advent['words']:
+for (w, lo, hi) in advent['words'].values():
     wdict.setdefault((lo, hi), []).append(w)
 
 data = b''.join(
@@ -128,8 +142,20 @@ print(f"VOCAB   {len(data)} bytes")
 bin += data
 header += struct.pack("<H", len(data))
 
+# cond
+data = bytes([0] + [
+    compact_cond(i+1, c['cond']) for i,c in enumerate(caves)
+])
+
+print(f"COND    {len(data)} bytes")
+bin += data
+header += struct.pack("<H", len(data))
+
 # caves
-zs = [compact_cave(sqz(c['long']), sqz(c['short']), c['travel']) for c in advent['caves']]
+zs = [
+    compact_cave(sqz(c['long']), sqz(c['short']), c['travel'])
+    for c in caves
+]
 idx = pack_index(zs)
 data = b''.join(zs)
 print(f"CAVES&  {len(idx)} bytes")
@@ -139,7 +165,7 @@ bin += data
 header += struct.pack("<HH", len(idx), len(data))
 
 # messages
-zs = [sqz(msg) for msg in advent['messages']]
+zs = [sqz(msg) for msg in advent['messages'].values()]
 idx = pack_index(zs)
 data = b''.join(zs)
 print(f"MSGS&   {len(idx)} bytes")
@@ -149,7 +175,10 @@ bin += data
 header += struct.pack("<HH", len(idx), len(data))
 
 # items
-zs = [b''.join(sqz(s) for s in states) for states in advent['items']]
+zs = [
+    b''.join(sqz(s) for s in states)
+    for states in advent['items'].values()
+]
 idx = pack_index(zs)
 data = b''.join(zs)
 print(f"ITEMS&  {len(idx)} bytes")
