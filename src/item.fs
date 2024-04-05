@@ -92,8 +92,9 @@
 : move-item ( obj where -- )
     over dup MAXOBJ < if
         ( obj where obj )
-        place{ + else
-        MAXOBJ - fixed{ +
+        place{
+    else
+        MAXOBJ - fixed{
     then
     + c@
     ( obj where from )
@@ -112,7 +113,7 @@
 : juggle-item ( obj -- )
     \ Juggle an object by picking it up and putting it down again
     \ to get the object to the front of the chain of things at its loc
-    \ TODO not is this the atloc thing that's not implemented?
+    \ ?? is this atloc linked list that's not implemented here?
     dup fixed{ c}@
     over dup place{ c}@
     ( obj fixed[obj] obj place[obj] )

@@ -612,7 +612,7 @@ create act-msg{  34 0,n
             r@ 'DWARF = dwarf-check and dflag @ 2 >= and if
                 drop 94
             else
-                \ TODO does short-circuit || matter?
+                \ ?? does short-circuit || matter?
                 r@ bottle-liquid = 'BOTTLE is-here and
                 r@ is-at or r@ loc@ liquid-at = or if
                     drop 94
@@ -985,7 +985,7 @@ create act-msg{  34 0,n
 ;
 
 : just-suspend
-\ TODO  just-suspend
+\ TODO just-suspend
 \ saveflg = 1;
 ;
 

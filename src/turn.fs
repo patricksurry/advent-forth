@@ -18,7 +18,7 @@
             17 of 80 endof
             12 swap
         endcase then
-    \ TODO does order matter here? occurs within case in c code
+    \ ?? does order matter here? occurs within case in c code
     verb c@ dup 'FIND = swap 'INVENTORY = or
     if drop 59 then
     speak-message
@@ -268,32 +268,14 @@
 
 \ turn.c:turn
 : turn
-    newloc @ dup 9 < swap 0<> and closing @ and if
-        130 speak-message
-        loc@ newloc !
-        panic @ 0= if
-            15 clock2 !
-        then
-        1 panic !
-    then
+    check-closing
 
     \ see if a dwarf has seen him and has come from where he wants to go.
-    newloc @ loc@ <>
-    loc@ is-forced 0= and
-    loc@ cond{ c}@ NOPIRAT and 0= and if
+    check-seen
 
-        MAXDWARF 1- 1 do
-            i odloc{ c}@ newloc @ =
-            i dseen{ c}@ and if
-                loc@ newloc !
-                2 speak-message
-                leave
-            then
-        loop
-
-    then
     do-dwarves \ including special dwarf (pirate who steals)
 
+    \ moving?
     loc@ newloc @ <> if
         1 turns +!
         newloc @ dup loc !
@@ -325,20 +307,11 @@
 
     check-hints
 
-    closed @ if
-        'OYSTER prop{}@ 0< 'OYSTER is-toting and if
-            'OYSTER 1 speak-item
-        then
-        MAXOBJ 1 do
-            i is-toting i prop{}@ 0< and if
-                -1 i prop{}@ - prop{}!
-            then
-        loop
-    then
+    check-closed
 
     is-dark wzdark !
-    knfloc @ dup 0> over loc@ <> and if
-        0 knfloc !
+    knfloc @ dup 0> swap loc@ <> and if
+        0 knfloc !      \ ?? knfloc = 1
     then
 
     \ as the grains of sand slip by

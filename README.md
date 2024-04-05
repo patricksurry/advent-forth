@@ -1,3 +1,13 @@
+\ TODO items
+\ - run tester.fs on all the words in the object array
+\ - make defs an init function so we can restart (advent.c:initplay)
+\ - save/restore (see advent.c)
+\ - debug flag?
+\ - open-adventure log random calls to replicate
+\ - could save about 300 bytes by shortening all words to max 6 chars, about 650 to 2char (unreadable)
+\ - move c}@!; <= etc; blkrw and friends to native words
+\ - is c!@ useful enough?
+
 There are a lot of moving parts here.
 
 We assume I/O is in the $c000 page, currently with a magic block read device.

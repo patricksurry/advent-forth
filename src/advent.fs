@@ -1,15 +1,3 @@
-\ TODO items
-\ - run tester.fs on all the words in the object array
-\ - make defs an init function so we can restart (advent.c:initplay)
-\ - save/restore (see advent.c)
-\ - debug flag?
-\ - open-adventure log random calls to replicate
-\ - could save about 300 bytes by shortening all words to max 6 chars, about 650 to 2char (unreadable)
-\ - hint data is present but code is missing?
-
-\ - move c}@!; <= etc; blkrw and friends to native words
-\ -  is c!@ useful enough?
-
 \ taliforth user_words reads and executes boot block
 \ advblk.py generates boot block code to load and evaluate source and then relocate main data tables
 

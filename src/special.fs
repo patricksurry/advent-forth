@@ -1,4 +1,3 @@
-
 \ turn.c:score
 : score
     0 0
@@ -60,14 +59,13 @@
 \ turn.c:normend
 : normal-end
     score
-    abort   \ TODO clean exit?
+    abort               \ exit back to forth
 ;
 
 
 \ player's incarnation has passed on
 \ turn.c:death
 : death
-
     closing @ 0= if
         numdie @ dup 2* dup 81 + swap 82 + 64 yes-no 0=
         ( numdie ?no )
@@ -99,6 +97,30 @@
 : dwarf-end
  	death
  	normal-end
+;
+
+: check-closing
+    newloc @ dup 9 < swap 0<> and closing @ and if
+        130 speak-message
+        loc@ newloc !
+        panic @ 0= if
+            15 clock2 !
+        then
+        1 panic !
+    then
+;
+
+: check-closed
+    closed @ if
+        'OYSTER prop{}@ 0< 'OYSTER is-toting and if
+            'OYSTER 1 speak-item
+        then
+        MAXOBJ 1 do
+            i is-toting i prop{}@ 0< and if
+                -1 i prop{}@ - prop{}!
+            then
+        loop
+    then
 ;
 
 \ TODO stimer
@@ -219,6 +241,21 @@
         then
     loop
     nip
+;
+
+: check-seen
+    newloc @ loc@ <>
+    loc@ is-forced 0= and
+    loc@ cond{ c}@ NOPIRAT and 0= and if
+        MAXDWARF 1- 1 do
+            i odloc{ c}@ newloc @ =
+            i dseen{ c}@ and if
+                loc@ newloc !
+                2 speak-message
+                leave
+            then
+        loop
+    then
 ;
 
 : do-dwarves ( -- )

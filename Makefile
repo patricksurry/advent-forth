@@ -12,7 +12,7 @@ data/advent.rom: data/advent.blk
 	dd bs=1024 skip=64 count=64 if=data/advent.blk > $@
 
 build: data/advent.blk runtime
-	../tali/c65/c65 -r ../tali/taliforth-adventure.bin -i 0xc004 -o 0xc001 -x 0xc010 -c 0xc008 -b $<
+	../tali/c65/c65 -r ../tali/taliforth-adventure.bin -m 0xc000 -b $<
 
 play: data/advent.rom
 	TURNKEY=$(shell grep _turnkey: ../tali/docs/adventure-listing.txt | cut -c2-5); \
