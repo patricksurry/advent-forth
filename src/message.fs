@@ -1,5 +1,5 @@
 : spkz ( strz -- )
-    DIGRAMS typez CR
+    DIGRAMS typez
 ;
 
 \ show 1-indexed message
