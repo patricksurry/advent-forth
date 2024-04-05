@@ -2,6 +2,12 @@
 
 6 constant MAXHINT
 
+\ columns in the hint array
+0 constant WAIT     \ number of turns in place before hint
+1 constant COST     \ score cost
+2 constant ASK      \ prompt message
+3 constant HINT     \ hint message
+
 create hints{
 4 c,  2 c, 62 c,  63 c,    \ 1 grate
 5 c,  2 c, 18 c,  19 c,    \ 2 bird
@@ -10,10 +16,6 @@ create hints{
 25 c, 5 c, 178 c, 179 c,   \ 5 plover
 20 c, 3 c, 180 c, 181 c,   \ 6 dark
 
-0 constant WAIT
-1 constant COST
-2 constant ASK
-3 constant HINT
 
 create hinted{
 0 c, 0 c, 0 c, 0 c, 0 c, 0 c,
@@ -90,7 +92,7 @@ create hintlc{
                     i 1 <>      \ bird hint doesn't reset on invalid
                 then
                 if
-                    0 over hintlc{ c}!
+                    0 i hintlc{ c}!
                 then
             then
         then

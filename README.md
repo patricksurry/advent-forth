@@ -8,6 +8,12 @@
 \ - move c}@!; <= etc; blkrw and friends to native words
 \ - is c!@ useful enough?
 
+BUGS
+
+- dragon doesn't appear in walkthrough 1
+- enter goes thru grate while locked?
+- score doesn't discount hinted{
+
 There are a lot of moving parts here.
 
 We assume I/O is in the $c000 page, currently with a magic block read device.
