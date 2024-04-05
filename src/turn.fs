@@ -31,9 +31,12 @@
         0 of dup 0= swap pct or endof
 		1 of dup 0= swap is-toting or endof
 		2 of dup is-toting swap is-at or endof
-
-		dup 3 < over 7 > or if 37 bug then
+        \ default case needs to leave ( flag ct )
+        \ ( cobj ct )
+		dup 3 8 within 0= if 37 bug then
 		dup 3 - rot prop{}@ <>
+		( ct flag )
+		swap
     endcase
 ;
 

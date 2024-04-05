@@ -1,18 +1,18 @@
 \ TODO items
 \ - run tester.fs on all the words in the object array
+\ - automate walkthrus from https://www.mipmip.org/dev/IFrescue/ajf/Universal350.html
 \ - make defs an init function so we can restart (advent.c:initplay)
-\ - save/restore (see advent.c)
-\ - debug flag?
-\ - open-adventure log random calls to replicate
+\ - save/restore (see advent.c) - just save/load a block? hints storage
 \ - could save about 300 bytes by shortening all words to max 6 chars, about 650 to 2char (unreadable)
 \ - move c}@!; <= etc; blkrw and friends to native words
 \ - is c!@ useful enough?
 
-BUGS
+## BUGS
 
-- dragon doesn't appear in walkthrough 1
-- enter goes thru grate while locked?
+- dragon's rug message isn't right
 - score doesn't discount hinted{
+
+## WHAT'S WHAT
 
 There are a lot of moving parts here.
 
