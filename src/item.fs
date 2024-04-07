@@ -108,17 +108,22 @@
     drop-item
 ;
 
+: move-dual-item ( obj wplace wfixed -- )
+    -rot over -rot
+    ( wfixed obj wplace obj )
+    swap move-item MAXOBJ + swap move-item
+;
+
 \ database.c:juggle is a no-op
 \ open-adventure:misc.c:juggle
 : juggle-item ( obj -- )
     \ Juggle an object by picking it up and putting it down again
     \ to get the object to the front of the chain of things at its loc
     \ ?? is this atloc linked list that's not implemented here?
-    dup fixed{ c}@
-    over dup place{ c}@
-    ( obj fixed[obj] obj place[obj] )
-    move-item
-    swap MAXOBJ + swap move-item
+    dup place{ c}@
+    over fixed{ c}@
+    ( obj place[obj] fixed[obj] )
+    move-dual-item
  ;
 
 \ database.c:dstroy
@@ -129,6 +134,10 @@
 \ database.c:put
 : put-item ( obj where pval -- pval' )
     >r move-item -1 r> -        \ obj where move-item; return -1 - pval
+;
+
+: put-item! ( obj where pval -- )
+    2>r dup 2r> put-item swap prop{}!
 ;
 
 : ?describe-item ( item -- )

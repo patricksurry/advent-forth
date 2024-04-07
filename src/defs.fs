@@ -167,6 +167,7 @@ variable bonus   0 bonus   !
 variable numdie  0 numdie  !
 variable gaveup  0 gaveup  !
 variable foobar  0 foobar  !
+variable lmwarn  0 lmwarn  !
 
 : 0pad ( n start -- )
     \ allocate and erase remainder of n byte region beginning at start

@@ -196,11 +196,9 @@ create act-msg{  34 here 0pad
 
     \ Bear and troll
     dup 'BEAR = 'TROLL is-at and if
-       163 speak-message
-        'TROLL dup 0 move-item
-        MAXOBJ + 0 move-item
-        'TROLL2 dup 117 move-item
-        MAXOBJ + 122 move-item
+        163 speak-message
+        'TROLL 0 0 move-dual-item    \ duplicated in stimer
+        'TROLL2 117 122 move-dual-item
         'CHASM juggle-item
         2 'TROLL prop{}!
     then
@@ -363,10 +361,8 @@ create act-msg{  34 here 0pad
     'DRAGON 1 speak-item
     2 'DRAGON prop{}!
     0 'RUG prop{}!
-    MAXOBJ 'DRAGON + NOWHERE move-item
-    MAXOBJ 'RUG + 0 move-item
-    'DRAGON 120 move-item
-    'RUG 120 move-item
+    'DRAGON 120 NOWHERE move-dual-item
+    'RUG 120 0 move-dual-item
     MAXOBJ 1- 1 do
         i place{ c}@ dup 119 = swap 121 = or if
             i 120 move-item

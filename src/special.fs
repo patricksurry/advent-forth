@@ -123,110 +123,118 @@
     then
 ;
 
-\ TODO stimer
 \ special time limit stuff...
 \ turn.c:stimer
 : stimer
+    foobar dup @ dup 0> if negate else 0 then !
+
+    clock1 @
+    tally 0= loc@ dup 15 >= swap 33 <> and and if
+        1- dup clock1 !
+    then
+    ( clock1@ )
+    ?dup 0= if
+        \ start closing the cave
+        0 'GRATE prop{}!
+        0 'FISSURE prop{}!
+        MAXDWARF 1 do
+            0 i dseen{ c}!
+        loop
+        'TROLL 0 0 move-dual-item
+        'TROLL2 117 122 move-dual-item
+        'CHASM juggle-item
+
+        3 'BEAR prop{}@ <> if
+            'BEAR destroy-item
+        then
+        0 'CHAIN prop{}!
+        0 'CHAIN fixed{ c}!
+        0 'AXE prop{}!
+        0 'AXE fixed{ c}!
+        129 speak-message
+        -1 clock1 !
+        1 closing !
+        0 exit
+    then
+    ( clock1@ )
+    clock2 @ swap 0< if
+        1- dup clock2 !
+    then
+    ( clock2@ )
+    0= if
+        \ set up storage room and close the cave...
+        'BOTTLE 115 1 put-item!
+        'PLANT 115 0 put-item!
+        'OYSTER 115 0 put-item!
+        'LAMP 115 0 put-item!
+        'ROD 115 0 put-item!
+        'DWARF 115 0 put-item!
+        115 dup dup
+        loc ! oldloc ! newloc !
+        'GRATE 116 0 put-item drop
+        'SNAKE 116 1 put-item!
+        'BIRD 116 1 put-item!
+        'CAGE 116 0 put-item!
+        'ROD2 116 0 put-item!
+        'PILLOW 116 0 put-item!
+        'MIRROR 115 0 put-item!
+        116 'MIRROR fixed{ c}!
+
+        MAXOBJ 1 do
+            i is-toting if
+                i destroy-item
+            then
+        loop
+        132 speak-message
+        1 closed !
+        1 exit
+    then
+
+    limit @
+    'LAMP prop{}@ 1 = if
+        1- dup limit !
+    then
+    ( limit@ )
+    dup 30 <= 'BATTERIES is-here and 'BATTERIES prop{}@ 0= and 'LAMP is-here and if
+        188 speak-message
+        1 'BATTERIES prop{}!
+        'BATTERIES is-toting if
+            'BATTERIES loc@ drop-item
+        then
+        ( limit@ )
+        2500 + limit !
+        0 lmwarn !
+        0 exit
+    then
+    ( limit@ )
+    dup 0= if
+        1- limit !
+        0 'LAMP prop{}!
+        'LAMP is-here if
+            184 speak-message
+        then
+        0 exit
+    then
+    ( limit@ )
+    dup 0< loc@ 8 <= and if
+        drop
+        185 speak-message
+        1 gaveup !
+        normal-end
+    then
+    ( limit@ )
+    30 <= lmwarn @ 0= and 'LAMP is-here and if
+        1 lmwarn !
+        187
+        'BATTERIES place{ c}@ 0= if
+            drop 183
+        then
+        'BATTERIES prop{}@ 1 = if
+            drop 189
+        then
+        speak-message
+    then
     0
-\ {
-\ 	int i;
-\
-\ 	foobar = foobar > 0 ? -foobar : 0;
-\ 	if (tally == 0 && loc >= 15 && loc != 33)
-\ 		--clock1;
-\ 	if (clock1 == 0) {
-\ 		/*
-\ 			start closing the cave
-\ 		*/
-\ 		prop[GRATE] = 0;
-\ 		prop[FISSURE] = 0;
-\ 		for (i = 1; i < DWARFMAX; ++i)
-\ 			dseen[i] = 0;
-\ 		move(TROLL, 0);
-\ 		move((TROLL + MAXOBJ), 0);
-\ 		move(TROLL2, 117);
-\ 		move((TROLL2 + MAXOBJ), 122);
-\ 		juggle(CHASM);
-\ 		if (prop[BEAR] != 3)
-\ 			dstroy(BEAR);
-\ 		prop[CHAIN] = 0;
-\ 		fixed[CHAIN] = 0;
-\ 		prop[AXE] = 0;
-\ 		fixed[AXE] = 0;
-\ 		rspeak(129);
-\ 		clock1 = -1;
-\ 		closing = 1;
-\ 		return 0;
-\ 	}
-\ 	if (clock1 < 0)
-\ 		--clock2;
-\ 	if (clock2 == 0) {
-\ 		/*
-\ 			set up storage room...
-\ 			and close the cave...
-\ 		*/
-\ 		prop[BOTTLE] = put(BOTTLE, 115, 1);
-\ 		prop[PLANT] = put(PLANT, 115, 0);
-\ 		prop[OYSTER] = put(OYSTER, 115, 0);
-\ 		prop[LAMP] = put(LAMP, 115, 0);
-\ 		prop[ROD] = put(ROD, 115, 0);
-\ 		prop[DWARF] = put(DWARF, 115, 0);
-\ 		loc = 115;
-\ 		oldloc = 115;
-\ 		newloc = 115;
-\ 		put(GRATE, 116, 0);
-\ 		prop[SNAKE] = put(SNAKE, 116, 1);
-\ 		prop[BIRD] = put(BIRD, 116, 1);
-\ 		prop[CAGE] = put(CAGE, 116, 0);
-\ 		prop[ROD2] = put(ROD2, 116, 0);
-\ 		prop[PILLOW] = put(PILLOW, 116, 0);
-\ 		prop[MIRROR] = put(MIRROR, 115, 0);
-\ 		fixed[MIRROR] = 116;
-\ 		for (i = 1; i < MAXOBJ; ++i) {
-\ 			if (toting(i))
-\ 				dstroy(i);
-\ 		}
-\ 		rspeak(132);
-\ 		closed = 1;
-\ 		return 1;
-\ 	}
-\ 	if (prop[LAMP] == 1)
-\ 		--limit;
-\ 	if (limit <= 30 && here(BATTERIES) && prop[BATTERIES] == 0 && here(LAMP)) {
-\ 		rspeak(188);
-\ 		prop[BATTERIES] = 1;
-\ 		if (toting(BATTERIES))
-\ 			drop(BATTERIES, loc);
-\ 		limit += 2500;
-\ 		lmwarn = 0;
-\ 		return 0;
-\ 	}
-\ 	if (limit == 0) {
-\ 		--limit;
-\ 		prop[LAMP] = 0;
-\ 		if (here(LAMP))
-\ 			rspeak(184);
-\ 		return 0;
-\ 	}
-\ 	if (limit < 0 && loc <= 8) {
-\ 		rspeak(185);
-\ 		gaveup = 1;
-\ 		normend();
-\ 	}
-\ 	if (limit <= 30) {
-\ 		if (lmwarn || !here(LAMP))
-\ 			return 0;
-\ 		lmwarn = 1;
-\ 		i = 187;
-\ 		if (place[BATTERIES] == 0)
-\ 			i = 183;
-\ 		if (prop[BATTERIES] == 1)
-\ 			i = 189;
-\ 		rspeak(i);
-\ 		return 0;
-\ 	}
-\ 	return 0;
-\ }
 ;
 
 \ check for presence of dwarves..

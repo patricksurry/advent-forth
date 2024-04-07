@@ -60,10 +60,8 @@
             'TROLL prop{}@ 1 = if
                 'TROLL 1 speak-item
                 0 'TROLL prop{}!
-                'TROLL2 0 move-item
-                [ 'TROLL2 MAXOBJ + ] literal 0 move-item
-                'TROLL 117 move-item
-                [ 'TROLL MAXOBJ + ] literal 122 move-item
+                'TROLL2 0 0 move-dual-item  \ duplicated in stimer
+                'TROLL 117 122 move-dual-item
                 'CHASM juggle-item
                 loc@ newloc !
             else
