@@ -125,6 +125,8 @@ variable motion
 2variable last-verb-cstr
 2variable last-nonverb-cstr
 
+\ turns is the save/load mark, need prop{ MAXOBJ  1+ + turns - <= 1024
+
 variable turns   0 turns   !
 variable wzdark  0 wzdark  !
 variable closed  0 closed  !
@@ -136,6 +138,10 @@ variable detail  0 detail  !
 variable clock1 30 clock1  !
 variable clock2 50 clock2  !
 variable panic   0 panic   !
+
+\ hint tracking
+create hinted 0 c,          \ bit flat for each hint offered
+create hintlc{ 0 c, 0 c, 0 c, 0 c, 0 c, 0 c, \ turns at hint-worthy locations
 
 \ dwarf locations; note dloc[DWARFMAX-1] = chloc
 create dloc{   0 c, 19 c, 27 c, 33 c, 44 c, 64 c, 114 c,
@@ -162,12 +168,11 @@ variable numdie  0 numdie  !
 variable gaveup  0 gaveup  !
 variable foobar  0 foobar  !
 
-: 0,n ( n -- )
-    ?dup 0> if 0 do 0 c, loop then
-;
-
 : 0pad ( n start -- )
-    + here - 0,n
+    \ allocate and erase remainder of n byte region beginning at start
+    + here swap over -
+    ( here k )
+    dup allot erase
 ;
 
 \ objects current location
@@ -194,8 +199,12 @@ create fixed{ MAXOBJ 1+ here
 	121 c, NOWHERE c,
     0pad
 
-create visited{ MAXLOC 1+ here 0pad         \ t/f if has been here
-create prop{ MAXOBJ 1+ here 0pad            \ (signed) status of objects
+\ reserve space but define consts after to keep save block under 1024 bytes
+here MAXLOC 1+ over 0pad
+here MAXOBJ 1+ over 0pad
+
+constant prop{              \ (signed char) status of objects
+constant visited{           \ flags user visited loc
 
 \ unsigned char(c) and signed byte(b) array accessors
 : c}@ ( off addr -- c ) + c@ ;

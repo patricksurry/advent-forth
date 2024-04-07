@@ -1,8 +1,8 @@
 \ 1-indexed arrays for action handlers up to 'LOAD = 33
 
-create obj-act&  34 cells 0,n
-create just-act& 34 cells 0,n
-create act-msg{  34 0,n
+create obj-act&  34 cells here 0pad
+create just-act& 34 cells here 0pad
+create act-msg{  34 here 0pad
 
 : set-actions ( action obj-act just-act msg -- )
     >r rot dup >r cells dup >r
@@ -10,7 +10,6 @@ create act-msg{  34 0,n
     just-act& + ! r> obj-act& + !
     2r> act-msg{ c}!
 ;
-
 
 \ turn.c:trverb,trobj
 : transitive-verb ( -- )  \ act on an object
@@ -985,12 +984,14 @@ create act-msg{  34 0,n
 ;
 
 : just-suspend
-\ TODO just-suspend
-\ saveflg = 1;
+    63 turns blk-write
+    ." Saved game." cr
+    abort
 ;
 
 : just-load
-\ TODO just-load
+    63 turns blk-read
+    ." Restored game." cr
 ;
 
 'CALM      ' obj-speak     ' need-obj       14  set-actions

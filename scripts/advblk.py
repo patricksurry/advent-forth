@@ -37,16 +37,13 @@ consts = '\n'.join([
 if 0x4000 + len(forth) > 0xc000:
     warn("Forth code @ $4000 overlaps IO space")
 
-boot = open('data/boot_fpp.fs').read().format(
-    data_start=data_start,
-    data_blk=data_blk,
-    data_blocks=nblocks(data),
-    data_tail=(len(data) % 1024) or 1024,
-    forth_blk=forth_blk,
-    forth_blocks=nblocks(forth),
-    forth_len=len(forth),
-    consts=consts,
-)
+template = open('data/boot_fpp.fs').read()
+data_blocks=nblocks(data)
+data_tail=(len(data) % 1024) or 1024
+forth_blocks=nblocks(forth)
+forth_len=len(forth)
+boot = eval('f"""' + template + '"""')
+
 open('data/boot_fpp_fmt.fs', 'w').write(boot)
 if len(boot) + 2 > 1024:
     warn("Boot block too long: {len(boot)} > 1024")

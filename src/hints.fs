@@ -1,8 +1,9 @@
-\ these are 0-indexed arrays but hint is 1 indexed
+\ support six 0-indexed hints
+\ locations are tagged with relevant hint using bits 4-6 in cond byte
 
 6 constant MAXHINT
 
-\ columns in the hint array
+\ columns in the hints{ array
 0 constant WAIT     \ number of turns in place before hint
 1 constant COST     \ score cost
 2 constant ASK      \ prompt message
@@ -16,13 +17,6 @@ create hints{
 25 c, 5 c, 178 c, 179 c,   \ 5 plover
 20 c, 3 c, 180 c, 181 c,   \ 6 dark
 
-
-create hinted{
-0 c, 0 c, 0 c, 0 c, 0 c, 0 c,
-
-create hintlc{
-0 c, 0 c, 0 c, 0 c, 0 c, 0 c,
-
 : hintp ( hint0 -- hintp )
     2 lshift hints{ +
 ;
@@ -33,13 +27,18 @@ create hintlc{
         ." I am prepared to give you a hint but, it will cost you "
         dup COST c}@ . ." points." cr
         175 swap HINT c}@ 54 yes-no
-        swap hinted{ c}!
+        ( hint0 f )
+        1 rot lshift and
+        ( hint-bit | 0 )
+        hinted c@ or hinted c!
     else
         2drop
     then
 ;
 
 : has-hint ( hint0 -- f )
+    \ is this location tagged for this hint?
+    \ get 1-based hint bits from cond and subtract one
     loc@ cond{ c}@ HINTMASK and 4 rshift 1- =
 ;
 
@@ -77,7 +76,7 @@ create hintlc{
 
 : check-hints
     MAXHINT 0 do
-        i hinted{ c}@ 0= if
+        1 i lshift hinted c@ and 0= if
             i has-hint if
                 i hintlc{ c}@ 1+
             else

@@ -133,18 +133,22 @@
 
 : ?describe-item ( item -- )
     dup 'STEPS = 'NUGGET is-toting and if
-        drop exit then
+        drop exit
+    then
 
     dup prop{}@ 0< if
         closed @ if
-            drop exit then
+            drop exit
+        then
         dup 'RUG = over 'CHAIN = or
         over prop{}!
         -1 tally +!
     then
 
-    dup 'STEPS = loc@ 'STEPS fixed{ c}@ = and if
-        1 else
+    dup 'STEPS = loc@ 'STEPS fixed{ c}@ = and
+    if
+        1
+    else
         dup prop{}@
     then
     ( item state )

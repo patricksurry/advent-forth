@@ -15,6 +15,9 @@ s" ... used " type u. s" bytes" type CR
 ADVDAT here - . s" bytes remain before ADVDAT" type CR
 .s cr       \ stack should be empty after evaluate
 
+' prop{{ turns -
+s" Save/restore state " type u. s" bytes" type CR
+
 \ now we have space to load data...
 
 \ copy last block first and move tail up 1024*(blks-1) to avoid overwriting "ROM"
