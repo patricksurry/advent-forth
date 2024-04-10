@@ -3,13 +3,18 @@
 
 0 nc-limit !        \ don't inline too much
 
-: umin ( x y -- x|y ) 2dup u< if drop else nip then ;
-: modu ( x d -- ur )    \ always produce remainder in 0..d-1 even when x < 0
-    dup >r mod r> over 0< if + else drop then ;
-: u<= u> 0= ;
-: u>= u< 0= ;
-: <= > 0= ;
-: >= < 0= ;
+\ random integer in [0, n) without modulo bias
+\ : randint ( n -- k )
+\     dup $ffff 0 rot um/mod
+\     ( n rem quo )
+\     begin
+\         nip
+\         over random 1- 0 rot um/mod
+\         ( n quo k quo' )
+\         rot tuck <>
+\     until \ while max quotient, retry
+\     drop nip
+\ ;
 
 \ helper for debugging stack trace
 \ : trace>name ( addr -- nt )
@@ -34,7 +39,14 @@
 
 \ database.c:pct
 : pct ( n -- flag )             \ true with percent n
-    random 100 modu <
+    100 randint  <
+;
+
+: 0pad ( n start -- )
+    \ allocate and erase remainder of n byte region beginning at start
+    + here swap over -
+    ( here k )
+    dup allot erase
 ;
 
 include defs.fs
@@ -50,7 +62,10 @@ include turn.fs
 \ see advent.c:main
 : main
     65 1 0 yes-no if        \ instructions?
-        1000 else 330
-    then limit !
+        cr 1000
+    else
+        330
+    then
+    limit !
     begin turn again
 ;

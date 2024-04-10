@@ -1,12 +1,15 @@
-\ TODO items
+## TODO
+
 \ - run tester.fs on all the words in the object array
 \ - automate walkthrus from https://www.mipmip.org/dev/IFrescue/ajf/Universal350.html
 \ - make defs an init function so we can restart (advent.c:initplay)
 \ - could save about 300 bytes by shortening all words to max 6 chars, about 650 to 2char (unreadable)
 \ - move c}@!; <= etc; blkrw and friends to native words
 \ - is c!@ useful enough?
+\ - split out dizzy to separate repo; optional decomp w/o wrap
+\ - how does it do compressing forth?
 
-## BUGS
+## KNOWN ISSUES
 
 - dragon's rug message isn't right
 - score doesn't discount hinted{

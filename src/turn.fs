@@ -60,9 +60,7 @@
             'TROLL prop{}@ 1 = if
                 'TROLL 1 speak-item
                 0 'TROLL prop{}!
-                'TROLL2 0 0 move-dual-item  \ duplicated in stimer
-                'TROLL 117 122 move-dual-item
-                'CHASM juggle-item
+                reset-troll
                 loc@ newloc !
             else
                 loc@ 117 = if 122 else 117 then newloc !

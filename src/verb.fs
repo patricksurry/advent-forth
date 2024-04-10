@@ -5,10 +5,11 @@ create just-act& 34 cells here 0pad
 create act-msg{  34 here 0pad
 
 : set-actions ( action obj-act just-act msg -- )
-    >r rot dup >r cells dup >r
-    ( obj-act just-act 2*act   R: msg act 2*act )
-    just-act& + ! r> obj-act& + !
-    2r> act-msg{ c}!
+    2swap swap >r
+    ( just-act msg obj-act  R: action )
+    r@ cells obj-act& + !
+    r@ act-msg{ c}!
+    r> cells just-act& + !
 ;
 
 \ turn.c:trverb,trobj
@@ -197,9 +198,7 @@ create act-msg{  34 here 0pad
     \ Bear and troll
     dup 'BEAR = 'TROLL is-at and if
         163 speak-message
-        'TROLL 0 0 move-dual-item    \ duplicated in stimer
-        'TROLL2 117 122 move-dual-item
-        'CHASM juggle-item
+        reset-troll
         2 'TROLL prop{}!
     then
 
@@ -526,8 +525,7 @@ create act-msg{  34 here 0pad
     dup 50 >= over MAXOBJ < and 'TROLL is-at and if
         159 speak-message
         0 drop-item
-        'TROLL 0 move-item
-        'TROLL MAXOBJ + 0 move-item
+        'TROLL 0 0 move-dual-item
         'TROLL2 117 drop-item
         'TROLL2 MAXOBJ + 122 drop-item
         'CHASM juggle-item

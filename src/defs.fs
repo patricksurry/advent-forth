@@ -95,7 +95,6 @@ $ff constant NOWHERE
 39  constant 'BATTERIES
 
 \ fixed locations
-
 50  constant 'NUGGET
 54  constant 'COINS
 55  constant 'CHEST
@@ -140,16 +139,16 @@ variable clock2 50 clock2  !
 variable panic   0 panic   !
 
 \ hint tracking
-create hinted 0 c,          \ bit flat for each hint offered
+create hinted 0 c,          \ bit flag for each hint offered
 create hintlc{ 0 c, 0 c, 0 c, 0 c, 0 c, 0 c, \ turns at hint-worthy locations
 
 \ dwarf locations; note dloc[DWARFMAX-1] = chloc
 create dloc{   0 c, 19 c, 27 c, 33 c, 44 c, 64 c, 114 c,
 create dseen{  0 c,  0 c,  0 c,  0 c,  0 c,  0 c,  0 c,     \ seen flag
 create odloc{  0 c,  0 c,  0 c,  0 c,  0 c,  0 c,  0 c,     \ old locs
-variable dkill  0  dkill    !        \ dwarves killed
+variable dkill  0  dkill    !       \ dwarves killed
 
-\ LOC_T daltloc;			  /* alternate appearance	*/
+variable daltloc 18 daltloc !       \ alternate appearance
 variable limit 100 limit   !
 variable tally  15 tally   !
 variable tally2  0 tally2  !
@@ -168,13 +167,6 @@ variable numdie  0 numdie  !
 variable gaveup  0 gaveup  !
 variable foobar  0 foobar  !
 variable lmwarn  0 lmwarn  !
-
-: 0pad ( n start -- )
-    \ allocate and erase remainder of n byte region beginning at start
-    + here swap over -
-    ( here k )
-    dup allot erase
-;
 
 \ objects current location
 create place{ MAXOBJ 1+ here
@@ -201,8 +193,8 @@ create fixed{ MAXOBJ 1+ here
     0pad
 
 \ reserve space but define consts after to keep save block under 1024 bytes
-here MAXLOC 1+ over 0pad
-here MAXOBJ 1+ over 0pad
+here MAXLOC 1+ over 0pad    \ visited{
+here MAXOBJ 1+ over 0pad    \ prop{
 
 constant prop{              \ (signed char) status of objects
 constant visited{           \ flags user visited loc
@@ -220,7 +212,9 @@ constant visited{           \ flags user visited loc
 
 : loc@ loc @ ;
 
+here
 :noname
     \ 50 and above are fixed location
     MAXOBJ 50 do $ff i prop{}! loop
-; execute
+;
+execute here - allot    \ run then drop this code

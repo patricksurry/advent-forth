@@ -10,7 +10,7 @@
 
 \ english.c:getwords
 : user-input ( -- addr n )
-    ." > " pad dup 127 accept tolower CR
+    ." > " $400 dup 127 accept tolower CR
 ;
 
 \ optionally prompt user and respond to a yes/no question returning flag
@@ -37,6 +37,7 @@
 ;
 
 : dunno
-    60 61 13 random 3 modu -1 do rot loop
+    60 61 13
+    3 randint -1 do rot loop    \ shuffle
     2drop speak-message
 ;

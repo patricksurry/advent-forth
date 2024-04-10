@@ -36,7 +36,7 @@
     or
 ;
 
-: location-empty ( loc -- flag )
+: is-vacant ( loc -- flag )
     true
     MAXLOC 1 do
         over i place{ c}@ <> and
@@ -132,12 +132,11 @@
 ;
 
 \ database.c:put
-: put-item ( obj where pval -- pval' )
-    >r move-item -1 r> -        \ obj where move-item; return -1 - pval
-;
-
-: put-item! ( obj where pval -- )
-    2>r dup 2r> put-item swap prop{}!
+\ move-item and set obj prop{} to -1 - pval
+: put-item ( pval obj where -- )
+    over swap move-item
+    ( pval obj )
+    -1 rot - swap prop{}!
 ;
 
 : ?describe-item ( item -- )

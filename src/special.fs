@@ -123,10 +123,32 @@
     then
 ;
 
+: reset-troll
+    'TROLL 0 0 move-dual-item
+    'TROLL2 117 122 move-dual-item
+    'CHASM juggle-item
+;
+
+create stroom
+    'BOTTLE 2* 1+ c, 115 c,
+    'PLANT  2*    c, 115 c,
+    'OYSTER 2*    c, 115 c,
+    'LAMP   2*    c, 115 c,
+    'ROD    2*    c, 115 c,
+    'DWARF  2*    c, 115 c,
+    'SNAKE  2* 1+ c, 116 c,
+    'BIRD   2* 1+ c, 116 c,
+    'CAGE   2*    c, 116 c,
+    'ROD2   2*    c, 116 c,
+    'PILLOW 2*    c, 116 c,
+    'MIRROR 2*    c, 115 c,
+    0 ,
+
+
 \ special time limit stuff...
 \ turn.c:stimer
 : stimer
-    foobar dup @ dup 0> if negate else 0 then !
+    foobar dup @ dup 0> if negate else 0 and then !
 
     clock1 @
     tally 0= loc@ dup 15 >= swap 33 <> and and if
@@ -140,10 +162,7 @@
         MAXDWARF 1 do
             0 i dseen{ c}!
         loop
-        'TROLL 0 0 move-dual-item
-        'TROLL2 117 122 move-dual-item
-        'CHASM juggle-item
-
+        reset-troll
         3 'BEAR prop{}@ <> if
             'BEAR destroy-item
         then
@@ -163,22 +182,21 @@
     ( clock2@ )
     0= if
         \ set up storage room and close the cave...
-        'BOTTLE 115 1 put-item!
-        'PLANT 115 0 put-item!
-        'OYSTER 115 0 put-item!
-        'LAMP 115 0 put-item!
-        'ROD 115 0 put-item!
-        'DWARF 115 0 put-item!
         115 dup dup
         loc ! oldloc ! newloc !
-        'GRATE 116 0 put-item drop
-        'SNAKE 116 1 put-item!
-        'BIRD 116 1 put-item!
-        'CAGE 116 0 put-item!
-        'ROD2 116 0 put-item!
-        'PILLOW 116 0 put-item!
-        'MIRROR 115 0 put-item!
+        'GRATE      116 move-item
         116 'MIRROR fixed{ c}!
+
+        stroom
+        begin
+            \ each value is (obj 2* pval + | loc << 16 )
+            dup @ dup while
+            unpack >r dup 1 and swap 2/ r>
+            ( stroom pval obj loc )
+            put-item
+            2 +
+        repeat
+        2drop
 
         MAXOBJ 1 do
             i is-toting if
@@ -266,116 +284,6 @@
     then
 ;
 
-: do-dwarves ( -- )
-\ TODO do-dwarves
-\ /*
-\ 	dwarf stuff.
-\ */
-\ turn.c:dwarves
-\ void dwarves(void)
-\ {
-\ 	int i, j, k, try, attack, stick, dtotal;
-\
-\ 	/*
-\ 		see if dwarves allowed here
-\ 	*/
-\ 	if (newloc == 0 || forced(newloc) || cond[newloc] & NOPIRAT)
-\ 		return;
-\ 	/*
-\ 		see if dwarves are active.
-\ 	*/
-\ 	if (!dflag) {
-\ 		if (newloc > 15)
-\ 			++dflag;
-\ 		return;
-\ 	}
-\ 	/*
-\ 		if first close encounter (of 3rd kind)
-\ 		kill 0, 1 or 2
-\ 	*/
-\ 	if (dflag == 1) {
-\ 		if (newloc < 15 || pct(95))
-\ 			return;
-\ 		++dflag;
-\ 		for (i = 1; i < 3; ++i)
-\ 			if (pct(50))
-\ 				dloc[rand() % 5 + 1] = 0;
-\ 		for (i = 1; i < (DWARFMAX - 1); ++i) {
-\ 			if (dloc[i] == newloc)
-\ 				dloc[i] = daltloc;
-\ 			odloc[i] = dloc[i];
-\ 		}
-\ 		rspeak(3);
-\ 		drop(AXE, newloc);
-\ 		return;
-\ 	}
-\ 	dtotal = attack = stick = 0;
-\ 	for (i = 1; i < DWARFMAX; ++i) {
-\ 		if (dloc[i] == 0)
-\ 			continue;
-\ 		/*
-\ 			move a dwarf at random.  we don't
-\ 			have a matrix around to do it
-\ 			as in the original version...
-\ 		*/
-\ 		for (try = 1; try < 20; ++try) {
-\ 			j = rand() % 106 + 15; /* allowed area */
-\ 			if (j != odloc[i] && j != dloc[i] &&
-\ 			    !(i == (DWARFMAX - 1) && (cond[j] & NOPIRAT) == NOPIRAT))
-\ 				break;
-\ 		}
-\ 		if (j == 0)
-\ 			j = odloc[i];
-\ 		odloc[i] = dloc[i];
-\ 		dloc[i] = j;
-\ 		if ((dseen[i] && newloc >= 15) || dloc[i] == newloc || odloc[i] == newloc)
-\ 			dseen[i] = 1;
-\ 		else
-\ 			dseen[i] = 0;
-\ 		if (!dseen[i])
-\ 			continue;
-\ 		dloc[i] = newloc;
-\ 		if (i == 6)
-\ 			dopirate();
-\ 		else {
-\ 			++dtotal;
-\ 			if (odloc[i] == dloc[i]) {
-\ 				++attack;
-\ 				if (knfloc >= 0)
-\ 					knfloc = newloc;
-\ 				if (rand() % 1000 < 95 * (dflag - 2))
-\ 					++stick;
-\ 			}
-\ 		}
-\ 	}
-\ 	if (dtotal == 0)
-\ 		return;
-\ 	if (dtotal > 1)
-\ 		printf("There are %d threatening little dwarves in the room with you!\n", dtotal);
-\ 	else
-\ 		rspeak(4);
-\ 	if (attack == 0)
-\ 		return;
-\ 	if (dflag == 2)
-\ 		++dflag;
-\ 	if (attack > 1) {
-\ 		printf("%d of them throw knives at you!!\n", attack);
-\ 		k = 6;
-\ 	} else {
-\ 		rspeak(5);
-\ 		k = 52;
-\ 	}
-\ 	if (stick <= 1) {
-\ 		rspeak(stick + k);
-\ 		if (stick == 0)
-\ 			return;
-\ 	} else
-\ 		printf("%d of them get you !!!\n", stick);
-\ 	oldloc2 = newloc;
-\ 	death();
-\ }
-;
-
 : stealable ( i -- f )
     'PYRAMID <>
     newloc @ dup 'PYRAMID place{ c}@ <>
@@ -449,4 +357,154 @@
     6 odloc{ c}@ 6 dloc{ c}@ <> 20 pct and if
         127 speak-message
     then
+;
+
+: move-dwarf ( i -- attack? here? )
+    \ move an active dwarf at random.  we don't have
+    \ a matrix around to do it as in the original version...
+
+    0 swap
+    begin
+        nip
+        106 randint  15 +  swap       \ allowed area
+        ( loc i )
+        2dup odloc{ c}@ <> >r  \ not current loc
+        2dup dloc{ c}@ <> r> and >r
+        ( loc i  R: f )
+        over cond{ c}@ NOPIRAT and
+        over MAXDWARF 1- = and 0= r> and
+        ( loc i f )
+    until
+
+    ( loc i )
+    dup dloc{ c}@  over odloc{ c}!
+    2dup dloc{ c}!
+    ( loc i )
+    newloc @ tuck 2swap = >r
+    ( newloc i  R: f )
+    2dup odloc{ c}@ = r> or >r
+    ( newloc i  R: f' )
+    2dup dseen{ c}@ swap 15 >= and r> or
+    ( newloc i f" )
+    1 and 2dup swap dseen{ c}!
+    ( newloc i 0|1 )
+    0= if
+        2drop 0 0 exit
+    then
+    tuck dloc{ c}!
+    ( i )
+
+    dup 6 = if
+        drop do-pirate
+        0 0
+    else
+        dup odloc{ c}@ swap dloc{ c}@ = 1 and   \ stick?
+        1                                       \ here
+    then
+;
+
+
+: do-dwarves ( -- )         \ dwarf stuff.
+    \ see if dwarves allowed here
+    newloc @  dup 0=
+    over is-forced or
+    swap cond{ c}@ NOPIRAT and  or  if
+        exit
+    then
+
+    \ see if dwarves are active.
+    dflag @ ?dup 0= if
+        newloc @ 15 > if
+            1 dflag +!
+        then
+        exit
+    then
+    ( dflag )
+
+    \ if first close encounter (of 3rd kind) kill 0, 1 or 2
+    1 = if
+        newloc @ 15 < 95 pct or if
+            exit
+        then
+        1 dflag +!
+        3 1 do
+            50 pct if
+                0  5 randint 1+  dloc{ c}!
+            then
+        loop
+        MAXDWARF 1- 1 do
+            i dloc{ c}@ dup newloc @ = if
+                drop daltloc @
+                dup  i dloc{ c}!
+            then
+            i odloc{ c}!
+        loop
+        3 speak-message
+        'AXE newloc @ drop-item
+        exit
+    then
+
+    0 0
+    ( #attack #dtotal )
+    MAXDWARF 1 do
+        i dloc{ c}@ if
+            i move-dwarf rot + >r + r>
+        then
+    loop
+
+    ( #attack #dtotal )
+    dup 0= if
+        2drop exit
+    then
+
+    0 knfloc @ >= if
+        newloc @ knfloc !
+    then
+
+    dup 1 > if
+        ." There are " u. ." threatening little dwarves in the room with you!" cr
+    else
+        drop 4 speak-message
+    then
+
+    ( #attack )
+    dup 0= if
+        drop exit
+    then
+
+    0
+    dup 0 do
+        1000 randint  95 dflag @ 2 - *  <  if
+            1+
+        then
+    loop
+    swap
+
+    ( #stick #attack )
+    dflag @ 2 = if
+        1 dflag +!
+    then
+
+    dup 1 > if
+        u. ." of them throw knives at you!!" cr
+        6
+    else
+        drop 5 speak-message
+        52
+    then
+
+    ( #stick k )
+
+    over 1 <= if
+        over + speak-message
+        0= if
+            exit
+        then
+    else
+        drop
+        u. ." of them get you !!!" cr
+    then
+
+    newloc @ oldloc2 !
+    death
 ;

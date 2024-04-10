@@ -58,9 +58,9 @@ create hints{
             'BIRD not-here and
         endof
         3 of
-            loc@ location-empty
-            oldloc @ location-empty and
-            oldloc2 @ location-empty and
+            loc@ is-vacant
+            oldloc @ is-vacant and
+            oldloc2 @ is-vacant and
             holding 1 > and
         endof
         4 of

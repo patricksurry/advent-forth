@@ -56,9 +56,11 @@
         dup -1 <> if                \ found a hit?
             2swap 2>r 2swap
             ( vptr' tv best tvmin   R: addr n )
-            rot 2dup u<= if
+            rot 2dup u> 0= if
                 ( vptr' best tvmin tv )
-                rot umin swap
+                rot
+                2dup u< if drop else nip then   \ umin ( best tv -- best' )
+                swap
             else
                 drop
             then
@@ -74,18 +76,19 @@
     2drop drop
 ;
 
-2variable tmp-cstr
+2variable 2tmp
 
 \ english.c:analyze
 : analyze ( addr n -- [typ-val true | false] )
-    2dup tmp-cstr 2!
+    2dup 2tmp 2!
     ?dup 0= if
-        drop false exit then
+        drop false exit
+    then
     0 vocab-best dup -1 = if            \ typ-val
         drop false dunno exit           \ drop result and ptr
     then
 
-    dup tmp-cstr 2@ rot
+    dup 2tmp 2@ rot
     ( tv addr n tv )
     unpack nip VERB-WORD = if           \ update either verb or nonverb
          last-verb-cstr else
