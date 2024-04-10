@@ -272,7 +272,7 @@
     \ see if a dwarf has seen him and has come from where he wants to go.
     check-seen
 
-    do-dwarves \ including special dwarf (pirate who steals)
+    \ do-dwarves \ including special dwarf (pirate who steals)
 
     \ moving?
     loc@ newloc @ <> if

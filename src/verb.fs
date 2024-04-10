@@ -363,7 +363,7 @@ create act-msg{  34 here 0pad
     'DRAGON 120 NOWHERE move-dual-item
     'RUG 120 0 move-dual-item
     MAXOBJ 1- 1 do
-        i place{ c}@ dup 119 = swap 121 = or if
+        i place{ c}@ dup  119 =  swap 121 =  or if
             i 120 move-item
         then
     loop
@@ -528,7 +528,7 @@ create act-msg{  34 here 0pad
         'TROLL 0 0 move-dual-item
         'TROLL2 117 drop-item
         'TROLL2 MAXOBJ + 122 drop-item
-        'CHASM juggle-item
+        \ 'CHASM juggle-item            \ no-op in this version
         exit
     then
 
@@ -576,7 +576,7 @@ create act-msg{  34 here 0pad
         'AXE loc@ drop-item
         NOWHERE 'AXE fixed{ c}!
         1 'AXE prop{}!
-        'BEAR juggle-item
+        \ 'BEAR juggle-item     \ no-op in this version
         exit
     \ otherwise it is an attack
     else

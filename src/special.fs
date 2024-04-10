@@ -126,7 +126,7 @@
 : reset-troll
     'TROLL 0 0 move-dual-item
     'TROLL2 117 122 move-dual-item
-    'CHASM juggle-item
+    \ 'CHASM juggle-item    \ no-op in this version
 ;
 
 create stroom
@@ -193,7 +193,15 @@ create stroom
             dup @ dup while
             unpack >r dup 1 and swap 2/ r>
             ( stroom pval obj loc )
-            put-item
+            \ put-item      \ inlined - only used here
+
+            \ database.c:put
+            \ move-item and set obj prop{} to -1 - pval
+            \ : put-item ( pval obj where -- )
+                over swap move-item
+                ( pval obj )
+                -1 rot - swap prop{}!
+            \ ;
             2 +
         repeat
         2drop
@@ -494,7 +502,6 @@ create stroom
     then
 
     ( #stick k )
-
     over 1 <= if
         over + speak-message
         0= if

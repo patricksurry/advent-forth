@@ -109,46 +109,40 @@
 ;
 
 : move-dual-item ( obj wplace wfixed -- )
-    -rot over -rot
+    -rot over
     ( wfixed obj wplace obj )
-    swap move-item MAXOBJ + swap move-item
+    swap move-item
+    MAXOBJ + swap move-item
 ;
 
 \ database.c:juggle is a no-op
-\ open-adventure:misc.c:juggle
-: juggle-item ( obj -- )
-    \ Juggle an object by picking it up and putting it down again
-    \ to get the object to the front of the chain of things at its loc
-    \ ?? is this atloc linked list that's not implemented here?
-    dup place{ c}@
-    over fixed{ c}@
-    ( obj place[obj] fixed[obj] )
-    move-dual-item
- ;
+\ \ open-adventure:misc.c:juggle
+\ : juggle-item ( obj -- )
+\     \ Juggle an object by picking it up and putting it down again
+\     \ to get the object to the front of the chain of things at its loc
+\     \ ?? is this atloc linked list that's not implemented here?
+\     dup place{ c}@
+\     over fixed{ c}@
+\     ( obj place[obj] fixed[obj] )
+\     move-dual-item
+\  ;
 
 \ database.c:dstroy
 : destroy-item ( obj -- )
     0 move-item
 ;
 
-\ database.c:put
-\ move-item and set obj prop{} to -1 - pval
-: put-item ( pval obj where -- )
-    over swap move-item
-    ( pval obj )
-    -1 rot - swap prop{}!
-;
-
 : ?describe-item ( item -- )
     dup 'STEPS = 'NUGGET is-toting and if
         drop exit
     then
-
+    ( item )
     dup prop{}@ 0< if
         closed @ if
             drop exit
         then
-        dup 'RUG = over 'CHAIN = or
+        ( item )
+        dup 'RUG = over 'CHAIN = or 1 and
         over prop{}!
         -1 tally +!
     then
