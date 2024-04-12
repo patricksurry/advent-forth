@@ -21,16 +21,16 @@
     \ ?? does order matter here? occurs within case in c code
     verb c@ dup 'FIND = swap 'INVENTORY = or
     if drop 59 then
-    speak-message
+    say-msg
 ;
 
-: check-move ( cond' -- flag )
+: move? ( cond' -- flag )
     unpack
     ( cobj ct )
     case
         0 of dup 0= swap pct or endof
-		1 of dup 0= swap is-toting or endof
-		2 of dup is-toting swap is-at or endof
+		1 of dup 0= swap toting? or endof
+		2 of dup toting? swap at? or endof
         \ default case needs to leave ( flag ct )
         \ ( cobj ct )
 		dup 3 8 within 0= if 37 bug then
@@ -45,10 +45,10 @@
 : move-special ( d -- )
     case
         1 of        \ plover movement via alcove
-            holding @ dup 0= swap 1 = 'EMERALD is-toting and or if
+            holding @ dup 0= swap 1 = 'EMERALD toting? and or if
                 199 loc@ - newloc !
             else
-                117 speak-message
+                117 say-msg
             then
         endof
 
@@ -58,7 +58,7 @@
 
         3 of        \ troll bridge
             'TROLL prop{}@ 1 = if
-                'TROLL 1 speak-item
+                'TROLL 1 say-item
                 0 'TROLL prop{}!
                 reset-troll
                 loc@ newloc !
@@ -67,8 +67,8 @@
                 'TROLL prop{}@ 0= if
                     1 prop{}!
                 then
-                'BEAR is-toting if
-                    162 speak-message
+                'BEAR toting? if
+                    162 say-msg
                     1 'CHASM prop{}!
                     2 'TROLL prop{}!
                     'BEAR newloc @ drop-item
@@ -101,7 +101,7 @@
         \ verb matches motion or 1, or already hit?
         swap dup 1 = swap motion @ = or r> or if
             ( link n d' c' )
-            true >r check-move
+            true >r move?
             ( link n d' f )
             0= if drop 0 then
             ( link n d'|0 )
@@ -120,7 +120,7 @@
             ( dest dt )
             0 of newloc ! endof
             1 of move-special endof
-            2 of speak-message endof
+            2 of say-msg endof
         endcase
         else bad-move
     then
@@ -129,13 +129,13 @@
 \ return from whence we came!
 \ turn.c:goback
 : go-back ( -- )
-    oldloc @ dup dup is-forced if
+    oldloc @ dup dup forced? if
         oldloc2 @ swap
     then
     oldloc2 ! loc@ dup oldloc !
     ( want loc )
     over = if
-        91 speak-message
+        91 say-msg
         exit
     then
     ( want )
@@ -159,7 +159,7 @@
             then
             ( n addr v want d' )
             \ is dest forced to where we want to go?
-            unpack 0= over is-forced and if
+            unpack 0= over forced? and if
                 cave-links drop decode-link 2drop
                 ( n addr v want d0' )
                 over = if
@@ -182,7 +182,7 @@
     r> ?dup if
         motion !
     else
-        140 speak-message
+        140 say-msg
     then
 ;
 
@@ -193,7 +193,7 @@
         'BACK of go-back endof
         'LOOK of
             detail @ 1+ dup detail !
-            3 < if 15 speak-message then
+            3 < if 15 say-msg then
             0 wzdark !
             loc@ false over visited{ c}!
             newloc ! 0 loc !
@@ -201,7 +201,7 @@
         'CAVE of
             loc@ 8 <
             if 57 else 58 then
-            speak-message
+            say-msg
         endof
         oldloc @ oldloc2 !
         loc@ oldloc !
@@ -213,8 +213,8 @@
 : do-object ( -- )
     object @
     dup
-    fixed{ c}@ loc@ = over is-here or if       \ is object here?
-        drop transitive-verb exit
+    fixed{ c}@ loc@ = over here? or if       \ is object here?
+        drop obj-verb exit
     then
 
     \ did they give grate as destination?
@@ -233,33 +233,33 @@
     \ is it a dwarf he is after?
     dwarf-check dflag @ 2 >= and if
         'DWARF object !
-        drop transitive-verb exit
+        drop obj-verb exit
     then
 
     \ is he trying to get/use a liquid?
     dup
-    bottle-liquid = 'BOTTLE is-here and
+    bottle-liquid = 'BOTTLE here? and
     over loc@ liquid-at = or if
-        drop transitive-verb exit
+        drop obj-verb exit
     then
 
     dup
-    'PLANT = 'PLANT2 is-at and 'PLANT2 prop{}@ 0= and if
+    'PLANT = 'PLANT2 at? and 'PLANT2 prop{}@ 0= and if
         'PLANT2 object !
-        drop transitive-verb exit
+        drop obj-verb exit
     then
 
     \ is he trying to grab a knife?
     dup 'KNIFE = loc@ knfloc @ = and if
-        116 speak-message
+        116 say-msg
         -1 knfloc !
         drop exit
     then
 
     \ is he trying to get at dynamite?
-    'ROD = 'ROD2 is-here and if
+    'ROD = 'ROD2 here? and if
         'ROD2 object !
-        transitive-verb exit
+        obj-verb exit
     then
 
     say-not-here
@@ -267,10 +267,10 @@
 
 \ turn.c:turn
 : turn
-    check-closing
+    closing?
 
     \ see if a dwarf has seen him and has come from where he wants to go.
-    check-seen
+    seen?
 
     do-dwarves \ including special dwarf (pirate who steals)
 
@@ -282,33 +282,33 @@
         ?dup 0= if                  \ location 0 means death
             death exit
         then
-        is-forced if                \ forced moved?
-            describe-location
+        forced? if                \ forced moved?
+            desc-loc
             do-move
             exit
         then
 
         \ wandering in the dark?
-        wzdark @ is-dark and 35 pct and if
-            23 speak-message
+        wzdark @ dark? and 35 pct and if
+            23 say-msg
             loc@ oldloc2 !
             death
             exit
         then
 
-        describe-location
+        desc-loc
 
-        is-dark 0= if
+        dark? 0= if
             true loc@ visited{ c}!
-            describe-items
+            desc-items
         then
     then
 
-    check-hints
+    hints?
 
-    check-closed
+    closed?
 
-    is-dark wzdark !
+    dark? wzdark !
     knfloc @ dup 0> swap loc@ <> and if
         0 knfloc !      \ ?? knfloc = 1
     then
@@ -328,7 +328,7 @@
         object @ if
             do-object
         else
-            intransitive-verb
+            just-verb
         then
     then
 ;

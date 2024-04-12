@@ -4,39 +4,39 @@
 
 \ show an item message, with -1 indexed state
 \ database.c:pspeak
-: speak-item ( i state -- )
+: say-item ( i state -- )
     1+ swap 1- 2* ITEMS& + @ ITEMS + swap               \ first item string
     ( strz state+1 )
     begin ?dup while 1- swap asciiz> + 1+ swap repeat   \ skip state+1 strings
-    spkz
+    sayz
 ;
 
 \ database.c:toting
-: is-toting ( item -- flag )
+: toting? ( item -- flag )
     place{ c}@ NOWHERE =
 ;
 
 \ database.c:here
-: is-here ( item -- flag )
+: here? ( item -- flag )
     dup
         place{ c}@ loc@ =
-        swap is-toting
+        swap toting?
     or
 ;
 
 : not-here ( item -- flag )
-    is-here 0=
+    here? 0=
 ;
 
-\ database.c:is-at
-: is-at ( item -- flag )
+\ database.c:at?
+: at? ( item -- flag )
     dup
         place{ c}@ loc@ =
         swap fixed{ c}@ loc@ =
     or
 ;
 
-: is-vacant ( loc -- flag )
+: vacant? ( loc -- flag )
     true
     MAXLOC 1 do
         over i place{ c}@ <> and
@@ -132,8 +132,8 @@
     0 move-item
 ;
 
-: ?describe-item ( item -- )
-    dup 'STEPS = 'NUGGET is-toting and if
+: ?desc-item ( item -- )
+    dup 'STEPS = 'NUGGET toting? and if
         drop exit
     then
     ( item )
@@ -154,13 +154,13 @@
         dup prop{}@
     then
     ( item state )
-    speak-item
+    say-item
 ;
 
 \ turn.c:descitem
-: describe-items ( -- )     \ describe visible items
+: desc-items ( -- )     \ describe visible items
     MAXOBJ 1- 1 do
-        i is-at if i ?describe-item then
+        i at? if i ?desc-item then
     loop
 
     tally @ dup tally2 @ = swap 0<> and limit @ 35 > and if

@@ -121,8 +121,8 @@ variable object
 variable motion
 
 \ set by analyze to repeat user words in context
-2variable last-verb-cstr
-2variable last-nonverb-cstr
+2variable 2verb
+2variable 2other
 
 \ turns is the save/load mark, need prop{ MAXOBJ  1+ + turns - <= 1024
 

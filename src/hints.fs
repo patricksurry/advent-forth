@@ -49,18 +49,18 @@ create hints{
             'KEYS not-here and
         endof
         1 of
-            'BIRD is-here
-            'ROD is-toting and
+            'BIRD here?
+            'ROD toting? and
             'BIRD object @ = and
         endof
         2 of
-            'SNAKE is-here
+            'SNAKE here?
             'BIRD not-here and
         endof
         3 of
-            loc@ is-vacant
-            oldloc @ is-vacant and
-            oldloc2 @ is-vacant and
+            loc@ vacant?
+            oldloc @ vacant? and
+            oldloc2 @ vacant? and
             holding 1 > and
         endof
         4 of
@@ -74,7 +74,7 @@ create hints{
     endcase
 ;
 
-: check-hints
+: hints?
     MAXHINT 0 do
         1 i lshift hinted c@ and 0= if
             i has-hint if

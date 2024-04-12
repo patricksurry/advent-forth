@@ -1,15 +1,20 @@
 ## TODO
 
-\ - stack depth check cost?
-\ - run tester.fs on all the words in the object array
-\ - automate walkthrus from https://www.mipmip.org/dev/IFrescue/ajf/Universal350.html
-\ - make defs an init function so we can restart (advent.c:initplay)
-\ - could save about 300 bytes by shortening all words to max 6 chars, about 650 to 2char (unreadable)
-\ - split out dizzy to separate repo; optional decomp w/o wrap
-\ - how does dizzy do compressing forth?
+- automate walkthrus from https://www.mipmip.org/dev/IFrescue/ajf/Universal350.html
+- add hint excursion
+- run tester.fs on all the words in the object array
+
+- stack depth check cost?
+- make defs an init function so we can restart (advent.c:initplay)
+- could save about 300 bytes by shortening all words to max 6 chars, about 650 to 2char (unreadable)
+
+- split out dizzy to separate repo; optional decomp w/o wrap
+- how does dizzy do compressing forth?
 
 ## KNOWN ISSUES
 
+- do-pirate broken in excursion2
+- \*Plant in excursion2
 - score doesn't discount hinted{
 
 ## WHAT'S WHAT

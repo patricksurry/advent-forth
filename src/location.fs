@@ -34,23 +34,23 @@
 
 \ describe 1-indexed location as long or short version
 \ database.c:desclg,descsh
-: speak-location ( i flag-long -- )
+: say-loc ( i flag-long -- )
     swap cave& swap
     ( addr f )
     if dup c@ else 0 then
     ( addr long-off|0 )
     ?dup 0= if dup 1+ c@ 2* 1+ 2* then
     ( addr long-off|short-off )
-    + spkz
+    + sayz
 ;
 
 \ database.c:forced
-: is-forced ( at -- flag )
+: forced? ( at -- flag )
     cond{ c}@ 2 =
 ;
 
 \ database.c:dark
-: is-dark ( -- flag )
+: dark? ( -- flag )
     loc@ cond{ c}@ LIGHT and 0=      \ ! (cond[loc] & LIGHT)
         'LAMP prop{}@ 0=
         'LAMP not-here
@@ -59,16 +59,16 @@
 ;
 
 \ turn.c:describe
-: describe-location ( -- )               \ describe current location
-    'BEAR is-toting if
-        141 speak-message
+: desc-loc ( -- )               \ describe current location
+    'BEAR toting? if
+        141 say-msg
     then
-    is-dark if
-        16 speak-message else
-        loc@ dup visited{ c}@ 0= speak-location
+    dark? if
+        16 say-msg else
+        loc@ dup visited{ c}@ 0= say-loc
     then
     33 loc@ = 25 pct and closing @ 0= and if
-        8 speak-message
+        8 say-msg
     then
 ;
 

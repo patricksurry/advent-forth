@@ -75,11 +75,11 @@
         then
         0 'WATER place{ c}!
         0 'OIL place{ c}!
-        'LAMP is-toting if
+        'LAMP toting? if
             0 'LAMP prop{}!
         then
         MAXOBJ 1- 1 do      \ original source uses i = MAXOBJ - j, unclear why
-            i is-toting if
+            i toting? if
                 i dup 'LAMP = if 1 else oldloc2 @ then drop-item
             then
         loop
@@ -87,7 +87,7 @@
         loc@ oldloc !
     else
         \ closing -- no resurrection...
-        131 speak-message
+        131 say-msg
         1 numdie +!
         normal-end
     then
@@ -100,9 +100,9 @@
  	normal-end
 ;
 
-: check-closing
+: closing?
     newloc @ dup 9 < swap 0<> and closing @ and if
-        130 speak-message
+        130 say-msg
         loc@ newloc !
         panic @ 0= if
             15 clock2 !
@@ -111,13 +111,13 @@
     then
 ;
 
-: check-closed
+: closed?
     closed @ if
-        'OYSTER prop{}@ 0< 'OYSTER is-toting and if
-            'OYSTER 1 speak-item
+        'OYSTER prop{}@ 0< 'OYSTER toting? and if
+            'OYSTER 1 say-item
         then
         MAXOBJ 1 do
-            i is-toting i prop{}@ 0< and if
+            i toting? i prop{}@ 0< and if
                 -1 i prop{}@ - prop{}!
             then
         loop
@@ -171,7 +171,7 @@ create stroom
         0 'CHAIN fixed{ c}!
         0 'AXE prop{}!
         0 'AXE fixed{ c}!
-        129 speak-message
+        129 say-msg
         -1 clock1 !
         1 closing !
         0 exit
@@ -208,11 +208,11 @@ create stroom
         2drop
 
         MAXOBJ 1 do
-            i is-toting if
+            i toting? if
                 i destroy-item
             then
         loop
-        132 speak-message
+        132 say-msg
         1 closed !
         1 exit
     then
@@ -222,10 +222,10 @@ create stroom
         1- dup limit !
     then
     ( limit@ )
-    dup 30 <= 'BATTERIES is-here and 'BATTERIES prop{}@ 0= and 'LAMP is-here and if
-        188 speak-message
+    dup 30 <= 'BATTERIES here? and 'BATTERIES prop{}@ 0= and 'LAMP here? and if
+        188 say-msg
         1 'BATTERIES prop{}!
-        'BATTERIES is-toting if
+        'BATTERIES toting? if
             'BATTERIES loc@ drop-item
         then
         ( limit@ )
@@ -237,20 +237,20 @@ create stroom
     dup 0= if
         1- limit !
         0 'LAMP prop{}!
-        'LAMP is-here if
-            184 speak-message
+        'LAMP here? if
+            184 say-msg
         then
         0 exit
     then
     ( limit@ )
     dup 0< loc@ 8 <= and if
         drop
-        185 speak-message
+        185 say-msg
         1 gaveup !
         normal-end
     then
     ( limit@ )
-    30 <= lmwarn @ 0= and 'LAMP is-here and if
+    30 <= lmwarn @ 0= and 'LAMP here? and if
         1 lmwarn !
         187
         'BATTERIES place{ c}@ 0= if
@@ -259,7 +259,7 @@ create stroom
         'BATTERIES prop{}@ 1 = if
             drop 189
         then
-        speak-message
+        say-msg
     then
     0
 ;
@@ -278,15 +278,15 @@ create stroom
     nip
 ;
 
-: check-seen
+: seen?
     newloc @ loc@ <>
-    loc@ is-forced 0= and
+    loc@ forced? 0= and
     loc@ cond{ c}@ NOPIRAT and 0= and if
         MAXDWARF 1- 1 do
             i odloc{ c}@ newloc @ =
             i dseen{ c}@ and if
                 loc@ newloc !
-                2 speak-message
+                2 say-msg
                 leave
             then
         loop
@@ -308,7 +308,7 @@ create stroom
 ;
 
 : stealit
-    128 speak-message
+    128 say-msg
 
     'MESSAGE place{ c}@ 0= if
         'CHEST chloc @ move-item
@@ -318,10 +318,10 @@ create stroom
 
     MAXTRS 1+ 50 do
         i stealable if
-            i is-at i fixed{ c}@ 0= and if
+            i at? i fixed{ c}@ 0= and if
                 i newloc @ carry-item
             then
-            i is-toting if
+            i toting? if
                 i chloc @ drop-item
             then
         then
@@ -340,10 +340,10 @@ create stroom
     0
     MAXTRS 50 do
         i stealable if
-            i is-toting if
+            i toting? if
                 drop stealit exit
             then
-            i is-here if
+            i here? if
                 1+
             then
         then
@@ -353,10 +353,10 @@ create stroom
     0=
     tally @  tally2 @ 1+  = and
     'CHEST place{ c}@  0= and
-    'LAMP is-here and
-    'LAMP prop{}@ 1  = and
+    'LAMP here?  and
+    'LAMP prop{}@  1 = and
     if
-        186 speak-message
+        186 say-msg
         'CHEST chloc @ move-item
         'MESSAGE chloc2 @ move-item
         put-chloc
@@ -365,7 +365,7 @@ create stroom
 
     6 odloc{ c}@  6 dloc{ c}@  <>
     20 pct  and if
-        127 speak-message
+        127 say-msg
     then
 ;
 
@@ -424,7 +424,7 @@ create stroom
 : do-dwarves ( -- )         \ dwarf stuff.
     \ see if dwarves allowed here
     newloc @  dup 0=
-    over is-forced or
+    over forced? or
     swap cond{ c}@ NOPIRAT and  or  if
         exit
     then
@@ -456,7 +456,7 @@ create stroom
             then
             i odloc{ c}!
         loop
-        3 speak-message
+        3 say-msg
         'AXE  newloc @  drop-item
         exit
     then
@@ -484,7 +484,7 @@ create stroom
     dup 1 > if
         ." There are " u. ." threatening little dwarves in the room with you!" cr
     else
-        drop 4 speak-message
+        drop 4 say-msg
     then
 
     ( #attack )
@@ -516,13 +516,13 @@ create stroom
         6
     else
         nip
-        5 speak-message
+        5 say-msg
         52
     then
 
     ( #stick k )
     over 1 <= if
-        over + speak-message
+        over + say-msg
         0= if
             exit
         then

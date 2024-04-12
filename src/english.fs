@@ -1,7 +1,7 @@
 \ each VOCAB entry is [ val typ len <chars> ], ending with [0 0 0]
 
 \ english.c:outwords
-: speak-vocab ( -- )
+: say-vocab ( -- )
     \ output vocabulary for motion and verb types
     VOCAB begin
         dup 2 + c@ ?dup while               \ p len
@@ -91,8 +91,10 @@
     dup 2tmp 2@ rot
     ( tv addr n tv )
     unpack nip VERB-WORD = if           \ update either verb or nonverb
-         last-verb-cstr else
-         last-nonverb-cstr then
+         2verb
+    else
+         2other
+    then
     2! true
 ;
 
@@ -111,7 +113,7 @@
     ( addr n tv )
     dup [ 'SAY VERB-WORD pack ] literal = if
         drop 'SAY verb ! 1 object !         \ oddly requires you have keys?
-        last-nonverb-cstr 2!                \ save remaining text
+        2other 2!                           \ save remaining text
         true exit
     then
     ( addr n tv )
@@ -125,15 +127,15 @@
     then
     ( tv1 tv2 )
     2dup = over [ 51 SPECIAL-WORD pack ] literal = and if
-        speak-vocab false exit
+        say-vocab false exit
     then
     unpack rot unpack rot swap
     ( v2 v1 t2 t1 )
     dup SPECIAL-WORD = if
-        2drop nip  speak-message false exit
+        2drop nip  say-msg false exit
     then
     over SPECIAL-WORD = if
-        2drop drop speak-message false exit
+        2drop drop say-msg false exit
     then
     2dup MOTION-WORD = if
         MOTION-WORD = if
