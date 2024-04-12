@@ -13,7 +13,7 @@
         else
             10 \ 12 - 2
         then then
-        i place{ c}@ 3 = i prop{}@ 0= and if
+        i place{ c}@  3 =  i prop{}@  0=  and if
             +
         else
             drop
@@ -21,24 +21,25 @@
     loop
     ( s t )
     ."       Treasures: " dup u. cr
-    + MAXDIE numdie @ - 10 *
+    +
+    MAXDIE numdie @ - 10 *
     ?dup if
         ."        Survival: " dup u. cr
         +
     then
     ( s )
-    gaveup @ 0= if
+    gaveup @  0= if
         4 +
     then
-    dflag @ ?dup if
+    dflag @  if
         ." Getting well in: 25" cr
         25 +
     then
-    closing @ ?dup if
+    closing @  if
         ." Masters section: 25" cr
         25 +
     then
-    closed @ if
+    closed @  if
         bonus @ case
             0   of 10 endof
             135 of 25 endof
@@ -266,14 +267,14 @@ create stroom
 \ check for presence of dwarves..
 \ database.c:dcheck
 : dwarf-check ( -- i|0 )
-    loc @ 0
+    loc @  0
     MAXDWARF 1- 1 do
         ( loc 0 )
-        over i dloc{ c}@ = if
+        over  i dloc{ c}@  = if
             drop i leave
-            ( loc i )
         then
     loop
+    ( loc i )
     nip
 ;
 
@@ -332,7 +333,7 @@ create stroom
 \ pirate stuff
 \ turn.c:dopirate
 : do-pirate ( -- )
-    chloc @ newloc @ = 'CHEST prop{}@ 0 >= or if
+    chloc @ newloc @ =  'CHEST prop{}@ 0 >=  or  if
         exit
     then
 
@@ -350,10 +351,10 @@ create stroom
     ( #treasure )
 
     0=
-    tally @ tally2 @ 1+ and
-    'CHEST place{ c}@ 0= and
+    tally @  tally2 @ 1+  = and
+    'CHEST place{ c}@  0= and
     'LAMP is-here and
-    'LAMP prop{}@ 1 = and
+    'LAMP prop{}@ 1  = and
     if
         186 speak-message
         'CHEST chloc @ move-item
@@ -362,7 +363,8 @@ create stroom
         exit
     then
 
-    6 odloc{ c}@ 6 dloc{ c}@ <> 20 pct and if
+    6 odloc{ c}@  6 dloc{ c}@  <>
+    20 pct  and if
         127 speak-message
     then
 ;
@@ -371,43 +373,50 @@ create stroom
     \ move an active dwarf at random.  we don't have
     \ a matrix around to do it as in the original version...
 
-    0 swap
+    0 >r >r
+    ( R: 0 i )
     begin
-        nip
-        106 randint  15 +  swap       \ allowed area
-        ( loc i )
-        2dup odloc{ c}@ <> >r  \ not current loc
-        2dup dloc{ c}@ <> r> and >r
-        ( loc i  R: f )
-        over cond{ c}@ NOPIRAT and
-        over MAXDWARF 1- = and 0= r> and
-        ( loc i f )
+        106 randint  15 +           \ allowed area
+        2r> nip 2dup 2>r
+        ( loc i  R: loc i )
+        odloc{ c}@ <>               \ not prev ...
+        2r@  dloc{ c}@ <>  and      \ ... or current loc
+        ( f  R: loc i )
+        2r@  MAXDWARF 1-  =         \ pirate?
+        swap  cond{ c}@ NOPIRAT and \ not allowed?
+        and  0=  and
+        ( f  R: loc i )
     until
 
-    ( loc i )
-    dup dloc{ c}@  over odloc{ c}!
-    2dup dloc{ c}!
-    ( loc i )
-    newloc @ tuck 2swap = >r
-    ( newloc i  R: f )
-    2dup odloc{ c}@ = r> or >r
-    ( newloc i  R: f' )
-    2dup dseen{ c}@ swap 15 >= and r> or
-    ( newloc i f" )
-    1 and 2dup swap dseen{ c}!
-    ( newloc i 0|1 )
-    0= if
-        2drop 0 0 exit
-    then
-    tuck dloc{ c}!
-    ( i )
+    ( R: loc i )
+    r@ dloc{ c}@        \ copy of current dloc
+    2r@ dloc{ c}!       \ update dloc
+    dup r@ odloc{ c}!   \ copy and update odloc
 
+    ( odloc  R: loc i )
+    newloc @ dup 15 >=
+    r@ dseen{ c}@  and
+    ( odloc newloc f  R: loc i )
+    over 2r@ drop =  or         \ newloc = dloc ?
+    ( odloc newloc f  R: loc i )
+    -rot =  or                  \ newloc = odloc ?
+    1 and  dup  r@ dseen{ c}!
+
+    2r> nip swap
+    ( i f )
+    0= if
+        drop 0 0 exit
+    then
+
+    ( i )
+    newloc @  over  dloc{ c}!
     dup 6 = if
-        drop do-pirate
+        drop
+        do-pirate
         0 0
     else
-        dup odloc{ c}@ swap dloc{ c}@ = 1 and   \ stick?
-        1                                       \ here
+        dup  odloc{ c}@  swap dloc{ c}@  =  1 and  \ stick?
+        1                                          \ here
     then
 ;
 
@@ -429,14 +438,14 @@ create stroom
     then
     ( dflag )
 
-    \ if first close encounter (of 3rd kind) kill 0, 1 or 2
+    \ if first close encounter (of 3rd kind) kill 0, 1 or 2 dwarves
     1 = if
-        newloc @ 15 < 95 pct or if
+        newloc @  15 <  95 pct  or  if
             exit
         then
         1 dflag +!
         3 1 do
-            50 pct if
+            50 pct  if
                 0  5 randint 1+  dloc{ c}!
             then
         loop
@@ -448,7 +457,7 @@ create stroom
             i odloc{ c}!
         loop
         3 speak-message
-        'AXE newloc @ drop-item
+        'AXE  newloc @  drop-item
         exit
     then
 
@@ -456,16 +465,19 @@ create stroom
     ( #attack #dtotal )
     MAXDWARF 1 do
         i dloc{ c}@ if
-            i move-dwarf rot + >r + r>
+            i move-dwarf
+            ( #attack #dtotal attack? here? )
+            rot + >r + r>
         then
     loop
+    ( #attack #dtotal )
 
     ( #attack #dtotal )
     dup 0= if
         2drop exit
     then
 
-    0 knfloc @ >= if
+    0  knfloc @  >=  if
         newloc @ knfloc !
     then
 
@@ -476,28 +488,35 @@ create stroom
     then
 
     ( #attack )
-    dup 0= if
-        drop exit
+    ?dup 0= if
+        exit
     then
 
-    0
-    dup 0 do
-        1000 randint  95 dflag @ 2 - *  <  if
-            1+
-        then
-    loop
-    swap
+    \ dflag=2 is first round of attacks, which all miss
+    \ then dflag=3 and things get dangerous
+    \ original code does rand % 1000 < 95 * (dflag-2) which seems wasteful
 
-    ( #stick #attack )
-    dflag @ 2 = if
-        1 dflag +!
+    0               \ count of hits
+    dflag @  2 =  if
+        3 dflag !
+    else
+        \ roll for the attacks
+        over 0 do
+            1000 randint  95  <  if
+                1+
+            then
+        loop
     then
 
-    dup 1 > if
+    ( #attack #stick )
+
+    over 1 > if
+        swap
         u. ." of them throw knives at you!!" cr
         6
     else
-        drop 5 speak-message
+        nip
+        5 speak-message
         52
     then
 

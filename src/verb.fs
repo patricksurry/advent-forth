@@ -545,27 +545,28 @@ create act-msg{  34 here 0pad
     then
 
     drop
+    ( )
 
     \ AXE is THROWN
     \ at a dwarf...
-
     dwarf-check ?dup if
         48
-        33 pct if
+        ( i msg )
+        33 pct  if
             drop 47
-            over 0 swap
-            ( i msg 0 i )
-            2dup dseen{ c}! dloc{ c}!
-            ( i msg )
-            dkill @ dup 1+ dkill ! 0= if
+            over 0 swap 2dup
+            ( i msg 0 i 0 i)
+            dseen{ c}! dloc{ c}!
+
+            dkill @ dup  1+ dkill !
+            0= if
                 drop 149
             then
+            ( i msg )
         then
         nip
-    then
-
     \  at a dragon...
-    'DRAGON is-at 'DRAGON prop{}@ 0= and if
+    else 'DRAGON is-at 'DRAGON prop{}@ 0= and if
         152
     \ at the troll...
     else 'TROLL is-at if
@@ -584,7 +585,7 @@ create act-msg{  34 here 0pad
         0 object !
         intransitive-verb
         exit
-    then then then
+    then then then then
 
     \ handle the left over axe...
     speak-message
@@ -963,11 +964,14 @@ create act-msg{  34 here 0pad
 
 \ itverb.c:inventory
 : just-inventory
-	98             \ message
+	98             \ default message
 	65 1 do
 	    i is-toting i 'BEAR <> and if
 			( msg )
-	        if 99 speak-message 0 then
+	        if
+				99 speak-message
+			then
+			0
 			i -1 speak-item
 	    then
 	loop

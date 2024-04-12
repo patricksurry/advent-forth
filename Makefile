@@ -31,3 +31,13 @@ data/advent_fpp.fs: src/*.fs
 
 data/%_fpp.fs: src/%.fs
 	python scripts/fpp.py --strip-whitespace --consts-inline $< -o $@
+
+excursions = $(wildcard tests/excursion*.txt)
+
+tests: $(patsubst %.txt,%.fs.log,$(excursions)) $(patsubst %.txt,%.c.log,$(excursions))
+
+%.fs.log: %.txt data/advent.rom tests/canonical.py
+	grep -v '#C' $< | grep -o '^[^#]*' | ../tali/c65/c65 -g 0xc14a -r data/advent.rom -b data/advent.blk -m 0xc000 | python tests/canonical.py > $@
+
+%.c.log: %.txt
+	grep -v '#F' $< | grep -o '^[^#]*' | ../adventure-original/src/advent | python tests/canonical.py > $@
