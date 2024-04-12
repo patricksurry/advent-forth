@@ -60,7 +60,7 @@
             'TROLL prop{}@ 1 = if
                 'TROLL 1 say-item
                 0 'TROLL prop{}!
-                reset-troll
+                troll!
                 loc@ newloc !
             else
                 loc@ 117 = if 122 else 117 then newloc !
@@ -210,7 +210,7 @@
 ;
 
 \ turn.c:doobj
-: do-object ( -- )
+: do-obj ( -- )
     object @
     dup
     fixed{ c}@ loc@ = over here? or if       \ is object here?
@@ -231,14 +231,14 @@
     then
 
     \ is it a dwarf he is after?
-    dwarf-check dflag @ 2 >= and if
+    dwarf? dflag @ 2 >= and if
         'DWARF object !
         drop obj-verb exit
     then
 
     \ is he trying to get/use a liquid?
     dup
-    bottle-liquid = 'BOTTLE here? and
+    liquid-in = 'BOTTLE here? and
     over loc@ liquid-at = or if
         drop obj-verb exit
     then
@@ -326,7 +326,7 @@
         do-move
     else
         object @ if
-            do-object
+            do-obj
         else
             just-verb
         then

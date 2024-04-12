@@ -55,7 +55,7 @@
 ;
 
 \ database.c:liq
-: bottle-liquid ( -- 'WATER | 'OIL | 0 )
+: liquid-in ( -- 'WATER | 'OIL | 0 )
     'BOTTLE prop{}@ dup 0< if
         negate 1-       \ max( prop[BOTTLE], -1 - prop[BOTTLE] )
     then
@@ -108,7 +108,7 @@
     drop-item
 ;
 
-: move-dual-item ( obj wplace wfixed -- )
+: move-2item ( obj wplace wfixed -- )
     -rot over
     ( wfixed obj wplace obj )
     swap move-item
@@ -124,7 +124,7 @@
 \     dup place{ c}@
 \     over fixed{ c}@
 \     ( obj place[obj] fixed[obj] )
-\     move-dual-item
+\     move-2item
 \  ;
 
 \ database.c:dstroy

@@ -93,7 +93,7 @@ create act-msg{  34 here 0pad
 \ verb.c:vpour
 : pour-obj ( obj -- )
     dup 'BOTTLE = over 0= or if
-        drop bottle-liquid dup object !
+        drop liquid-in dup object !
     then
     dup 0= if
         drop need-obj exit
@@ -198,7 +198,7 @@ create act-msg{  34 here 0pad
     \ Bear and troll
     dup 'BEAR = 'TROLL at? and if
         163 say-msg
-        reset-troll
+        troll!
         2 'TROLL prop{}!
     then
 
@@ -219,7 +219,7 @@ create act-msg{  34 here 0pad
     then
 
 	\ handle liquid and bottle
-	bottle-liquid
+	liquid-in
 	( obj liq )
 
 	2dup = if
@@ -360,8 +360,8 @@ create act-msg{  34 here 0pad
     'DRAGON 1 say-item
     2 'DRAGON prop{}!
     0 'RUG prop{}!
-    'DRAGON 120 NOWHERE move-dual-item
-    'RUG 120 0 move-dual-item
+    'DRAGON 120 NOWHERE move-2item
+    'RUG 120 0 move-2item
     MAXOBJ 1- 1 do
         i place{ c}@ dup  119 =  swap 121 =  or if
             i 120 move-item
@@ -450,7 +450,7 @@ create act-msg{  34 here 0pad
     'WATER <> if
         110 say-msg
     else
-        'WATER bottle-liquid <> 'BOTTLE not-here or if
+        'WATER liquid-in <> 'BOTTLE not-here or if
             say-it
         else
             1 'BOTTLE prop{}!
@@ -525,7 +525,7 @@ create act-msg{  34 here 0pad
     dup 50 >= over MAXOBJ < and 'TROLL at? and if
         159 say-msg
         0 drop-item
-        'TROLL 0 0 move-dual-item
+        'TROLL 0 0 move-2item
         'TROLL2 117 drop-item
         'TROLL2 MAXOBJ + 122 drop-item
         \ 'CHASM juggle-item            \ no-op in this version
@@ -549,7 +549,7 @@ create act-msg{  34 here 0pad
 
     \ AXE is THROWN
     \ at a dwarf...
-    dwarf-check ?dup if
+    dwarf? ?dup if
         48
         ( i msg )
         33 pct  if
@@ -603,11 +603,11 @@ create act-msg{  34 here 0pad
         closed @ if
             drop 138
         else
-            r@ 'DWARF = dwarf-check and dflag @ 2 >= and if
+            r@ 'DWARF = dwarf? and dflag @ 2 >= and if
                 drop 94
             else
                 \ ?? does short-circuit || matter?
-                r@ bottle-liquid = 'BOTTLE here? and
+                r@ liquid-in = 'BOTTLE here? and
                 r@ at? or r@ loc@ liquid-at = or if
                     drop 94
                 then
@@ -626,11 +626,11 @@ create act-msg{  34 here 0pad
 : fill-obj ( obj -- )
     case
     'BOTTLE of
-        bottle-liquid if 105
+        liquid-in if 105
         else loc@ liquid-at 0= if 106
         else
             loc@ cond{ c}@ WATOIL and 'BOTTLE prop{}!
-            bottle-liquid
+            liquid-in
             'BOTTLE toting? if
                 NOWHERE over place{ c}!
             then
@@ -683,7 +683,7 @@ create act-msg{  34 here 0pad
     dup 'WATER = over 'OIL = or if
         'BOTTLE dup object ! swap
         ( 'BOTTLE oldobj )
-        bottle-liquid <> 'BOTTLE not-here or if
+        liquid-in <> 'BOTTLE not-here or if
             'BOTTLE toting? 'BOTTLE prop{}@ 1 = and if
                 fill-obj exit
             then
@@ -725,7 +725,7 @@ create act-msg{  34 here 0pad
 	dup loc@ carry-item
 
     \  handle liquid in bottle
-    bottle-liquid swap 'BOTTLE = over 0<> and if
+    liquid-in swap 'BOTTLE = over 0<> and if
         NOWHERE swap place{ c}!
     else
         drop
@@ -811,7 +811,7 @@ create act-msg{  34 here 0pad
         i loc@ over place{ c}@ = ?add-obj
     loop
 
-    1 <> dwarf-check dflag 2 >= and or if
+    1 <> dwarf? dflag 2 >= and or if
         drop need-obj
     else
         dup object ! take-obj
@@ -844,7 +844,7 @@ create act-msg{  34 here 0pad
     0 0
     ( obj count )
 
-    dwarf-check dflag @ 2 >= and if
+    dwarf? dflag @ 2 >= and if
         'DWARF object !
     then
 
@@ -881,7 +881,7 @@ create act-msg{  34 here 0pad
 \ itverb.c:ivdrink
 : drink-it
     loc@ liquid-at 'WATER <>
-    bottle-liquid 'WATER <>
+    liquid-in 'WATER <>
     'BOTTLE not-here or and if
         need-obj
     else

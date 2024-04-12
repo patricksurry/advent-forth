@@ -124,9 +124,9 @@
     then
 ;
 
-: reset-troll
-    'TROLL 0 0 move-dual-item
-    'TROLL2 117 122 move-dual-item
+: troll!
+    'TROLL 0 0 move-2item
+    'TROLL2 117 122 move-2item
     \ 'CHASM juggle-item    \ no-op in this version
 ;
 
@@ -163,7 +163,7 @@ create stroom
         MAXDWARF 1 do
             0 i dseen{ c}!
         loop
-        reset-troll
+        troll!
         3 'BEAR prop{}@ <> if
             'BEAR destroy-item
         then
@@ -266,7 +266,7 @@ create stroom
 
 \ check for presence of dwarves..
 \ database.c:dcheck
-: dwarf-check ( -- i|0 )
+: dwarf? ( -- i|0 )
     loc @  0
     MAXDWARF 1- 1 do
         ( loc 0 )
