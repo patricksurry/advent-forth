@@ -1782,7 +1782,8 @@
         ],
         "11": [
             "*Snake",
-            "A huge green fierce snake bars the way!"
+            "A huge green fierce snake bars the way!",
+            ""
         ],
         "12": [
             "*Fissure",
@@ -1807,12 +1808,8 @@
             "\"Spelunker Today\"",
             "There are a few recent issues of \"Spelunker Today\" magazine\nhere."
         ],
-        "17": [
-            ""
-        ],
-        "18": [
-            ""
-        ],
+        "17": [],
+        "18": [],
         "19": [
             "Tasty food",
             "There is tasty food here."
@@ -1830,7 +1827,8 @@
             "Oil in the bottle"
         ],
         "23": [
-            "*Mirror"
+            "*Mirror",
+            ""
         ],
         "24": [
             "*Plant",
@@ -1848,7 +1846,8 @@
             "There is a huge beanstalk growing out of the west pit up to\nthe hole."
         ],
         "26": [
-            "*Stalactite"
+            "*Stalactite",
+            ""
         ],
         "27": [
             "*Shadowy figure",
@@ -1860,10 +1859,12 @@
             "There is a little axe lying beside the bear."
         ],
         "29": [
-            "*Cave drawings"
+            "*Cave drawings",
+            ""
         ],
         "30": [
-            "*Pirate"
+            "*Pirate",
+            ""
         ],
         "31": [
             "*Dragon",
@@ -1879,23 +1880,27 @@
         "33": [
             "*Troll",
             "A burly troll stands by the bridge and insists you throw\nhim a treasure before you may cross.",
-            "The troll steps out from beneath the bridge and blocks\nyour way."
+            "The troll steps out from beneath the bridge and blocks\nyour way.",
+            ""
         ],
         "34": [
             "*Phony troll",
             "The troll is nowhere to be seen."
         ],
         "35": [
+            "",
             "There is a ferocious cave bear eyeing you from the far\nend of the room!",
             "There is a gentle cave bear sitting placidly in one corner.",
-            "There is a contented-looking bear wandering about nearby."
+            "There is a contented-looking bear wandering about nearby.",
+            ""
         ],
         "36": [
             "*Message in second maze",
             "There is a message scrawled in the dust in a flowery script,\nreading:\n           \"This is not the maze where the\"\n           \"pirate leaves his treasure chest\""
         ],
         "37": [
-            "*Volcano and,or Geyser"
+            "*Volcano and,or Geyser",
+            ""
         ],
         "38": [
             "*Vending machine",
@@ -1907,35 +1912,18 @@
             "Some worn-out batteries have been discarded nearby."
         ],
         "40": [
-            "*Carpet and,or moss"
-        ],
-        "41": [
+            "*Carpet and,or moss",
             ""
         ],
-        "42": [
-            ""
-        ],
-        "43": [
-            ""
-        ],
-        "44": [
-            ""
-        ],
-        "45": [
-            ""
-        ],
-        "46": [
-            ""
-        ],
-        "47": [
-            ""
-        ],
-        "48": [
-            ""
-        ],
-        "49": [
-            ""
-        ],
+        "41": [],
+        "42": [],
+        "43": [],
+        "44": [],
+        "45": [],
+        "46": [],
+        "47": [],
+        "48": [],
+        "49": [],
         "50": [
             "Large gold nugget",
             "There is a large sparkling nugget of gold here!"

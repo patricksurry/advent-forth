@@ -293,11 +293,11 @@ create stroom
     then
 ;
 
-: stealable ( i -- f )
+: loot? ( i -- f )
     'PYRAMID <>
-    newloc @ dup 'PYRAMID place{ c}@ <>
-    swap 'EMERALD place{ c}@ <>
-    and or
+        newloc @ dup  'PYRAMID place{ c}@  <>
+        swap  'EMERALD place{ c}@  <>  and
+    or
 ;
 
 : put-chloc ( -- )
@@ -317,7 +317,7 @@ create stroom
     'MESSAGE chloc2 @ move-item
 
     MAXTRS 1+ 50 do
-        i stealable if
+        i loot? if
             i at? i fixed{ c}@ 0= and if
                 i newloc @ carry-item
             then
@@ -338,14 +338,13 @@ create stroom
     then
 
     0
-    MAXTRS 50 do
-        i stealable if
+    MAXTRS 1+ 50 do
+        i loot? if
             i toting? if
-                drop stealit exit
+                drop stealit
+                unloop exit
             then
-            i here? if
-                1+
-            then
+            i here? 1 and +
         then
     loop
     ( #treasure )

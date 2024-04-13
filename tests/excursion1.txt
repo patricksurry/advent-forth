@@ -1,0 +1,68 @@
+NO          # no instructions
+ENTER
+GET KEYS
+GET LAMP
+W
+S
+S
+S
+UNLOCK GRATE
+D
+W
+ON
+GET CAGE
+W
+W
+W
+GET BIRD
+W
+D
+S
+GET GOLD
+GET AXE     #F
+N
+N
+DROP BIRD
+S           #F          deal with the dwarf
+THROW AXE   #F
+GET AXE     #F
+THROW AXE   #F
+GET AXE     #F
+THROW AXE   #F
+GET AXE     #F
+N           #F
+DROP CAGE
+DROP KEYS
+S
+GET AXE     #C
+GET JEWELRY
+N
+SW
+W
+KILL DRAGON
+YES
+GET RUG
+E
+E
+W
+GET COINS
+E
+N
+THROW AXE   #C
+GET AXE     #C
+THROW AXE   #C
+GET AXE     #C
+GET SILVER
+N
+OFF
+PLUGH
+DROP GOLD
+DROP JEWELRY
+# DROP COINS
+DROP SILVER
+DROP RUG
+GET BOTTLE
+INVENTORY
+SCORE
+SAVE
+shutdown    #F

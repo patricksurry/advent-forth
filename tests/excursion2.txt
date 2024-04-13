@@ -1,0 +1,104 @@
+NO
+RESTORE
+INVENTORY
+PLUGH
+ON
+S
+S
+SW
+W
+N
+D
+S
+D
+POUR WATER
+U
+W
+U
+N
+N
+GET WATER
+S
+S
+D
+S
+D
+POUR WATER
+U
+E
+D
+GET OIL
+U
+THROW AXE   #F
+GET AXE     #F
+W
+D
+CLIMB PLANT
+W
+N
+POUR OIL
+DROP BOTTLE
+N
+GET TRIDENT
+W
+D
+SE
+THROW AXE  # C
+GET AXE    # C
+THROW AXE  # C
+GET AXE    # C
+N
+W
+DROP TRIDENT
+DROP LAMP
+DROP AXE
+E
+GET EMERALD
+W
+GET AXE
+GET LAMP
+GET TRIDENT
+NW
+S
+GET VASE
+SE
+E
+GET PILLOW
+W
+NE
+E
+# If the pirate has relieved you of the trident (INVENTORY to check), RESTORE (CALH0000: QUIT and restart with ADVENT -R; RAUS0350 reboot then RESTORE) last SAVEd position (you did SAVE, right?) and try again.
+N
+OPEN CLAM
+D
+D
+GET PEARL
+U
+U
+S
+U
+E
+U
+N
+OFF
+PLUGH
+DROP EMERALD
+DROP TRIDENT
+DROP PEARL
+DROP PILLOW     # Make sure you drop the pillow before the vase.
+DROP VASE
+PLUGH
+ON
+PLOVER
+NE
+GET PYRAMID
+S
+PLOVER
+OFF
+PLUGH
+DROP PYRAMID
+GET FOOD
+INVENTORY
+SCORE
+SAVE
+shutdown    #F

@@ -1,5 +1,6 @@
 ## TODO
 
+- real kernel should increment rand16 l/h (skip 0) on peekc busy loop
 - automate walkthrus from https://www.mipmip.org/dev/IFrescue/ajf/Universal350.html
 - add hint excursion
 - run tester.fs on all the words in the object array
@@ -13,8 +14,7 @@
 
 ## KNOWN ISSUES
 
-- do-pirate broken in excursion2
-- \*Plant in excursion2
+- skip empty string entirely in say-item
 - score doesn't discount hinted{
 
 ## WHAT'S WHAT

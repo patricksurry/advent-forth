@@ -120,7 +120,7 @@ print(f"{fname} n={len(travel)} maxdir={max(len(cave) for cave in travel)} maxva
 #from collections import Counter
 #print(dict(sorted(Counter(d for dirs in travel for (t,d,v,m,c) in dirs).items())))
 
-items = [chunk.strip().strip('/').split('/') for chunk in text['items']]
+items = [chunk.strip().split('/')[1:-1] for chunk in text['items']]
 items = [[s.rstrip() for s in states] for states in items]
 print(f"items n={len(items)} maxstate={max(len(ds) for ds in items)} "
     f"maxlen={max(len(d) for d in sum(items, []))}")

@@ -107,13 +107,15 @@ create act-msg{  34 here 0pad
     1 'BOTTLE prop{}!
     0 over place{ c}!
 
+    ( obj )
     'PLANT at? if
         dup 'WATER <> if
             112 say-msg
         else
-            'PLANT dup prop{}@ swap over 1+ say-item
-            2 + 6 mod dup 'PLANT prop{}!
-            2/ 'PLANT2 prop{}@
+            'PLANT dup prop{}@ 1+
+            tuck say-item                   \ say 'PLANT prop+1
+            1+ 6 mod  dup  'PLANT prop{}!   \ update to prop+2 % 6
+            2/ 'PLANT2 prop{}!              \ other to half that
             desc-loc
         then
     else
@@ -208,12 +210,11 @@ create act-msg{  34 here 0pad
             54 say-msg
         else
             'PILLOW at? if 0 else 2 then
-            'VASE prop{}!
-            'VASE dup prop{}@ dup -rot 1+
-            ( prop[VASE] VASE prop[VASE]+1 )
-            say-msg
+            ( obj prop )
+            2dup swap prop{}!
+            2dup 1+ say-item
             if
-                NOWHERE 'VASE fixed{ c}!
+                NOWHERE over fixed{ c}!
             then
         then
     then
@@ -983,7 +984,7 @@ create act-msg{  34 here 0pad
 
 : save
     63 turns blk-write
-    ." Saved game." cr
+    ." Game saved." cr
     abort
 ;
 

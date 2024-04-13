@@ -289,7 +289,7 @@
         then
 
         \ wandering in the dark?
-        wzdark @ dark? and 35 pct and if
+        wzdark @  dark? and  35 pct  and if
             23 say-msg
             loc@ oldloc2 !
             death

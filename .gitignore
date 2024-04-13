@@ -9,3 +9,4 @@ scripts/alice.dzy
 scripts/alice.wzy
 scripts/corpus.asc
 c65-*.dat
+tests/excursion*log
