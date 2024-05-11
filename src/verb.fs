@@ -70,7 +70,7 @@ create act-msg{  34 here 0pad
             39 say-msg
             wzdark @ if
                 0 wzdark !
-                desc-loc
+                describe
             then
         then
     else
@@ -116,7 +116,7 @@ create act-msg{  34 here 0pad
             tuck say-item                   \ say 'PLANT prop+1
             1+ 6 mod  dup  'PLANT prop{}!   \ update to prop+2 % 6
             2/ 'PLANT2 prop{}!              \ other to half that
-            desc-loc
+            describe
         then
     else
         'DOOR at? if
@@ -182,8 +182,9 @@ create act-msg{  34 here 0pad
     \ coins and vending machine
     dup 'COINS = 'VEND here? and if
         destroy-item
-    	'BATTERIES dup loc@ drop-item
-    	say-item
+    	'BATTERIES dup
+            loc@ drop-item
+            0 say-item
     	exit
     then
 
@@ -523,7 +524,7 @@ create act-msg{  34 here 0pad
     then
 
     \ treasure to troll
-    dup 50 >= over MAXOBJ < and 'TROLL at? and if
+    dup 50 >=  over MAXOBJ <  and  'TROLL at?  and if
         159 say-msg
         0 drop-item
         'TROLL 0 0 move-2item
@@ -591,7 +592,7 @@ create act-msg{  34 here 0pad
     \ handle the left over axe...
     say-msg
     'AXE loc@ drop-item
-    desc-loc
+    describe
 ;
 
 \ INVENTORY, FIND etc.
@@ -991,6 +992,7 @@ create act-msg{  34 here 0pad
 : load
     63 turns blk-read
     ." Restored game." cr
+    describe
 ;
 
 'CALM      ' say-obj       ' need-obj    14     act!

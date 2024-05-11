@@ -1,0 +1,120 @@
+NO
+RESTORE
+INVENTORY
+GET GOLD
+# You should be carrying the lamp, axe and food.
+PLUGH
+ON
+S
+S
+GET KEYS
+SW
+W
+N
+D
+S
+D
+CLIMB PLANT
+W
+GET EGGS    # If the eggs are not here, FEE, FIE, FOE, FOO recalls them.
+N
+N
+W
+D
+SW
+U
+# If the pirate managed to relieve you of the eggs, return to the Giant Room and do FEE, FIE, FOE, FOO.
+# In some variants, say GIVE EGGS TO TROLL.
+# In NELS0350 and descendants, the troll is not waiting at the bridge. NE draws him out.
+#
+THROW EGGS
+NE
+NE
+E
+NE
+E
+GET SPICES
+# If you wish, you can detour N briefly from the Warm Walls Room to take in the Breath-Taking View. It's quite, umm, breath-taking.
+N
+S
+W
+S
+SE
+S
+E
+# Guess all that growling was coming from the bear's stomach.
+FEED BEAR
+UNLOCK CHAIN
+DROP KEYS
+GET CHAIN
+GET BEAR
+W
+W
+N
+W
+W
+SW
+# Looks like the troll finds your friend un-bear-able.
+DROP BEAR
+SW
+SW
+D
+SE
+SE
+W
+W
+D
+CLIMB PLANT
+W
+FEE
+FIE
+FOE
+FOO
+# Hey, you just climbed up a giant beanstalk. You were expecting Andre the Giant, maybe?
+GET EGGS
+S
+D
+U
+W
+U
+S
+E
+E
+W
+W
+W
+E
+E
+GET DIAMONDS
+W
+# If the pirate hasn't yet shown up to relieve you of your treasures, just WAIT repeatedly until he does. Now we can go get our treasures back.
+# One variant offers a shorter route to the Pirate's chest: S,E,S,N.
+S
+E
+S
+S
+S
+N
+E
+E
+NW
+# Repeat GET <TREASURE> and DROP <TREASURE>once for each treasure (in some variants you can simply say GET ALL).
+# If there are too many treasures to carry, get what you can now. You can return later for the rest.
+GET COINS
+GET CHEST
+SE
+N
+D
+E
+E
+OFF
+XYZZY
+DROP GOLD
+DROP DIAMONDS
+DROP COINS
+DROP CHEST
+DROP CHAIN
+INVENTORY
+SCORE
+SAVE
+shutdown    #F

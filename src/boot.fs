@@ -28,7 +28,7 @@ ADVDAT {data_start} {data_blocks} 1- 10 lshift + {data_tail} move
 {data_blk} ADVDAT {data_blocks} 1- blk-read-n
 
 \ save turnkey entry point and dump image
-' main $7e !
+' main $fff8 !
 64 0 64 blk-write-n
 
 main

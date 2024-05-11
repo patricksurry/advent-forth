@@ -57,22 +57,28 @@
         endof
 
         3 of        \ troll bridge
+            ." troll bridge " .s cr  \ TODO
             'TROLL prop{}@ 1 = if
                 'TROLL 1 say-item
                 0 'TROLL prop{}!
                 troll!
                 loc@ newloc !
             else
-                loc@ 117 = if 122 else 117 then newloc !
+                loc@ 117 = if
+                    122
+                else
+                    117
+                then
+                newloc !
                 'TROLL prop{}@ 0= if
-                    1 prop{}!
+                    1 'TROLL prop{}!
                 then
                 'BEAR toting? if
                     162 say-msg
                     1 'CHASM prop{}!
                     2 'TROLL prop{}!
                     'BEAR newloc @ drop-item
-                    NOWHERE 'BEAR fixed{ c}@
+                    NOWHERE 'BEAR fixed{ c}!
                     3 'BEAR prop{}!
                     'SPICES prop{}@ 0< if
                         1 tally2 +!
@@ -283,7 +289,7 @@
             death exit
         then
         forced? if                \ forced moved?
-            desc-loc
+            describe
             do-move
             exit
         then
@@ -296,7 +302,7 @@
             exit
         then
 
-        desc-loc
+        describe
 
         dark? 0= if
             true loc@ visited{ c}!

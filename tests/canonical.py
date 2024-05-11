@@ -10,11 +10,15 @@ for line in sys.stdin:
         prev = line[2:]
         continue
 
-#    if line.startswith('#') or 'c65:' in line:
-#        continue
+    # strip debug info
+    if line.startswith('#') or 'c65:' in line:
+        continue
 
-    if not line.startswith('>') and (prev or len(line) > 49):
-        prev += ' ' + line
+    if not line.startswith('>') and (prev or (len(line) > 49 and line[-1] not in '!.')):
+        if prev:
+            prev += ' ' + line
+        else:
+            prev = line
         continue
 
     if prev:

@@ -1,0 +1,34 @@
+NO
+RESTORE
+GET COINS
+INVENTORY
+XYZZY
+ON
+GET ROD
+W
+W
+W
+D
+W
+WAVE ROD
+DROP ROD
+W
+W
+W
+W
+S   # S takes you into the maze. Follow the steps from here carefully, or you'll wind up hopelessly lost.
+U
+U
+S
+DROP COINS
+GET BATTERIES
+N
+SE
+N
+D
+E
+E
+INVENTORY
+SCORE
+SAVE
+shutdown    #F

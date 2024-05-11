@@ -32,7 +32,7 @@
 \     ( d' v c' )
 \ ;
 
-\ describe 1-indexed location as long or short version
+\ show long or short description of 1-indexed location
 \ database.c:desclg,descsh
 : say-loc ( i flag-long -- )
     swap cave& swap
@@ -59,7 +59,7 @@
 ;
 
 \ turn.c:describe
-: desc-loc ( -- )               \ describe current location
+: describe ( -- )               \ describe current location
     'BEAR toting? if
         141 say-msg
     then

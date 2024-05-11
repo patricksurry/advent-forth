@@ -1,21 +1,30 @@
 ## TODO
 
+- update this README, split out TODO.md
 - real kernel should increment rand16 l/h (skip 0) on peekc busy loop
-- automate walkthrus from https://www.mipmip.org/dev/IFrescue/ajf/Universal350.html
-- add hint excursion
-- run tester.fs on all the words in the object array
+- tests:
 
-- stack depth check cost?
-- make defs an init function so we can restart (advent.c:initplay)
-- could save about 300 bytes by shortening all words to max 6 chars, about 650 to 2char (unreadable)
+  - end game from https://www.mipmip.org/dev/IFrescue/ajf/Universal350.html
+  - hint excursion
+  - automate tester.fs over all the words in the object array in Makefile
 
-- split out dizzy to separate repo; optional decomp w/o wrap
-- how does dizzy do compressing forth?
+- decompress:
+
+  - avoid trailing NL
+  - split out dizzy to separate repo; optional decomp w/o wrap
+  - how does dizzy do compressing forth?
+
+- further optimization possibilities:
+  - redo the bliteral/literal to share runtime
+  - stack depth check cost?
+  - could save about 300 bytes by shortening all words to max 6 chars, about 650 to 2char (unreadable)
 
 ## KNOWN ISSUES
 
-- skip empty string entirely in say-item
+- skip empty string entirely in say-item. could avoid trailing NL in core decompress and then add one if source wasn't empty
 - score doesn't discount hinted{
+- batteries are broken in C, not sure complete in Forth
+- fee fie foe foo not working?
 
 ## WHAT'S WHAT
 
