@@ -65,4 +65,4 @@ GET BOTTLE
 INVENTORY
 SCORE
 SAVE
-shutdown    #F
+bye    #F

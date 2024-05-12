@@ -31,4 +31,4 @@ E
 INVENTORY
 SCORE
 SAVE
-shutdown    #F
+bye    #F
