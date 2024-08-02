@@ -1,0 +1,12 @@
+NO
+S
+S
+S
+SCORE
+UNLOCK
+LOOK
+YES
+YES
+QUIT
+YES
+bye     #F
