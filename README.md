@@ -1,7 +1,17 @@
+## KNOWN ISSUES
+
+- skip empty string entirely in say-item. could avoid trailing NL in core decompress and then add one if source wasn't empty
+
+- batteries are broken in C, not sure complete in Forth
+
+- fee fie foe foo not working?
+
 ## TODO
 
 - update this README, split out TODO.md
+
 - real kernel should increment rand16 l/h (skip 0) on peekc busy loop
+
 - tests:
 
   - end game from https://www.mipmip.org/dev/IFrescue/ajf/Universal350.html
@@ -10,7 +20,6 @@
 
 - decompress:
 
-  - avoid trailing NL
   - split out dizzy to separate repo; optional decomp w/o wrap
   - how does dizzy do compressing forth?
 
@@ -19,14 +28,7 @@
   - stack depth check cost?
   - could save about 300 bytes by shortening all words to max 6 chars, about 650 to 2char (unreadable)
 
-## KNOWN ISSUES
-
-- skip empty string entirely in say-item. could avoid trailing NL in core decompress and then add one if source wasn't empty
-- score doesn't discount hinted{
-- batteries are broken in C, not sure complete in Forth
-- fee fie foe foo not working?
-
-## WHAT'S WHAT
+## HOW IT WORKS
 
 There are a lot of moving parts here.
 
