@@ -16,7 +16,7 @@ ADVDAT here - . s" bytes remain before ADVDAT" type CR
 .s cr       \ stack should be empty after evaluate
 
 ' prop{{ turns -
-s" Save/restore state " type u. s" bytes" type CR
+s" Save/restore state " type u. s" bytes" type CR  \ should be < 1024
 
 \ now we have space to load data...
 
@@ -29,6 +29,8 @@ ADVDAT {data_start} {data_blocks} 1- 10 lshift + {data_tail} move
 
 \ save turnkey entry point and dump image
 ' main $fff8 !
+\ bump reset vector +3 to do warm start
+$fffc @ 3 + $fffc !
 64 0 64 blk-write-n
 
 main

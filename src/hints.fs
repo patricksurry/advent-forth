@@ -21,6 +21,17 @@ create hints{
     2 lshift hints{ +
 ;
 
+: hint-cost ( -- n )
+    0  hinted c@
+    MAXHINT 0 do
+        dup 1 and if
+            swap  i hintp COST c}@ +  swap
+        then
+        1 rshift
+    loop
+    drop
+;
+
 : offer-hint ( hint0 -- )
     dup hintp
     dup ASK c}@ 0 54 yes-no if

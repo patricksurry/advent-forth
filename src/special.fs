@@ -6,17 +6,16 @@
         i prop{}@ 0 >= if
             2 +
         then
-        i 'CHEST = if
-            12 \ 14 - 2
-        else i 'CHEST > if
-            14 \ 16 - 2
-        else
-            10 \ 12 - 2
-        then then
         i place{ c}@  3 =  i prop{}@  0=  and if
+            \ add 12, 14 or 16 minus 2
+            \ depending if i <, = or > 'CHEST
+            i 'CHEST -
+            ?dup 0= if
+                12
+            else
+                0> if 14 else 10 then
+            then
             +
-        else
-            drop
         then
     loop
     ( s t )
@@ -25,6 +24,12 @@
     MAXDIE numdie @ - 10 *
     ?dup if
         ."        Survival: " dup u. cr
+        +
+    then
+    ( s )
+    hint-cost ?dup 0<> if
+        negate
+        ."           Hints: " dup . cr
         +
     then
     ( s )

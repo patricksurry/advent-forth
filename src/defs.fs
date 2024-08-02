@@ -3,7 +3,7 @@
 65  constant MAXOBJ     \ max # of objects in cave
 140 constant MAXLOC     \ max # of cave locations
 3   constant MAXDIE     \ max resurrections
-79  constant MAXTRS     \ number of scored treasures
+64  constant MAXTRS     \ treasures are 50..MAXTRS (aka 'CHAIN)
 7   constant MAXDWARF   \ number of dwarves
 
 \ vocabulary word types
@@ -94,7 +94,7 @@ $ff constant NOWHERE
 38  constant 'VEND
 39  constant 'BATTERIES
 
-\ fixed locations
+\ fixed locations (treasures)
 50  constant 'NUGGET
 54  constant 'COINS
 55  constant 'CHEST
@@ -124,7 +124,7 @@ variable motion
 2variable 2verb
 2variable 2other
 
-\ turns is the save/load mark, need prop{ MAXOBJ  1+ + turns - <= 1024
+\ turns is the save/load mark, need prop{  MAXOBJ 1+ +  turns - <= 1024
 
 variable turns   0 turns   !
 variable wzdark  0 wzdark  !

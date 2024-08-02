@@ -326,7 +326,8 @@
 
     begin english until     \ retrieve player instructions
 
-    ." # loc " loc@ . ."  verb " verb @ . ."  obj " object @ . ."  motion " motion @ . .s CR
+    \ debugging
+    \ ." # loc " loc@ . ."  verb " verb @ . ."  obj " object @ . ."  motion " motion @ . .s CR
 
     motion @ if             \ execute player instructions
         do-move
