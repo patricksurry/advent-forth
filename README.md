@@ -1,8 +1,57 @@
+This is a 65c02 Forth port of Crowther & Wood's [Colossal Cave Adventure](https://en.wikipedia.org/wiki/Colossal_Cave_Adventure) targeting a 64K system with 48K of RAM and 16K of ROM.
+You can play the
+[64K memory image](data/advent.rom) using a simulator like
+[c65](https://github.com/SamCoVT/TaliForth2/tree/master-64tass/c65)
+or [py65mon](https://github.com/mnaberez/py65)
+or adapt the code for your own hardware.
+
+I started from [Wiberg's C-port](https://github.com/troglobit/adventure) with some later
+adaptations and fixes from [Gillogly's earlier C-port](https://www.ifarchive.org/indexes/if-archive/games/source/)
+which contains some more direct translation of the original(?) FORTRAN code.
+Other useful references were [Raymond's Open Adventure](https://gitlab.com/esr/open-adventure) and
+and the [Universal Adventure 350 Walkthrough](https://www.mipmip.org/dev/IFrescue/ajf/Universal350.html).
+
+The main challenge was size, given the 64K target:  the original `glorkz` data file that
+drives the game is already 56K before adding any logic.
+Wiberg's port extracts most string data to `advent?.txt`
+which weigh in at 47K but also embeds some data in the source files.
+
+I first created some scripts to extract and reorganize the cave description,
+connectivity and object data and then compress it using some simple preprocessing
+followed by a recursive digram coding scheme.
+The compression ratio is about 50% compression resulting
+in binary data file of about 27K in `data/advent.dat`.
+The two stage decompression was straightforward to implement in assembly,
+though I used a streaming approach to avoid the need for fixed size buffers in memory.
+Space is tight!
+See [scripts/README.md](scripts/README.md) for more details
+
+Compression left about 37K for the Forth core and the ported source code.
+I started with [TaliForth2](https://github.com/SamCoVT/TaliForth2) which
+originally wanted about 24K within a 32K ROM image.  With some adaption
+I settled on a "minimal" build that halved that, using about 12K
+within 16K of ROM.  This left space for a few assembler extensions like
+decompression and various kernel routines, with 2-3K of ROM free.
+
+The remaining 21K RAM budget (48K - 27K of data) was tight but doable for the game code.
+The raw Forth source is nearly 64K of ascii text, but compacts to about 27K
+with some light pre-processing to inline constants and strip comments and excess whitespace
+(see [scripts/fpp.py](fpp.py)).
+
+A little dance then ensues to build the game image.   The source is compacted
+and written to a block device image, along with the binary data file.
+A tiny forth bootloader reads the source
+into high memory from the block device and compiles it, using about 19K.
+The source is discarded and the data file is written above the code
+aligned with the end of RAM.   The loader then updates a turnkey startup
+address and dumps the entire 64K back to the block device.
+This lets us play from the memory image directly in a simulator without a block device,
+or read a pre-compiled image from block storage.
+
+
 ## KNOWN ISSUES
 
-- skip empty string entirely in say-item. could avoid trailing NL in core decompress and then add one if source wasn't empty
-
-- batteries are broken in C, not sure complete in Forth
+- batteries are broken in C, not sure if they're complete in Forth
 
 - fee fie foe foo not working?
 
@@ -80,25 +129,3 @@ Older was running with pymon (lacks block device for startup)
 
       py65mon -m 65c02 -i c004 -o c001 -b forth/advent.mon
 
-Tali word list
-
-drop dup swap ! @ over >r r> r@ nip rot
--rot tuck , c@ c! +! execute emit type . u. u.r .r d. d.r ud. ud.r ? false
-true space 0 1 2 2dup ?dup + - 1- 1+ 2* 2/ abs dabs and or xor rshift lshift
-pick char [char] char+ chars cells cell+ here = <> < u< u> > 0= 0<> 0> 0< min
-max 2drop 2swap 2over 2! 2@ 2variable 2constant 2literal 2r@ 2r> 2>r invert
-negate dnegate c, bounds spaces bl -trailing -leading /string refill accept
-input>r r>input unused depth key allot create does> variable constant value
-to s>d d>s d- d+ erase blank fill find-name ' ['] name>int int>name
-name>string >body defer latestxt latestnt parse-name parse execute-parsing
-source source-id : ; :noname compile, [ ] literal sliteral ." s" s\" postpone
-immediate compile-only never-native always-native allow-native nc-limit
-strip-underflow abort abort" do ?do i j loop +loop exit unloop leave recurse
-quit begin again state evaluate base digit? number >number hex decimal count
-m* um\* _ um/mod sm/rem fm/mod / /mod mod _/mod \*/ \ move cmove> cmove pad
-cleave hexstore within >in <# # #s #> hold sign output input cr page at-xy
-marker words wordsize aligned align bell dump .s compare search find word (
-.( if then else repeat until while case of endof endcase defer@ defer! is
-action-of useraddr buffer: buffstatus buffblocknum blkbuffer scr blk
-block-write block-write-vector block-read block-read-vector save-buffers
-block update buffer empty-buffers flush load thru list see cold bye ok

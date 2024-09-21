@@ -1,31 +1,40 @@
+\ Bootstrap forth source and adventure data to create turnkey image.
+\ Block device image contains the preprocessed source and data blob
+\ with pre-calculated data pointers
+\ Our job is to:
+\ - read the source code as a string and evaluate it;
+\ - move the binary data into place;
+\ - update the turnkey entry point and reset vector;
+\ - dump the memory image back to the block device;
+\ - start the game
+
+
 \ define data pointers
 ${data_start:04x} constant ADVDAT
 {consts}
 
 \ load and compile forth source
 {forth_blk} $4000 {forth_blocks} blk-read-n
-\ count length to nul
-$4000 {forth_len} dup
-s" Compiling " type u. s" bytes ... " type CR
-here -rot
+here $4000 {forth_len}
 ( at addr n )
+here
+s" Compiling {forth_len} bytes ... " type cr
+here - allot    \ drop the string
 evaluate
-here swap -
-s" ... used " type u. s" bytes" type CR
-ADVDAT here - . s" bytes remain before ADVDAT" type CR
-.s cr       \ stack should be empty after evaluate
+here dup rot -
+( cp len )
+s" ... used " type u. s" bytes" type cr
+ADVDAT here - . s" bytes remain before ADVDAT" type cr
 
 ' prop{{ turns -
-s" Save/restore state " type u. s" bytes" type CR  \ should be < 1024
+s" Save/restore state " type u. s" bytes; must be <1024" type cr
+here - allot    \ drop strings
+.s cr           \ stack should be empty
 
 \ now we have space to load data...
-
-\ copy last block first and move tail up 1024*(blks-1) to avoid overwriting "ROM"
-{data_blk} {data_blocks} + 1- ADVDAT blk-read
-ADVDAT {data_start} {data_blocks} 1- 10 lshift + {data_tail} move
-
-\ then read the remaining whole blocks
-{data_blk} ADVDAT {data_blocks} 1- blk-read-n
+\ read data blocks to ADVDAT rounded down to a whole block since
+\ the data is 'right-aligned' to the end of the last block
+{data_blk} ADVDAT $fc00 and {data_blocks} blk-read-n
 
 \ save turnkey entry point and dump image
 ' main $fff8 !

@@ -4,6 +4,7 @@ alice.gz
 alice.txt
 data/advent.blk
 data/advent.dat
+data/boot_advent.fs
 *_fpp*.fs
 scripts/alice.dzy
 scripts/alice.wzy
