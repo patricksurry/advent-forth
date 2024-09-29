@@ -984,13 +984,13 @@ create act-msg{  34 here 0pad
 ;
 
 : save
-    63 turns blk-write
+    turns 63 block-write
     ." Game saved." cr
     abort
 ;
 
 : load
-    63 turns blk-read
+    turns 63 block-read
     ." Restored game." cr
     describe
 ;

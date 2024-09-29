@@ -14,7 +14,7 @@ ${data_start:04x} constant ADVDAT
 {consts}
 
 \ load and compile forth source
-{forth_blk} $4000 {forth_blocks} blk-read-n
+$4000 {forth_blk} {forth_blocks} block-read-n
 here $4000 {forth_len}
 ( at addr n )
 here
@@ -37,17 +37,17 @@ here - allot    \ drop strings
 
 \ read first block and shuffle the data down to
 \ avoid overwriting code with padding if we're tight
-{data_blk} ADVDAT blk-read
+ADVDAT {data_blk} block-read
 ADVDAT dup $fc00 and -          \ calculate leading space in first block
 $400 over -                     \ data size in first block
 swap ADVDAT + ADVDAT rot move   \ move data down
 \ read remaining blocks
-{data_blk} 1+ ADVDAT $fc00 and $400 + {data_blocks} 1- blk-read-n
+ADVDAT $fc00 and $400 +  {data_blk} 1+  {data_blocks} 1-  block-read-n
 
 \ save turnkey entry point and dump image
 ' main $fff8 !
 \ bump reset vector +3 to do warm start
 $fffc @ 3 + $fffc !
-64 0 64 blk-write-n
+0 64 64 block-write-n
 
 main
