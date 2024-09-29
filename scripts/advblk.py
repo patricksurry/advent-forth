@@ -7,6 +7,8 @@ from struct import unpack_from, pack
 from warnings import warn
 from itertools import accumulate
 
+hi_mem = 0xbc00   # ram_end + 1
+
 def nblocks(d):
     return (len(d) - 1) // 1024 + 1
 
@@ -33,7 +35,7 @@ data_blocks = nblocks(data)
 forth_blk = 1
 data_blk = forth_blk + forth_blocks
 
-data_start = 0xc000 - len(data)
+data_start = hi_mem - len(data)
 
 addrs = [data_start + off for off in [0] + offsets[:-1]]
 consts = '\n'.join([
@@ -41,7 +43,7 @@ consts = '\n'.join([
     for addr, section in zip(addrs, sections)
 ])
 
-if 0x4000 + len(forth) > 0xc000:
+if 0x4000 + len(forth) > hi_mem:
     warn("Forth code @ $4000 overlaps IO space")
 
 # read the boot template after fpp pre-processing

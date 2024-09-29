@@ -9,20 +9,20 @@ clean:
 rom: build data/advent.rom
 
 runtime:
-	cd ../micro-colossus && $(MAKE)
+	cd ../micro-colossus && $(MAKE) ucs.rom
 
 data/advent.rom: data/advent.blk
 	dd bs=1024 skip=64 count=64 if=data/advent.blk > $@
 
 build: data/advent.blk runtime
 	echo 'no\nquit\ny\nbye' | \
-	$(C65) -r ../micro-colossus/colossus.rom -m 0xc000 -b $<
+	$(C65) -r ../micro-colossus/ucs.rom -m 0xff00 -b $<
 
 play: data/advent.rom
-	$(C65) -r data/advent.rom -m 0xc000
+	$(C65) -r data/advent.rom -m 0xff00
 
 debug: data/advent.rom
-	$(C65) -r data/advent.rom -m 0xc000 -l ../micro-colossus/colossus.lst -gg
+	$(C65) -r data/advent.rom -m 0xff00 -l ../micro-colossus/ucs.sym -gg
 
 data/advent.blk: scripts/advblk.py data/boot_fpp.fs data/advent_fpp.fs data/advent.dat
 	$(PYTHON) scripts/advblk.py
@@ -46,7 +46,7 @@ tests: $(patsubst %.txt,%.fs.log,$(excursions)) $(patsubst %.txt,%.c.log,$(excur
 
 %.fs.log: %.txt .FORCE
 	grep -v '#C' $< | sed -E 's/ *(#.*)?$$//' | \
-	$(C65) -r data/advent.rom -b data/advent.blk -m 0xc000 | \
+	$(C65) -r data/advent.rom -b data/advent.blk -m 0xff00 | \
 	$(PYTHON) tests/canonical.py > $@
 
 %.c.log: %.txt .FORCE

@@ -34,7 +34,15 @@ here - allot    \ drop strings
 \ now we have space to load data...
 \ read data blocks to ADVDAT rounded down to a whole block since
 \ the data is 'right-aligned' to the end of the last block
-{data_blk} ADVDAT $fc00 and {data_blocks} blk-read-n
+
+\ read first block and shuffle the data down to
+\ avoid overwriting code with padding if we're tight
+{data_blk} ADVDAT blk-read
+ADVDAT dup $fc00 and -          \ calculate leading space in first block
+$400 over -                     \ data size in first block
+swap ADVDAT + ADVDAT rot move   \ move data down
+\ read remaining blocks
+{data_blk} 1+ ADVDAT $fc00 and $400 + {data_blocks} 1- blk-read-n
 
 \ save turnkey entry point and dump image
 ' main $fff8 !
