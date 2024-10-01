@@ -50,17 +50,26 @@
 ;
 
 include defs.fs
+42 emit
 include message.fs
+42 emit
 include item.fs
+42 emit
 include location.fs
+42 emit
 include hints.fs
+42 emit
 include english.fs
+42 emit
 include special.fs
+42 emit
 include verb.fs
+42 emit
 include turn.fs
+cr
 
 \ see advent.c:main
-: main
+: play
     65 1 0 yes-no if        \ instructions?
         cr 1000
     else

@@ -983,13 +983,13 @@ create act-msg{  34 here 0pad
     ?dup if say-msg then
 ;
 
-: save
+: save-game
     turns 63 block-write
     ." Game saved." cr
     abort
 ;
 
-: load
+: load-game
     turns 63 block-read
     ." Restored game." cr
     describe
@@ -1001,8 +1001,8 @@ create act-msg{  34 here 0pad
 'SCORE     ' say-obj       ' score       13     act!
 'FOO       ' say-obj       ' foo-it     147     act!
 'BRIEF     ' say-obj       0            155     act!
-'SUSPEND   ' say-obj       ' save        13     act!
-'LOAD      0               ' load         0     act!
+'SUSPEND   ' say-obj       ' save-game   13     act!
+'LOAD      0               ' load-game    0     act!
 'HOURS     ' say-obj       0             13     act!
 'LOG       ' say-obj       0              0     act!
 'TAKE      ' take-obj      ' take-it     24     act!

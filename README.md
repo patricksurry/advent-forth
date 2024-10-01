@@ -129,3 +129,31 @@ Older was running with pymon (lacks block device for startup)
 
       py65mon -m 65c02 -i c004 -o c001 -b forth/advent.mon
 
+
+
+
+Write block image to SD card (OS X)
+
+  > diskutil list  # see mounted drives
+
+  # insert SD card
+
+  > diskutil list # so we can find the SD card, for example:
+
+  ...
+
+  /dev/disk4 (external, physical):
+    #:                       TYPE NAME                    SIZE       IDENTIFIER
+    0:     FDisk_partition_scheme                        *31.9 GB    disk4
+    1:             Windows_FAT_32 PRODOS1                 31.9 GB    disk4s1
+
+  # unmount all numbered partitions, e.g. disk4s1 here:
+
+  > diskutil unmountDisk /dev/disk4s1
+
+  Unmount of all volumes on disk4 was successful
+
+  # write to the *raw* disk using /dev/rdisk... instead of /dev/disk...
+  # BE CAREFUL!
+
+  sudo dd if=data/advent.blk of=/dev/rdisk4

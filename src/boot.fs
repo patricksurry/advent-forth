@@ -8,7 +8,6 @@
 \ - dump the memory image back to the block device;
 \ - start the game
 
-
 \ define data pointers
 ${data_start:04x} constant ADVDAT
 {consts}
@@ -24,10 +23,10 @@ evaluate
 here dup rot -
 ( cp len )
 s" ... used " type u. s" bytes" type cr
-ADVDAT here - . s" bytes remain before ADVDAT" type cr
+ADVDAT here - . s" bytes free before data blob" type cr
 
 ' prop{{ turns -
-s" Save/restore state " type u. s" bytes; must be <1024" type cr
+s" Save/restore uses " type u. s" bytes (max 1024)" type cr
 here - allot    \ drop strings
 .s cr           \ stack should be empty
 
@@ -45,9 +44,9 @@ swap ADVDAT + ADVDAT rot move   \ move data down
 ADVDAT $fc00 and $400 +  {data_blk} 1+  {data_blocks} 1-  block-read-n
 
 \ save turnkey entry point and dump image
-' main $fff8 !
+' play $fff8 !
 \ bump reset vector +3 to do warm start
 $fffc @ 3 + $fffc !
 0 64 64 block-write-n
 
-main
+play
