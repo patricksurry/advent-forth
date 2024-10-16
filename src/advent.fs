@@ -70,6 +70,7 @@ cr
 
 \ see advent.c:main
 : play
+    cls
     65 1 0 yes-no if        \ instructions?
         cr 1000
     else

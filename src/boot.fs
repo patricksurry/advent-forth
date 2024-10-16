@@ -48,5 +48,5 @@ ADVDAT $fc00 and $400 +  {data_blk} 1+  {data_blocks} 1-  block-read-n
 \ bump reset vector +3 to do warm start
 $fffc @ 3 + $fffc !
 0 64 64 block-write-n
-
-play
+\ leave the XT to execute once string eval is complete
+' play

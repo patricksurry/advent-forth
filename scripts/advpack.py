@@ -4,6 +4,22 @@ import re
 from itertools import accumulate
 from dizzy import dizzy, undizzy, dizzy_squeeze, woozy, unwoozy, unwrap
 
+splash40 = """
+               Welcome to
+
+        Colossal Cave Adventure!
+
+
+Original development by Willie Crowther.
+   Major features added by Don Woods.
+  Conversion to BDS C by J. R. Jaeger.
+ Unix standardization by Jerry D. Pohl.
+ QNX 4 port, bug fixes by James Lummel.
+  Taliforth 6502 port by P. Surry from
+    code by J. Wiberg, J. Gillogly.
+
+Would you like instructions?
+"""
 
 def compact_word(lo: int, hi: int, words: list[str]) -> bytes:
     """
@@ -73,121 +89,125 @@ def compact_cave(long: bytes, short: bytes, travel: list[tuple[int,int,int,int,i
         data += long
     return data
 
-# fetch the extracted data
-advent = json.load(open('data/advent.json'))
+if __name__ == "__main__":
+    # fetch the extracted data
+    advent = json.load(open('data/advent.json'))
 
-caves = list(advent['caves'].values())
+    # custom 40-column splash screen
+    advent['messages']['65'] = splash40
 
-# was 27176
-for c in caves:
-    s = c['long']
-    c['long'] = unwrap(c['long'])
-    c['short'] = unwrap(c['short'])
+    caves = list(advent['caves'].values())
 
-corpus = (
-    [c['long'] for c in caves]
-    + [c['short'] for c in caves if c['short'] != c['long']]
-    + list(advent['messages'].values())
-    + sum(advent['items'].values(), [])
-)
+    # was 27176
+    for c in caves:
+        s = c['long']
+        c['long'] = unwrap(c['long'])
+        c['short'] = unwrap(c['short'])
 
-# make a digram lookup table
-source = unwrap('\0'.join(corpus)+'\0')
-print('corpus has', len(corpus), 'strings', len(source), 'total characters as strz')
-open('scripts/corpus.asc', 'w').write(source)
-data, digrams = dizzy(woozy(source))
+    corpus = (
+        [c['long'] for c in caves]
+        + [c['short'] for c in caves if c['short'] != c['long']]
+        + list(advent['messages'].values())
+        + sum(advent['items'].values(), [])
+    )
 
-print(f"dizzy compress {len(source)} source bytes to {len(data)} compressed bytes "
-    f"with {len(digrams)} digrams. uncompress ok? {unwoozy(undizzy(data, digrams)) == source}")
+    # make a digram lookup table
+    source = unwrap('\0'.join(corpus)+'\0')
+    print('corpus has', len(corpus), 'strings', len(source), 'total characters as strz')
+    open('scripts/corpus.asc', 'w').write(source)
+    data, digrams = dizzy(woozy(source))
 
-max_sqz = dict(raw=0, woozy=0, sqz=0)
-def sqz(s):
-    w = woozy(unwrap(s))
-    z = dizzy_squeeze(w, digrams) + b'\0'
-    for (t, d) in zip(['raw', 'woozy', 'sqz'], [s, w+b'\0', z]):
-        max_sqz[t] = max(max_sqz[t], len(d))
-    return z
+    print(f"dizzy compress {len(source)} source bytes to {len(data)} compressed bytes "
+        f"with {len(digrams)} digrams. uncompress ok? {unwoozy(undizzy(data, digrams)) == source}")
 
-"""
-print(', '.join(f'${x:02x},${y:02x}' for x,y in d.values()))
-print(', '.join(f'${x:02x}' for x in z.split(b'\0')[0]))
-print(src.split(b'\0')[0].decode('ascii'))
-"""
+    max_sqz = dict(raw=0, woozy=0, sqz=0)
+    def sqz(s):
+        w = woozy(unwrap(s))
+        z = dizzy_squeeze(w, digrams) + b'\0'
+        for (t, d) in zip(['raw', 'woozy', 'sqz'], [s, w+b'\0', z]):
+            max_sqz[t] = max(max_sqz[t], len(d))
+        return z
 
-def pack_index(zs: list[bytes]) -> bytes:
-    offsets = list(accumulate((len(z) for z in zs), initial=0))[:-1]
-    idx = struct.pack(f"<{len(offsets)}H", *offsets)
-    assert len(offsets) == len(zs)
-    return idx
+    """
+    print(', '.join(f'${x:02x},${y:02x}' for x,y in d.values()))
+    print(', '.join(f'${x:02x}' for x in z.split(b'\0')[0]))
+    print(src.split(b'\0')[0].decode('ascii'))
+    """
+
+    def pack_index(zs: list[bytes]) -> bytes:
+        offsets = list(accumulate((len(z) for z in zs), initial=0))[:-1]
+        idx = struct.pack(f"<{len(offsets)}H", *offsets)
+        assert len(offsets) == len(zs)
+        return idx
 
 
-# digrams
-print(f"??? constant ADVDAT")
-data = b''.join(digrams.values())
-bin = data
-header = struct.pack("<H", len(data))
-print(f"DIGRAMS {len(data)} bytes")
+    # digrams
+    print(f"??? constant ADVDAT")
+    data = b''.join(digrams.values())
+    bin = data
+    header = struct.pack("<H", len(data))
+    print(f"DIGRAMS {len(data)} bytes")
 
-# words
-# first group as (lo, hi): [ words ]
-wdict = {}
-for (w, lo, hi) in advent['words'].values():
-    wdict.setdefault((lo, hi), []).append(w)
+    # words
+    # first group as (lo, hi): [ words ]
+    wdict = {}
+    for (w, lo, hi) in advent['words'].values():
+        wdict.setdefault((lo, hi), []).append(w)
 
-data = b''.join(
-    compact_word(lo, hi, ws) for (lo, hi), ws in wdict.items()
-) + bytes([0xff, 0xff])
+    data = b''.join(
+        compact_word(lo, hi, ws) for (lo, hi), ws in wdict.items()
+    ) + bytes([0xff, 0xff])
 
-print(f"VOCAB   {len(data)} bytes")
-bin += data
-header += struct.pack("<H", len(data))
+    print(f"VOCAB   {len(data)} bytes")
+    bin += data
+    header += struct.pack("<H", len(data))
 
-# cond
-data = bytes([0] + [
-    compact_cond(i+1, c['cond']) for i,c in enumerate(caves)
-])
+    # cond
+    data = bytes([0] + [
+        compact_cond(i+1, c['cond']) for i,c in enumerate(caves)
+    ])
 
-print(f"COND    {len(data)} bytes")
-bin += data
-header += struct.pack("<H", len(data))
+    print(f"COND    {len(data)} bytes")
+    bin += data
+    header += struct.pack("<H", len(data))
 
-# caves
-zs = [
-    compact_cave(sqz(c['long']), sqz(c['short']), c['travel'])
-    for c in caves
-]
-idx = pack_index(zs)
-data = b''.join(zs)
-print(f"CAVES&  {len(idx)} bytes")
-bin += idx
-print(f"CAVES   {len(data)} bytes")
-bin += data
-header += struct.pack("<HH", len(idx), len(data))
+    # caves
+    zs = [
+        compact_cave(sqz(c['long']), sqz(c['short']), c['travel'])
+        for c in caves
+    ]
+    idx = pack_index(zs)
+    data = b''.join(zs)
+    print(f"CAVES&  {len(idx)} bytes")
+    bin += idx
+    print(f"CAVES   {len(data)} bytes")
+    bin += data
+    header += struct.pack("<HH", len(idx), len(data))
 
-# messages
-zs = [sqz(msg) for msg in advent['messages'].values()]
-idx = pack_index(zs)
-data = b''.join(zs)
-print(f"MSGS&   {len(idx)} bytes")
-bin += idx
-print(f"MSGS    {len(data)} bytes")
-bin += data
-header += struct.pack("<HH", len(idx), len(data))
+    # messages
+    zs = [sqz(msg) for msg in advent['messages'].values()]
+    idx = pack_index(zs)
+    data = b''.join(zs)
+    print(f"MSGS&   {len(idx)} bytes")
+    bin += idx
+    print(f"MSGS    {len(data)} bytes")
+    bin += data
+    header += struct.pack("<HH", len(idx), len(data))
 
-# items
-zs = [
-    b''.join(sqz(s) for s in states)
-    for states in advent['items'].values()
-]
-idx = pack_index(zs)
-data = b''.join(zs)
-print(f"ITEMS&  {len(idx)} bytes")
-bin += idx
-print(f"ITEMS   {len(data)} bytes")
-bin += data
-header += struct.pack("<HH", len(idx), len(data))
+    # items
+    zs = [
+        b''.join(sqz(s) for s in states)
+        for states in advent['items'].values()
+    ]
+    idx = pack_index(zs)
+    data = b''.join(zs)
+    print(f"ITEMS&  {len(idx)} bytes")
+    bin += idx
+    print(f"ITEMS   {len(data)} bytes")
+    bin += data
+    header += struct.pack("<HH", len(idx), len(data))
 
-bin = struct.pack("<H", len(header)//2) + header + bin
-print(f"longest string {max_sqz['raw']}, woozy {max_sqz['woozy']}, packed {max_sqz['sqz']}")
-open('data/advent.dat', 'wb').write(bin)
-print(f"Wrote {len(bin)} bytes to advent.dat")
+    bin = struct.pack("<H", len(header)//2) + header + bin
+    print(f"longest string {max_sqz['raw']}, woozy {max_sqz['woozy']}, packed {max_sqz['sqz']}")
+    open('data/advent.dat', 'wb').write(bin)
+    print(f"Wrote {len(bin)} bytes to advent.dat")
