@@ -50,27 +50,26 @@
 ;
 
 include defs.fs
-42 emit
+46 emit
 include message.fs
-42 emit
+46 emit
 include item.fs
-42 emit
+46 emit
 include location.fs
-42 emit
+46 emit
 include hints.fs
-42 emit
+46 emit
 include english.fs
-42 emit
+46 emit
 include special.fs
-42 emit
+46 emit
 include verb.fs
-42 emit
+46 emit
 include turn.fs
-cr
 
 \ see advent.c:main
 : play
-    cls
+    page
     65 1 0 yes-no if        \ instructions?
         cr 1000
     else

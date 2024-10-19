@@ -12,7 +12,7 @@ runtime:
 	cd ../micro-colossus && $(MAKE) ucs.rom
 
 data/advent.rom: data/advent.blk runtime
-	echo 'block-boot\nno\nquit\ny\nbye' | \
+	echo 'no\nquit\ny\nbye' | \
 	$(C65) -r ../micro-colossus/ucs.rom -m 0xffe0 -b $<
 	dd bs=1024 skip=64 count=64 if=data/advent.blk > $@
 

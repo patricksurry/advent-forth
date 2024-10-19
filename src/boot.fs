@@ -17,18 +17,20 @@ $4000 {forth_blk} {forth_blocks} block-read-n
 here $4000 {forth_len}
 ( at addr n )
 here
-s" Compiling {forth_len} bytes ... " type cr
-here - allot    \ drop the string
+s" Read {forth_len} bytes of Forth source." type cr
+s" Compiling " type
+here - allot    \ drop the strings
 evaluate
 here dup rot -
 ( cp len )
-s" ... used " type u. s" bytes" type cr
-ADVDAT here - . s" bytes free before data blob" type cr
+space u. s" bytes." type cr
+s" Read {data_len} bytes data, " type
+ADVDAT here - . s" bytes free. " type cr
 
 ' prop{{ turns -
-s" Save/restore uses " type u. s" bytes (max 1024)" type cr
+s" Save/restore uses " type u. s" of 1024 bytes." type cr
 here - allot    \ drop strings
-.s cr           \ stack should be empty
+\ .s cr           \ stack should be empty
 
 \ now we have space to load data...
 \ read data blocks to ADVDAT rounded down to a whole block since
