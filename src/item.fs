@@ -1,4 +1,4 @@
-\ each item is simply a concatenated list of 0-terminated terminated
+\ each item is simply a concatenated list of 0-terminated compressed strings
 \ the first string is found in the ITEMS& array,
 \ subsequent strings are found by skipping past ascii zeros
 
@@ -7,7 +7,15 @@
 : say-item ( i state -- )
     1+ swap 1- 2* ITEMS& + @ ITEMS + swap               \ first item string
     ( strz state+1 )
-    begin ?dup while 1- swap asciiz> + 1+ swap repeat   \ skip state+1 strings
+    begin
+        ?dup while
+        1- swap
+        ( state strz )
+        begin
+            dup 1+ swap c@ while
+        repeat
+        swap
+    repeat   \ skip state+1 strings
     sayz
 ;
 

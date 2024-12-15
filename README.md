@@ -71,7 +71,7 @@ into high memory from the block device and compiles it, using about 19K.
 The source is discarded and the data file is written above the code
 aligned to the end of RAM.  This leaves the game ready to play.
 
-Currently the loader also dumps the entire 64K memory image back to the block devic
+Currently the loader also dumps the entire 64K memory image back to the block device
 in order to support simulator play without compilation or block storage.
 
 HOW IT WORKS

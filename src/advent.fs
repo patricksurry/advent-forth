@@ -37,6 +37,8 @@
     abort
 ;
 
+: lower ( addr len -- ) bounds ?do i c@ $20 or i c! loop ;
+
 \ database.c:pct
 : pct ( n -- flag )             \ true with percent n
     100 randint  <

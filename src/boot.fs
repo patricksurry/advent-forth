@@ -47,8 +47,6 @@ ADVDAT $fc00 and $400 +  {data_blk} 1+  {data_blocks} 1-  block-read-n
 
 \ save turnkey entry point and dump image
 ' play $fff8 !
-\ bump reset vector +3 to do warm start
-$fffc @ 3 + $fffc !
 0 64 64 block-write-n
 \ leave the XT to execute once string eval is complete
 ' play

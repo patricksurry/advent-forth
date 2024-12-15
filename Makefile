@@ -40,6 +40,11 @@ excursions = $(wildcard tests/excursion*.txt)
 
 tests: $(patsubst %.txt,%.fs.log,$(excursions)) $(patsubst %.txt,%.c.log,$(excursions))
 
+tests/excursion6.fs.log: tests/excursion5.fs.log
+tests/excursion5.fs.log: tests/excursion3.fs.log  # there is no 4
+tests/excursion3.fs.log: tests/excursion2.fs.log
+tests/excursion2.fs.log: tests/excursion1.fs.log
+
 .FORCE:
 
 %.fs.log: %.txt .FORCE

@@ -10,7 +10,7 @@
 
 \ english.c:getwords
 : user-input ( -- addr n )
-    ." > " $400 dup 127 accept tolower CR
+    ." > " $400 dup 127 accept 2dup lower CR
 ;
 
 \ optionally prompt user and respond to a yes/no question returning flag
