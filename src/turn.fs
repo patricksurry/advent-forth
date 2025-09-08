@@ -4,7 +4,8 @@
 : bad-move ( -- )
 	motion c@
     dup 43 >= over 50 <= and if
-        drop 9 else
+        drop 9
+    else
         case
             29 of 9 endof
             30 of 9 endof
@@ -17,7 +18,8 @@
             65 of 42 endof
             17 of 80 endof
             12 swap
-        endcase then
+        endcase
+    then
     \ ?? does order matter here? occurs within case in c code
     verb c@ dup 'FIND = swap 'INVENTORY = or
     if drop 59 then
@@ -128,7 +130,8 @@
             1 of move-special endof
             2 of say-msg endof
         endcase
-        else bad-move
+    else
+        bad-move
     then
 ;
 

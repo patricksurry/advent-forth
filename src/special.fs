@@ -154,7 +154,12 @@ create stroom
 \ special time limit stuff...
 \ turn.c:stimer
 : stimer
-    foobar dup @ dup 0> if negate else 0 and then !
+    foobar @ dup 0> if
+        negate
+    else
+        drop 0
+    then
+    foobar !
 
     clock1 @
     tally 0= loc@ dup 15 >= swap 33 <> and and if

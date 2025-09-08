@@ -1,5 +1,8 @@
-C65 = ../tali/c65/c65
-PYTHON = python3
+TALIDIR := ../tali
+C65 := $(TALIDIR)/tools/c65/c65
+TALIUC := $(TALIDIR)/taliforth-uc.bin
+TALISYM := $(TALIDIR)/platform/uc/uc-labelmap.txt
+PYTHON := python3
 
 all: rom
 
@@ -9,18 +12,18 @@ clean:
 rom: data/advent.rom
 
 runtime:
-	cd ../micro-colossus && $(MAKE) ucs.rom
+	cd $(TALIDIR) && $(MAKE) $(TALIUC)
 
 data/advent.rom: data/advent.blk runtime
 	echo 'no\nquit\ny\nbye' | \
-	$(C65) -r ../micro-colossus/ucs.rom -m 0xffe0 -b $<
+	$(C65) -r $(TALIUC) -m 0xffe0 -b $<
 	dd bs=1024 skip=64 count=64 if=data/advent.blk > $@
 
 play: rom
 	$(C65) -r data/advent.rom -m 0xffe0
 
 debug: rom
-	$(C65) -r data/advent.rom -m 0xffe0 -l ../micro-colossus/ucs.sym -gg
+	$(C65) -r data/advent.rom -m 0xffe0 -l $(TALISYM) -gg
 
 data/advent.blk: scripts/advblk.py data/boot_fpp.fs data/advent_fpp.fs data/advent.dat
 	$(PYTHON) scripts/advblk.py
@@ -41,7 +44,7 @@ excursions = $(wildcard tests/excursion*.txt)
 tests: $(patsubst %.txt,%.fs.log,$(excursions)) $(patsubst %.txt,%.c.log,$(excursions))
 
 tests/excursion6.fs.log: tests/excursion5.fs.log
-tests/excursion5.fs.log: tests/excursion3.fs.log  # there is no 4
+tests/excursion5.fs.log: tests/excursion3.fs.log  # there is currently no 4
 tests/excursion3.fs.log: tests/excursion2.fs.log
 tests/excursion2.fs.log: tests/excursion1.fs.log
 
