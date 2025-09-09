@@ -6,8 +6,7 @@ YOU ARE IN A MAZE OF TWISTY LITTLE PASSAGES, ALL ALIKE.
 </em></p>
 
 This is a [TaliForth][tali] port of Crowther & Wood's original 
-[Colossal Cave Adventure](https://en.wikipedia.org/wiki/Colossal_Cave_Adventure) 
-(350 point version) that requires only 64K to play.
+[Colossal Cave Adventure](cca) (350 point version) that needs only 64K to play.
 You can play on real hardware like my [&micro;65c02](uc) setup (pictured), 
 adapt the code for your own hardware,
 or play using a 6502 simulator like [c65][c65] or [py65mon][py65].
@@ -16,6 +15,7 @@ or play using a 6502 simulator like [c65][c65] or [py65mon][py65].
   <img src="doc/adventure-splash.jpeg" />
 </p>
 
+[cca]: https://en.wikipedia.org/wiki/Colossal_Cave_Adventure
 [tali]: https://github.com/SamCoVT/TaliForth2
 [uc]: https://github.com/patricksurry/taliforth-uc
 [c65]: https://github.com/patricksurry/c65
@@ -155,7 +155,7 @@ back  to the block device in order to support standalone simulator play.
   <img src="doc/adventure-enter.jpeg" />
 </p>
 
-Hacking the source
+Hacking
 ---
 
 There are a lot of moving parts here.  We currently assume the hardware
