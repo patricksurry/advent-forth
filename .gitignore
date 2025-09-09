@@ -13,4 +13,5 @@ c65-*.dat
 tests/excursion*log
 .c65
 .DS_Store
+.vscode
 adv350jg/
