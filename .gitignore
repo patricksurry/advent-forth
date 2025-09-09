@@ -12,3 +12,5 @@ scripts/corpus.asc
 c65-*.dat
 tests/excursion*log
 .c65
+.DS_Store
+adv350jg/

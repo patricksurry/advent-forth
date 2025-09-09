@@ -45,12 +45,13 @@ swap ADVDAT + ADVDAT rot move   \ move data down
 \ read remaining blocks
 ADVDAT $fc00 and $400 +  {data_blk} 1+  {data_blocks} 1-  block-read-n
 
-\ stash system and user vars by copying 64 bytes from page 0 and page 3
+\ wrapper to unstash system and user vars before play
 \ since these get stomped before the turnkey word executes
-here 128 allot 0 over 64 cmove $300 over 64 + 64 cmove
-( stash )
-\ wrapper word to unstash system and user vars before play
-: replay literal dup 64 + $300 64 cmove  0 64 cmove play ;
+: replay $380 0 $40 cmove  $3c0 $300 $40 cmove  play ;
+
+\ stash system and user vars (first 64 bytes from page 0 and 3)
+\ to the top half of page 3 which is unused
+0 $380 $40 cmove $300 $3c0 $40 cmove
 
 \ save turnkey entry point and dump image
 ' replay $fff8 !

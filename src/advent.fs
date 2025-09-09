@@ -1,7 +1,8 @@
-\ taliforth user_words reads and executes boot block
-\ advblk.py generates boot block code to load and evaluate source and then relocate main data tables
+\ The taliforth uc platform's `platform_forth.fs` executes a turnkey
+\ word which is normally `block-boot`.   This reads and executes `boot.fs`
+\ from the block device which compiles this source code and relocates the data tables.
 
-0 nc-limit !        \ don't inline too much
+0 nc-limit !        \ minimize code size by not inlining anything
 
 \ random integer in [0, n) without modulo bias
 \ : randint ( n -- k )
