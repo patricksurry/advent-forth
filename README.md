@@ -234,6 +234,16 @@ This ensures that the source code is small enough to load
 and compile, and that the compiled code is compact enough 
 to leave space for the compressed game data in `data/advent.dat`.
 
+Almost all of the game is standard Forth with only a couple of words written in assembler to save space
+(see [adventure.asm](https://github.com/patricksurry/taliforth-uc/blob/main/words/adventure.asm)).
+The `decode-link` word could easily be recast in Forth. 
+The main output word, `typez`, displays compressed game strings.
+It does decompression and word-wrapping on the fly
+to avoid large buffers (some game strings are very long).
+This is currently tangled up with the kernel's 
+[text display code](https://github.com/patricksurry/taliforth-uc/blob/main/kernel/txt.asm).
+With more memory a much simpler implementation in Forth would be possible.
+
 The game has been reasonably well tested, including automated
 playthroughs in `tests/excursion*.txt`.  
 These compare output between the C and Forth versions 
